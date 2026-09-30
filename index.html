@@ -11,7 +11,7 @@
 <meta name="robots" content="index,follow">
 <link rel="canonical" href="https://topo-wars.vercel.app/">
 <meta name="application-name" content="Topo Wars">
-<meta name="version" content="6.5">
+<meta name="version" content="6.6">
 <meta name="apple-mobile-web-app-title" content="Topo Wars">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -90,23 +90,25 @@ button.on{background:var(--amber-soft);border-color:#f59e0b}
 #endBtn.ready{box-shadow:0 0 0 3px rgba(21,128,61,.25)}
 .credit{font-size:10px;color:var(--muted);text-align:right;margin-top:6px}
 
-#setup{position:fixed;top:0;right:0;bottom:0;width:clamp(220px,60vw,360px);z-index:1100;background:#fff;border-left:1px solid var(--line);
-  padding:calc(12px + env(safe-area-inset-top)) 12px calc(12px + env(safe-area-inset-bottom));box-shadow:-6px 0 24px rgba(0,0,0,.08);
+#setup{position:fixed;top:0;right:0;bottom:0;width:clamp(160px,42vw,260px);z-index:1100;background:#fff;border-left:1px solid var(--line);
+  padding:calc(10px + env(safe-area-inset-top)) 8px calc(10px + env(safe-area-inset-bottom));box-shadow:-6px 0 24px rgba(0,0,0,.08);
   overflow-y:auto;overscroll-behavior:contain;display:flex;flex-direction:column}
 #setup h2{font-size:17px;margin-bottom:4px}
 #setup p{font-size:12px;line-height:1.4;margin-bottom:10px}
-#setup .seg{flex-wrap:wrap;gap:6px;margin-bottom:10px}
-#setup .seg span{flex-basis:100%;margin:0;font-size:12px;font-weight:600;color:var(--muted)}
-#setup .seg button{flex:1 1 0;min-width:0;padding:9px 4px;text-align:center}
+#setup .seg{flex-wrap:wrap;gap:4px;margin-bottom:8px}
+#setup .seg span{flex-basis:100%;margin:0;font-size:11px;font-weight:600;color:var(--muted)}
+#setup .seg button{flex:1 1 0;min-width:0;padding:6px 2px;font-size:12px;text-align:center}
 #setup .seg.joinrow input{flex:1 1 0}
-#setup .seg.joinrow button{flex:0 0 auto;padding:9px 14px}
+#setup .seg.joinrow input{font-size:13px;padding:5px 6px;letter-spacing:1px}
+#setup .seg.joinrow button{flex:0 0 auto;padding:6px 8px}
 #setup #areaInfo{display:none}
-#setup #resumeBtn,#setup #mpResumeBtn{padding:10px 8px;font-size:13px}
-#setup .btns{flex-direction:column;gap:8px}
-#setup .btns button{padding:12px 6px;font-size:14px}
+#setup #resumeBtn,#setup #mpResumeBtn{padding:7px 4px;font-size:11px;margin-bottom:6px}
+#setup .btns{flex-direction:column;gap:6px}
+#setup .btns button{padding:8px 4px;font-size:13px}
 #setup .btns #startBtn{order:-1}
-#setup .links{flex-wrap:wrap;gap:4px 12px}
-#setup .credit{text-align:center;margin-top:auto;padding-top:8px}
+#setup .links{flex-wrap:wrap;gap:2px 8px}
+#setup .links button{font-size:12px}
+#setup .credit{text-align:center;margin-top:auto;padding-top:6px;font-size:9px}
 .seg{display:flex;gap:6px;align-items:center;margin-bottom:8px}
 .joinrow input{flex:1;min-width:0;font:inherit;font-size:15px;letter-spacing:2px;text-transform:uppercase;padding:7px 10px;border:1px solid #d1d5db;border-radius:10px;background:#fff;color:var(--ink)}
 #joinMsg{color:var(--red);margin:-4px 0 8px}
@@ -172,7 +174,7 @@ button.on{background:var(--amber-soft);border-color:#f59e0b}
     <button id="ctrBtn">Center<small>on you</small></button>
     <button id="endBtn" class="primary">End turn</button>
   </div>
-  <div class="credit">Topo Wars 6.5. Map data &copy; OpenStreetMap contributors</div>
+  <div class="credit">Topo Wars 6.6. Map data &copy; OpenStreetMap contributors</div>
 </div>
 
 <div id="setup">
@@ -241,7 +243,7 @@ button.on{background:var(--amber-soft);border-color:#f59e0b}
     <p>On the setup screen, Enemy starts Far places the enemy about 20 cells farther away than Close, as far as the grid allows. Close is handy for quick test fights. Take out the enemy commander, have the enemy surrender, or hold the higher score when round 40 ends. The first side to reach 150 points is offered the other side's surrender. Accept it for the win, or fight on to finish them off. A computer enemy that has offered to surrender pulls back to the best ground near its commander, digs trenches and puts up barricades. If the enemy reaches 150 first, it demands your surrender, and you can give up or keep fighting. Menu, Surrender, gives up at any time on your turn. After a win against the computer, Keep playing on the victory screen lets you carry on and wipe out whatever is left. The win is already recorded, and Menu, Finish battle, ends the mop-up whenever you like. A commander falls when an enemy commander, soldier or rifleman steps onto it, or when rifle and artillery hits take away its 3 health. The same can happen to you.</p>
 
     <h3>Playing a friend</h3>
-    <p>Set Opponent to Friend on the setup screen, pick your ground and press Start battle. The game gives you a link, a QR code and a six character battle code to send. Whoever opens the link or scans the QR code first, or types the code under Join a battle on the setup screen and presses Join, becomes your opponent on the same map, and each of you sees yourself in blue. You move first. Take your turn and press End turn, and the battle server checks every move with the same rules before passing the turn over. You do not both need to be online: open the game whenever you like, and while it is open it checks for your friend's move every few seconds. Menu, Invite a friend, shows the link again. Continue battle with a friend on the setup screen brings you back to it.</p>
+    <p>Set Opponent to Friend on the setup screen, pick your ground and press Start battle. The game gives you a link, a QR code and a six character battle code to send. Whoever opens the link or scans the QR code first, or types the code under Join a battle on the setup screen and presses Join, becomes your opponent on the same map, and each of you sees yourself in blue. You move first. Take your turn and press End turn, and the battle server checks every move with the same rules before passing the turn over. You do not both need to be online: open the game whenever you like, and while it is open it checks for your friend's move every few seconds. Menu, Invite a friend, shows the link again. Continue friend battle on the setup screen brings you back to it.</p>
     <p>Turn notifications buzz your phone when your friend finishes a turn, joins the battle or ends it, even when the game is closed. Turn them on from the invite screen, or with Menu, Turn notifications. Tapping the notification opens the battle.</p>
 
     <h3>Buildings</h3>
@@ -258,7 +260,7 @@ button.on{background:var(--amber-soft);border-color:#f59e0b}
     <p>At the start of every turn you gain supply based on how much territory you hold. Under 20 cells pays 2, 20 to 29 pays 3, 30 to 39 pays 4, and every further 10 cells adds 1 more. The top bar shows your supply with this turn's income in brackets, and the Deploy sheet tells you how many cells you need for the next step. Spreading out with soldiers, riflemen and artillery grows your income. Your commander may move once, and every piece may move once and, if it has a gun, fire once. Do these in any order, then press End turn. Artillery that moves off road loses that turn's shot. Undo takes back anything done this turn. Every cell your commander, soldiers, riflemen and artillery stop on becomes your territory.</p>
 
     <h3>Your pieces</h3>
-    <p>A howitzer costs 6 supply and works like artillery with 3 more range, but after each shot it spends 2 full rounds reloading, shown by orange dots under it. Press Deploy to spend supply. After you pick a piece you can keep tapping gold squares to place as many as your supply allows. Press Done to stop placing, or Pick another to switch to a different piece. There is no limit on how many of each piece you field, only on the supply you have.</p>
+    <p>A howitzer costs 6 supply. It reaches 5 cells plus twice its tier, so a howitzer on a peak or a raised mound fires far past ordinary artillery. Its barrel cannot drop low enough for close targets: it cannot hit anything within 3 cells, or anything on lower ground within 6 cells. After each shot it spends 2 full rounds reloading, shown by orange dots under it. Press Deploy to spend supply. After you pick a piece you can keep tapping gold squares to place as many as your supply allows. Press Done to stop placing, or Pick another to switch to a different piece. There is no limit on how many of each piece you field, only on the supply you have.</p>
     <table>
       <tr><th>Piece</th><th>Cost</th><th>What it does</th></tr>
       <tr><td>Commander (star)</td><td>Free</td><td>Moves on foot. 3 health. Sees 4 cells. Losing it loses the battle.</td></tr>
@@ -267,7 +269,7 @@ button.on{background:var(--amber-soft);border-color:#f59e0b}
       <tr><td>Drone (four rotors)</td><td>2</td><td>Flies 4 cells over anything, including water and buildings. Sees 6 cells around it over any obstacle. Cannot attack or claim ground.</td></tr>
       <tr><td>Jeep (box on wheels)</td><td>2</td><td>Needs someone aboard to drive. Drives 2 cells over open ground or road, or up to 3 along roads and tire treads. Leaves tire treads everywhere it drives. Tows 1 gun and has 3 seats for soldiers, riflemen and your commander. Cannot attack. Sees 3 cells.</td></tr>
       <tr><td>Artillery (field gun)</td><td>3</td><td>Shells any cell or piece you can see within 2 plus its tier. Moves 1 cell on roads or open ground, or up to 3 along a road and still fires. Sees 2 cells.</td></tr>
-      <tr><td>Howitzer (big field gun, long barrel)</td><td>6</td><td>Artillery with 3 more range. After each shot it spends 2 full rounds reloading, shown by orange dots.</td></tr>
+      <tr><td>Howitzer (big field gun, long barrel)</td><td>6</td><td>Reaches 5 plus twice its tier. Cannot hit within 3 cells, or lower ground within 6. Reloads for 2 rounds after each shot, shown by orange dots.</td></tr>
       <tr><td>Recon plane</td><td>3</td><td>One pass over any spot, even under fog, that reveals 8 cells around it until your turn ends.</td></tr>
       <tr><td>Helicopter</td><td>4</td><td>Hovers over any spot and reveals 4 cells around it for 3 turns.</td></tr>
     </table>
@@ -469,7 +471,9 @@ const Engine = (() => {
   const WIN = 150, MAX_ROUNDS = 40;
   const COST = { soldier: 1, rifle: 2, drone: 2, jeep: 2, arty: 3, how: 6, plane: 3, heli: 4 };
   // A howitzer is artillery with 3 more range that needs 2 full rounds to reload after each shot.
-  const HOW_EXTRA = 3, HOW_RELOAD = 3, HOW_KILL = 12;
+  // Height helps a howitzer twice as much as ordinary artillery, but its barrel cannot drop low
+  // enough for close targets: nothing within 3 cells, and nothing on lower ground within 6.
+  const HOW_EXTRA = 3, HOW_RELOAD = 3, HOW_KILL = 12, HOW_MIN = 3, HOW_MIN_LOW = 6;
   const KILL = { soldier: 5, rifle: 6, drone: 4, jeep: 5, arty: 8 };
   const NAMES = { soldier: 'soldier', rifle: 'rifleman', drone: 'drone', jeep: 'jeep', arty: 'artillery', how: 'howitzer', plane: 'recon plane', heli: 'helicopter' };
   const nameOf = u => u.heavy ? 'howitzer' : NAMES[u.type];
@@ -534,7 +538,8 @@ const Engine = (() => {
   const tierAt = (G, i) => Math.min(5, G.tier[i] + (G.mound ? G.mound[i] : 0));
   const heightAt = (G, i) => G.elev[i] + (G.mound ? G.mound[i] * MOUND_METERS : 0);
   const artyRange = (G, i) => 2 + tierAt(G, i);
-  const gunRange = (G, u, at = u.idx) => artyRange(G, at) + (u.heavy ? HOW_EXTRA : 0);
+  const gunRange = (G, u, at = u.idx) => artyRange(G, at) + (u.heavy ? HOW_EXTRA + tierAt(G, at) : 0);
+  const tooClose = (G, u, i) => { if (!u.heavy) return false; const d = cheb(G, u.idx, i); return d <= HOW_MIN || (d <= HOW_MIN_LOW && tierAt(G, i) < tierAt(G, u.idx)); };
   const reloading = (G, u) => !!(u.heavy && u.cool && G.round < u.cool);
   const rifleRange = (G, i) => (tierAt(G, i) >= 4 ? 3 : 2);
   const unitAt = (G, i) => { for (const u of G.units) if (u.idx === i) return u; return null; };
@@ -820,6 +825,7 @@ const Engine = (() => {
     const R = u.type === 'arty' ? gunRange(G, u) : rifleRange(G, u.idx);
     const raw = u.type === 'arty' ? sightRaw(G, u.side) : null;
     for (const i of square(G, u.idx, R)) {
+      if (tooClose(G, u, i)) continue;
       // Artillery can shell any building it could see, whether or not anyone is hiding in it.
       const shellBuilding = raw && raw[i] && G.terr[i] === T.BUILDING && G.owner[i] !== u.side && !(unitAt(G, i) && unitAt(G, i).side === u.side);
       if (!vis[i] && !shellBuilding) continue;
@@ -1253,7 +1259,7 @@ const Engine = (() => {
       if (u.side !== side || !seen(u.idx)) continue;
       if (u.type === 'soldier' || u.type === 'rifle') for (const i of moveOptions(G, side, u.idx, 'foot').keys()) contact[i] = 1;
       if (u.type === 'rifle') for (const i of square(G, u.idx, rifleRange(G, u.idx))) shot[i] = 1;
-      if (u.type === 'arty') for (const i of square(G, u.idx, gunRange(G, u))) shot[i] = 1;
+      if (u.type === 'arty') for (const i of square(G, u.idx, gunRange(G, u))) if (!tooClose(G, u, i)) shot[i] = 1;
     }
     return { contact, shot };
   }
@@ -1818,7 +1824,7 @@ const Engine = (() => {
     los, sight, airActive, reach, moveOptions, commanderMoves, moveCommander, unitMoveMap, unitMoves, keepsFire, moveUnit,
     shotTargets, fire, deployCheck, deployCells, deploy, callAir, income, aiTurn, beginTurn, nextRound, playerEnd,
     computeTiers, markSteep, noiseTerrain, create, clone, serialize, deserialize, apply, passTurn, swapSides, keepPlaying, checkWipe,
-    HOW_EXTRA, HOW_RELOAD, HOW_KILL, gunRange, reloading, nameOf, buildingGroup, enterCells, enterBuilding, sightRaw,
+    HOW_EXTRA, HOW_RELOAD, HOW_KILL, HOW_MIN, HOW_MIN_LOW, tooClose, gunRange, reloading, nameOf, buildingGroup, enterCells, enterBuilding, sightRaw,
     STRUCT, STRUCT_HP, STRUCT_KILL, structAt, structCheck, structCells, buildStructure
   };
 })();
@@ -1837,7 +1843,7 @@ const PIECES = {
   rifle: { label: 'Rifleman', desc: 'Moves like a soldier and shoots enemy pieces it can see 2 cells away, 3 from high ground.' },
   drone: { label: 'Drone', desc: 'Flies 4 cells over anything and sees 6 cells around it. Cannot attack.' },
   arty: { label: 'Artillery', desc: 'Shells any cell or piece you can see within 2 plus its tier. Roads and open ground only.' },
-  how: { label: 'Howitzer', desc: 'Heavy artillery with 3 more range, but after each shot it needs 2 full rounds to reload.' },
+  how: { label: 'Howitzer', desc: 'Heavy artillery that gains twice as much range from height. Cannot hit anything within 3 cells, or lower ground within 6. Reloads for 2 rounds after each shot.' },
   plane: { label: 'Recon plane', desc: 'One pass that reveals 8 cells around any spot until this turn ends.' },
   heli: { label: 'Helicopter', desc: 'Hovers over any spot and reveals 4 cells around it for 3 turns.' },
   jeep: { label: 'Jeep', desc: 'Drives 2 cells over open ground, 3 along roads or its own tire treads. Tows artillery.' },
@@ -2233,7 +2239,10 @@ function draw() {
       ctx.strokeStyle = '#f59e0b'; ctx.lineWidth = 3; ctx.setLineDash([]);
       ctx.strokeRect(x + 2, y + 2, s - 4, s - 4);
     }
-    if (ui.mode === 'unit' && ui.sel === u.id && u.type === 'arty') box(u.idx, Engine.gunRange(G, u), 'rgba(37,99,235,0.07)', 'rgba(37,99,235,0.75)');
+    if (ui.mode === 'unit' && ui.sel === u.id && u.type === 'arty') {
+      box(u.idx, Engine.gunRange(G, u), 'rgba(37,99,235,0.07)', 'rgba(37,99,235,0.75)');
+      if (u.heavy) { box(u.idx, Engine.HOW_MIN_LOW, null, 'rgba(107,114,128,0.6)'); box(u.idx, Engine.HOW_MIN, 'rgba(107,114,128,0.12)', 'rgba(107,114,128,0.85)'); }
+    }
     if (ui.mode === 'unit' && ui.sel === u.id) {
       ctx.strokeStyle = '#f59e0b'; ctx.lineWidth = 3;
       ctx.beginPath(); ctx.arc(x + s / 2, y + s / 2, R * 1.4, 0, Math.PI * 2); ctx.stroke();
@@ -2569,7 +2578,7 @@ function selectUnit(u) {
   }
   ui.mode = 'unit'; ui.sel = u.id;
   if (u.type === 'arty' && Engine.reloading(G, u)) ui.info = 'Howitzer reloading. It can fire again in round ' + u.cool + '.' + (moves ? ' It can still move.' : '');
-  else if (u.type === 'arty') ui.info = (u.heavy ? 'Howitzer, range ' : 'Range ') + Engine.gunRange(G, u) + ', shown by the blue square. ' + (shots ? 'Orange cells can be shelled. ' : 'It can only shell what your side can see, so nothing is a target yet. A drone, helicopter or recon plane over that square spots targets for it. ') + (moves ? 'Solid teal keeps the shot, dashed teal uses it.' : '');
+  else if (u.type === 'arty') ui.info = (u.heavy ? 'Howitzer, range ' : 'Range ') + Engine.gunRange(G, u) + ', shown by the blue square. ' + (u.heavy ? 'Its barrel cannot drop low enough for the gray inner square, 3 cells out, or for lower ground inside the outer gray square, 6 cells out. ' : '') + (shots ? 'Orange cells can be shelled. ' : 'It can only shell what your side can see, so nothing is a target yet. A drone, helicopter or recon plane over that square spots targets for it. ') + (moves ? 'Solid teal keeps the shot, dashed teal uses it.' : '');
   else if (u.type === 'rifle') ui.info = 'Range ' + Engine.rifleRange(G, u.idx) + ' with a clear line of sight. ' + (shots ? 'Orange cells can be shot. ' : '') + (moves ? 'Teal cells are moves. It can move and shoot in the same turn.' : '');
   else if (u.type === 'drone') ui.info = 'Drones fly over anything and see 6 cells around them.';
   else ui.info = 'Moving onto an enemy piece destroys it. Or throw a grenade, dig in, block a path, raise the ground or pave a road.';
@@ -3379,10 +3388,10 @@ function readSave() {
 }
 function refreshResume() {
   const s = readSave(), b = $('resumeBtn');
-  if (s && !s.over) { b.textContent = 'Continue saved battle (round ' + s.round + ')'; b.classList.remove('hidden'); }
+  if (s && !s.over) { b.textContent = 'Continue battle, round ' + s.round; b.classList.remove('hidden'); }
   else b.classList.add('hidden');
   const ms = mpSession(), mg = ms ? readMpSave() : null, mb = $('mpResumeBtn');
-  if (mg && !mg.over) { mb.textContent = 'Continue battle with a friend (round ' + mg.round + ')'; mb.classList.remove('hidden'); }
+  if (mg && !mg.over) { mb.textContent = 'Continue friend battle, round ' + mg.round; mb.classList.remove('hidden'); }
   else mb.classList.add('hidden');
 }
 $('resumeBtn').onclick = () => {
