@@ -11,7 +11,7 @@
 <meta name="robots" content="index,follow">
 <link rel="canonical" href="https://topo-wars.vercel.app/">
 <meta name="application-name" content="Topo Wars">
-<meta name="version" content="4.9">
+<meta name="version" content="5.0">
 <meta name="apple-mobile-web-app-title" content="Topo Wars">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -99,7 +99,7 @@ button.on{background:var(--amber-soft);border-color:#f59e0b}
 .seg button{padding:7px 12px;font-size:13px}
 .seg button.on{background:var(--ink);color:#fff;border-color:var(--ink)}
 #areaInfo{min-height:16px;margin-bottom:10px}
-#resumeBtn{width:100%;margin-bottom:8px}
+#resumeBtn,#mpResumeBtn{width:100%;margin-bottom:8px}
 
 .overlay{position:fixed;inset:0;z-index:2000;background:rgba(31,41,55,.35);display:flex;align-items:flex-end;justify-content:center}
 .overlay.center{align-items:center}
@@ -118,7 +118,8 @@ button.on{background:var(--amber-soft);border-color:#f59e0b}
 #logList{font-size:12.5px;line-height:1.5}
 #logList div{padding:3px 0;border-bottom:1px solid #f0ede6}
 #toast{position:fixed;left:50%;top:calc(70px + env(safe-area-inset-top));transform:translateX(-50%);z-index:3000;
-  background:var(--ink);color:#fff;font-size:13px;padding:8px 14px;border-radius:10px;max-width:90vw;text-align:center}
+  background:#fff;color:var(--ink);border:1px solid #d1d5db;box-shadow:0 4px 14px rgba(31,41,55,.18);font-size:13px;padding:8px 14px;border-radius:10px;max-width:90vw;text-align:center}
+#inviteLink{width:100%;box-sizing:border-box;font:inherit;font-size:14px;padding:10px;border:1px solid #d1d5db;border-radius:10px;background:#f9fafb;color:var(--ink);margin:6px 0}
 </style>
 </head>
 <body>
@@ -149,7 +150,7 @@ button.on{background:var(--amber-soft);border-color:#f59e0b}
     <button id="ctrBtn">Center<small>on you</small></button>
     <button id="endBtn" class="primary">End turn</button>
   </div>
-  <div class="credit">Topo Wars 4.9. Map data &copy; OpenStreetMap contributors</div>
+  <div class="credit">Topo Wars 5.0. Map data &copy; OpenStreetMap contributors</div>
 </div>
 
 <div id="setup">
@@ -157,6 +158,9 @@ button.on{background:var(--amber-soft);border-color:#f59e0b}
   <p class="muted">Pan and zoom until the square covers the ground you want to fight over. Real elevation inside the square becomes the high ground.</p>
   <div class="seg" id="sizeSeg"><span>Grid</span>
     <button data-n="32">32</button><button data-n="64">64</button><button data-n="128">128</button>
+  </div>
+  <div class="seg" id="oppSeg"><span>Opponent</span>
+    <button data-o="ai">Computer</button><button data-o="friend">Friend</button>
   </div>
   <div class="seg" id="diffSeg"><span>Enemy</span>
     <button data-d="easy">Easy</button><button data-d="normal">Normal</button><button data-d="hard">Hard</button>
@@ -169,6 +173,7 @@ button.on{background:var(--amber-soft);border-color:#f59e0b}
   </div>
   <div id="areaInfo" class="muted small"></div>
   <button id="resumeBtn" class="hidden"></button>
+  <button id="mpResumeBtn" class="hidden"></button>
   <div class="btns">
     <button id="locBtn">Find me</button>
     <button id="startBtn" class="primary">Start battle</button>
@@ -189,6 +194,7 @@ button.on{background:var(--amber-soft);border-color:#f59e0b}
   <div class="sheet">
     <h2>Menu</h2>
     <div class="stack">
+      <button id="mInvite" class="hidden">Invite a friend</button>
       <button id="mHelp">Game guide</button>
       <button id="mLog">Battle log</button>
       <button id="mHistory">Battle history</button>
@@ -203,10 +209,13 @@ button.on{background:var(--amber-soft);border-color:#f59e0b}
 <div role="dialog" aria-modal="true" id="help" class="overlay hidden">
   <div class="sheet">
     <h2>Game guide</h2>
-    <p>You command the blue side against a computer commander in red. The battlefield is the real place you picked: its roads, buildings, water, forest and hills all change how pieces move, see and fight.</p>
+    <p>You command the blue side against a computer commander or a friend in red. The battlefield is the real place you picked: its roads, buildings, water, forest and hills all change how pieces move, see and fight.</p>
 
     <h3>How to win</h3>
     <p>On the setup screen, Enemy starts Far places the enemy about 20 cells farther away than Close, as far as the grid allows. Close is handy for quick test fights. Take out the enemy commander, reach 150 points first, or hold the higher score when round 40 ends. A commander falls when an enemy commander, soldier or rifleman steps onto it, or when rifle and artillery hits take away its 3 health. The same can happen to you.</p>
+
+    <h3>Playing a friend</h3>
+    <p>Set Opponent to Friend on the setup screen, pick your ground and press Start battle. The game gives you a link to send. Whoever opens it first becomes your opponent on the same map, and each of you sees yourself in blue. You move first. Take your turn and press End turn, and the battle server checks every move with the same rules before passing the turn over. You do not both need to be online: open the game whenever you like, and while it is open it checks for your friend's move every few seconds. Menu, Invite a friend, shows the link again. Continue battle with a friend on the setup screen brings you back to it.</p>
 
     <h3>Your turn</h3>
     <p>At the start of every turn you gain supply based on how much territory you hold. Under 20 cells pays 2, 20 to 29 pays 3, 30 to 39 pays 4, and every further 10 cells adds 1 more. The top bar shows your supply with this turn's income in brackets, and the Deploy sheet tells you how many cells you need for the next step. Spreading out with soldiers, riflemen and artillery grows your income. Your commander may move once, and every piece may move once and, if it has a gun, fire once. Do these in any order, then press End turn. Artillery that moves off road loses that turn's shot. Undo takes back anything done this turn. Every cell your commander, soldiers, riflemen and artillery stop on becomes your territory.</p>
@@ -376,6 +385,15 @@ button.on{background:var(--amber-soft);border-color:#f59e0b}
     <p class="muted hidden" id="historyEmpty">No finished battles yet.</p>
     <div id="historyList"></div>
     <div class="stack"><button id="exportBtn">Export history</button><button class="primary" data-close="historySheet">Close</button></div>
+  </div>
+</div>
+
+<div role="dialog" aria-modal="true" id="inviteSheet" class="overlay hidden">
+  <div class="sheet">
+    <h2>Invite a friend</h2>
+    <p class="muted">Send this link to the friend you want to fight. The first person to open it joins as your opponent. You each take your turn whenever you open the game, and the game checks for their moves while it is open.</p>
+    <input id="inviteLink" readonly>
+    <div class="stack"><button id="inviteShare">Share link</button><button id="inviteCopy">Copy link</button><button class="primary" data-close="inviteSheet">Close</button></div>
   </div>
 </div>
 
@@ -1227,6 +1245,53 @@ const Engine = (() => {
     return touched;
   }
 
+  // Two player battles: the server ends a turn without running the computer side.
+  function passTurn(G, side) {
+    if (G.over || G.turn !== side) return false;
+    if (side === 1) beginTurn(G, 2); else nextRound(G);
+    return true;
+  }
+  // Every change a player makes is one small action, so the server can replay a turn with the same rules.
+  function apply(G, side, a) {
+    if (!a || G.over || G.turn !== side || typeof a.f !== 'string') return false;
+    const i = a.i;
+    if (!Number.isInteger(i) || i < 0 || i >= G.size * G.size) return false;
+    if (a.f === 'cmd') return moveCommander(G, side, i);
+    if (a.f === 'deploy') return ['soldier', 'rifle', 'drone', 'jeep', 'arty'].includes(a.k) && deploy(G, side, a.k, i);
+    if (a.f === 'air') return (a.k === 'plane' || a.k === 'heli') && callAir(G, side, a.k, i);
+    const u = G.units.find(x => x.id === a.u && x.side === side);
+    if (!u) return false;
+    switch (a.f) {
+      case 'move': return moveUnit(G, u, i);
+      case 'fire': return fire(G, u, i);
+      case 'grenade': return throwGrenade(G, u, i);
+      case 'trench': case 'barricade': case 'mound': return build(G, u, a.f, i);
+      case 'hitch': return hitch(G, u, i);
+      case 'unhitch': return unhitch(G, u, i);
+      case 'load': return load(G, u, i);
+      case 'cmdout': return cmdOut(G, u, i);
+      case 'unload': return unload(G, u, i);
+      case 'board': return board(G, u, i);
+    }
+    return false;
+  }
+  // Relabel the two sides so whoever is looking at the battle is always side 1 on their own screen.
+  const REASON_FLIP = { 'You took out the enemy commander': 'The enemy took out your commander', 'The enemy took out your commander': 'You took out the enemy commander' };
+  function swapSides(G) {
+    const sw = v => v === 1 ? 2 : v === 2 ? 1 : v;
+    const pair = o => o ? { 1: o[2], 2: o[1] } : o;
+    for (const k of ['cmd', 'hq', 'intel', 'hqTaken', 'score', 'supply', 'hp', 'cmdMoved', 'riding', 'stats']) G[k] = pair(G[k]);
+    for (let i = 0; i < G.owner.length; i++) { G.owner[i] = sw(G.owner[i]); G.known[i] = sw(G.known[i]); }
+    const flipUnit = u => { u.side = sw(u.side); if (u.cargo) u.cargo.side = sw(u.cargo.side); for (const r of u.riders || []) r.side = sw(r.side); };
+    G.units.forEach(flipUnit);
+    for (const a of G.air) a.side = sw(a.side);
+    for (const e of G.log) e.s = sw(e.s);
+    G.turn = sw(G.turn);
+    if (G.over) G.over = { winner: sw(G.over.winner), reason: REASON_FLIP[G.over.reason] || G.over.reason };
+    G.ver = (G.ver || 0) + 1;
+    return G;
+  }
+
   function computeTiers(elev) {
     const sorted = Float32Array.from(elev).sort();
     const cuts = TIER_CUTS.map(p => sorted[Math.min(sorted.length - 1, Math.floor(p * sorted.length))]);
@@ -1373,7 +1438,7 @@ const Engine = (() => {
     rcOf, nb8, square, cheb, footOK, vehOK, artyRange, rifleRange, unitAt, occupant, count, ready, canShoot, artyReady,
     los, sight, airActive, reach, moveOptions, commanderMoves, moveCommander, unitMoveMap, unitMoves, keepsFire, moveUnit,
     shotTargets, fire, deployCheck, deployCells, deploy, callAir, income, aiTurn, beginTurn, nextRound, playerEnd,
-    computeTiers, markSteep, noiseTerrain, create, clone, serialize, deserialize
+    computeTiers, markSteep, noiseTerrain, create, clone, serialize, deserialize, apply, passTurn, swapSides
   };
 })();
 /*ENGINE-END*/
@@ -1399,7 +1464,7 @@ const PIECES = {
 let G = null;
 const ui = {
   phase: 'setup', mode: 'idle', sel: null, deployType: null, info: '', warn: false,
-  busy: false, terrain: 1, touched: [], undo: [], size: 128, diff: 'normal', fog: true, far: true, userLL: null, anim: null, action: null
+  busy: false, terrain: 1, touched: [], undo: [], acts: [], mp: null, mpTimer: 0, opp: 'ai', size: 128, diff: 'normal', fog: true, far: true, userLL: null, anim: null, action: null
 };
 
 // ---------- map ----------
@@ -1651,7 +1716,7 @@ function draw() {
     ctx.setLineDash([]);
   }
 
-  if (!G.over && !ui.busy) {
+  if (myTurn()) {
     const danger = dangerSet();
     if (ui.mode === 'idle' && !G.cmdMoved[1]) {
       const moves = Engine.commanderMoves(G, 1);
@@ -1734,7 +1799,7 @@ function draw() {
       ctx.fillStyle = k < G.hp[side] ? (side === 1 ? '#2563eb' : '#dc2626') : '#d1d5db';
       ctx.fill(); ctx.lineWidth = 1; ctx.strokeStyle = '#fff'; ctx.stroke();
     }
-    if (side === 1 && !G.cmdMoved[1] && !G.over && !ui.busy) {
+    if (side === 1 && !G.cmdMoved[1] && myTurn()) {
       ctx.strokeStyle = '#15803d'; ctx.lineWidth = 2;
       ctx.beginPath(); ctx.arc(cx, cy, rr + 3, 0, Math.PI * 2); ctx.stroke();
     }
@@ -1876,6 +1941,7 @@ function dangerSet(kind = 'both') {
   for (let i = 0; i < contact.length; i++) if ((kind !== 'shot' && contact[i]) || (kind !== 'contact' && shot[i])) set.add(i);
   return set;
 }
+function myTurn() { return !!G && !G.over && !ui.busy && !(ui.mp && G.turn !== 1); }
 function clearSel() { ui.mode = 'idle'; ui.sel = null; ui.deployType = null; ui.action = null; }
 function toast(msg, ms = 2600) {
   const t = $('toast'); t.textContent = msg; t.classList.remove('hidden');
@@ -1932,10 +1998,11 @@ function handleTap(x, y) {
   onTap(r * G.size + c);
 }
 
-function act(fn) {
-  ui.undo.push(Engine.clone(G));
+// Every change goes through Engine.apply as a small action, recorded so a two player turn can be sent to the server.
+function act(a) {
+  ui.undo.push({ g: Engine.clone(G), n: ui.acts.length });
   if (ui.undo.length > 40) ui.undo.shift();
-  fn();
+  if (Engine.apply(G, 1, a)) ui.acts.push(a);
   paintLayers();
   persist();
   if (G.over) setTimeout(showOver, 350);
@@ -1943,16 +2010,16 @@ function act(fn) {
 
 // Extra actions beyond moving and shooting: soldiers throw grenades and build, jeeps tow guns.
 const ACTIONS = {
-  grenade: { label: 'Grenade', cells: u => Engine.grenadeTargets(G, u), run: (u, i) => Engine.throwGrenade(G, u, i), sub: u => Engine.grenadesLeft(u) + ' left' },
-  trench: { label: 'Dig trench', cells: u => Engine.buildCells(G, u, 'trench'), run: (u, i) => Engine.build(G, u, 'trench', i), sub: () => 'free' },
-  barricade: { label: 'Barricade', cells: u => Engine.buildCells(G, u, 'barricade'), run: (u, i) => Engine.build(G, u, 'barricade', i), sub: () => '1 supply' },
-  mound: { label: 'Raise ground', cells: u => Engine.buildCells(G, u, 'mound'), run: (u, i) => Engine.build(G, u, 'mound', i), sub: () => '1 supply' },
-  hitch: { label: 'Hitch gun', cells: u => Engine.hitchTargets(G, u), run: (u, i) => Engine.hitch(G, u, i), sub: () => 'artillery beside it' },
-  unhitch: { label: 'Drop gun', cells: u => Engine.unhitchCells(G, u), run: (u, i) => Engine.unhitch(G, u, i), sub: () => 'beside the jeep' },
-  load: { label: 'Load', cells: u => Engine.loadTargets(G, u), run: (u, i) => Engine.load(G, u, i), sub: u => Engine.seatsUsed(G, u) + ' of ' + Engine.SEATS + ' seats' },
-  cmdout: { label: 'Commander out', cells: u => Engine.cmdOutCells(G, u), run: (u, i) => Engine.cmdOut(G, u, i), sub: () => 'beside the jeep' },
-  unload: { label: 'Unload', cells: u => Engine.unloadCells(G, u), run: (u, i) => Engine.unload(G, u, i), sub: u => Engine.ridersOf(u).length + ' aboard' },
-  board: { label: 'Get in jeep', cells: u => Engine.boardTargets(G, u), run: (u, i) => Engine.board(G, u, i), sub: () => 'jeep beside it' }
+  grenade: { label: 'Grenade', cells: u => Engine.grenadeTargets(G, u), sub: u => Engine.grenadesLeft(u) + ' left' },
+  trench: { label: 'Dig trench', cells: u => Engine.buildCells(G, u, 'trench'), sub: () => 'free' },
+  barricade: { label: 'Barricade', cells: u => Engine.buildCells(G, u, 'barricade'), sub: () => '1 supply' },
+  mound: { label: 'Raise ground', cells: u => Engine.buildCells(G, u, 'mound'), sub: () => '1 supply' },
+  hitch: { label: 'Hitch gun', cells: u => Engine.hitchTargets(G, u), sub: () => 'artillery beside it' },
+  unhitch: { label: 'Drop gun', cells: u => Engine.unhitchCells(G, u), sub: () => 'beside the jeep' },
+  load: { label: 'Load', cells: u => Engine.loadTargets(G, u), sub: u => Engine.seatsUsed(G, u) + ' of ' + Engine.SEATS + ' seats' },
+  cmdout: { label: 'Commander out', cells: u => Engine.cmdOutCells(G, u), sub: () => 'beside the jeep' },
+  unload: { label: 'Unload', cells: u => Engine.unloadCells(G, u), sub: u => Engine.ridersOf(u).length + ' aboard' },
+  board: { label: 'Get in jeep', cells: u => Engine.boardTargets(G, u), sub: () => 'jeep beside it' }
 };
 function actionsFor(u) {
   if (!u || !Engine.ready(G, u) || G.over) return [];
@@ -1997,19 +2064,19 @@ function keepOrClear(u) {
 
 function onTap(i) {
   ui.warn = false;
-  if (G.over) { ui.info = describe(i); return render(); }
+  if (!myTurn()) { ui.info = describe(i); return render(); }
 
   if (ui.mode === 'deploy') {
     const type = ui.deployType;
     if (type === 'plane' || type === 'heli') {
-      act(() => Engine.callAir(G, 1, type, i));
+      act({ f: 'air', k: type, i });
       clearSel();
       if (type === 'plane') { ui.anim = { t0: performance.now(), idx: i }; ui.info = 'The recon plane passes over. You can see that area until your turn ends.'; }
       else ui.info = 'The helicopter hovers there and spots through your next 2 turns.';
       return render();
     }
     const why = Engine.deployCheck(G, 1, type, i);
-    if (!why) { act(() => Engine.deploy(G, 1, type, i)); clearSel(); ui.info = PIECES[type].label + ' placed. It can act next turn.'; }
+    if (!why) { act({ f: 'deploy', k: type, i }); clearSel(); ui.info = PIECES[type].label + ' placed. It can act next turn.'; }
     else ui.info = why + '.';
     return render();
   }
@@ -2018,7 +2085,7 @@ function onTap(i) {
     const u = unitById(ui.sel), kind = ui.action;
     if (u && ACTIONS[kind].cells(u).includes(i)) {
       const wasCmd = i === G.cmd[1];
-      act(() => ACTIONS[kind].run(u, i));
+      act({ f: kind, u: u.id, i });
       ui.info = {
         grenade: 'Grenade thrown. ' + Engine.grenadesLeft(u) + ' left.',
         trench: 'Trench dug. Rifles cannot hit a piece in it, and it soaks up one artillery shell.',
@@ -2039,11 +2106,11 @@ function onTap(i) {
   if (ui.mode === 'unit') {
     const u = unitById(ui.sel);
     if (u) {
-      if (Engine.shotTargets(G, u).includes(i)) { act(() => Engine.fire(G, u, i)); ui.info = ''; keepOrClear(u); return render(); }
+      if (Engine.shotTargets(G, u).includes(i)) { act({ f: 'fire', u: u.id, i }); ui.info = ''; keepOrClear(u); return render(); }
       const mm = Engine.unitMoveMap(G, u);
       if (mm.has(i)) {
         const road = mm.get(i).road;
-        act(() => Engine.moveUnit(G, u, i));
+        act({ f: 'move', u: u.id, i });
         ui.info = u.type === 'arty' ? (road ? 'Drove along the road. It can still fire.' : 'Repositioned. It can fire again next turn.') : '';
         keepOrClear(u);
         return render();
@@ -2054,7 +2121,7 @@ function onTap(i) {
 
   const u = Engine.unitAt(G, i);
   if (u && u.side === 1) { selectUnit(u); return render(); }
-  if (Engine.commanderMoves(G, 1).includes(i)) { act(() => Engine.moveCommander(G, 1, i)); ui.info = ''; return render(); }
+  if (Engine.commanderMoves(G, 1).includes(i)) { act({ f: 'cmd', i }); ui.info = ''; return render(); }
   if (i === G.cmd[1]) {
     ui.info = G.cmdMoved[1] ? 'Your commander already moved this turn.' : 'Your commander steps one cell, or up to 3 along a road. Tap a green or orange square.';
     return render();
@@ -2069,7 +2136,7 @@ function onTap(i) {
 
 // ---------- deploy sheet ----------
 function openDeploy() {
-  if (!G || ui.busy || G.over) return;
+  if (!G || !myTurn()) return;
   if (ui.mode === 'deploy') { clearSel(); ui.info = ''; return render(); }
   const list = $('deployList');
   list.innerHTML = '';
@@ -2110,15 +2177,16 @@ function renderActions(u, idle) {
 }
 $('undoBtn').onclick = () => {
   if (!ui.undo.length || ui.busy) return;
-  G = ui.undo.pop(); clearSel(); ui.info = 'Undone.'; paintLayers(); persist(); render();
+  const e = ui.undo.pop(); G = e.g; ui.acts.length = e.n; clearSel(); ui.info = 'Undone.'; paintLayers(); persist(); render();
 };
 $('ctrBtn').onclick = () => focusCommander();
 $('endBtn').onclick = () => endTurn();
 
 function endTurn() {
-  if (!G || ui.busy || G.over) return;
+  if (!G || !myTurn()) return;
+  if (ui.mp) return mpEndTurn();
   if (ui.mode !== 'idle') clearSel();
-  ui.busy = true; ui.undo = []; ui.touched = []; ui.info = ''; render();
+  ui.busy = true; ui.undo = []; ui.acts = []; ui.touched = []; ui.info = ''; render();
   setTimeout(() => {
     const before = G.log.length;
     ui.touched = Engine.playerEnd(G);
@@ -2131,7 +2199,9 @@ function endTurn() {
 
 // ---------- HUD ----------
 function hintText() {
+  if (ui.mp && ui.busy) return 'Sending your turn to the battle server...';
   if (ui.busy) return 'Enemy is moving...';
+  if (ui.mp && !G.over && G.turn !== 1) return 'Waiting for your friend to take their turn.';
   if (G.over) return 'The battle is over.';
   if (ui.mode === 'deploy') {
     if (ui.deployType === 'plane') return 'Tap where the recon plane should fly over.';
@@ -2171,13 +2241,15 @@ function render() {
     else if (dangerSet('shot').has(G.cmd[1])) { info = 'Warning: your commander is inside the range of an enemy gun you can see.'; warn = true; }
   }
   if (!info && G.mapSource === 'none') info = 'Road and building data is missing, so roads will not speed anything up. Menu, Reload roads and buildings tries again.';
+  if (!info && ui.mp && !ui.mp.joined && !G.over) info = 'Your friend has not joined yet. Menu, Invite a friend, shows the link to send.';
   if (!info && G.round === 1 && !G.cmdMoved[1]) info = G.fog
     ? 'The enemy started about ' + Engine.cheb(G, G.cmd[1], G.hq[2]) + ' cells away, marked with a faded star. Scout with drones or aircraft to find them.'
     : 'The enemy HQ is ' + Engine.cheb(G, G.cmd[1], G.hq[2]) + ' cells away. Pinch out to scout it.';
   $('info').textContent = info;
   $('info').classList.toggle('warn', !!warn);
 
-  const idle = !ui.busy && !G.over;
+  const idle = myTurn();
+  $('mInvite').classList.toggle('hidden', !ui.mp);
   const selU = ui.mode === 'unit' ? unitById(ui.sel) : null;
   renderActions(selU, idle && !!selU);
   $('deployBtn').disabled = !idle;
@@ -2185,7 +2257,7 @@ function render() {
   $('deployBtn').querySelector('small').textContent = ui.mode === 'deploy' ? 'tap to cancel' : G.supply[1] + ' supply';
   $('undoBtn').disabled = !idle || !ui.undo.length;
   $('endBtn').disabled = !idle;
-  $('endBtn').textContent = ui.busy ? 'Enemy turn' : 'End turn';
+  $('endBtn').textContent = ui.mp ? (ui.busy ? 'Sending' : !G.over && G.turn !== 1 ? 'Their turn' : 'End turn') : ui.busy ? 'Enemy turn' : 'End turn';
   $('endBtn').classList.toggle('ready', idle && hintText().startsWith('All set'));
   draw();
 }
@@ -2464,6 +2536,10 @@ function segment(id, key, attr, storeKey, parse = v => v) {
 }
 segment('sizeSeg', 'size', 'n', 'tw_size', v => +v);
 segment('diffSeg', 'diff', 'd', 'tc_diff');
+segment('oppSeg', 'opp', 'o', 'tw_opp');
+function syncOpp() { $('diffSeg').classList.toggle('hidden', ui.opp === 'friend'); }
+document.querySelectorAll('#oppSeg button').forEach(b => b.addEventListener('click', syncOpp));
+syncOpp();
 segment('fogSeg', 'fog', 'f', 'tw_fog', v => v === 'on' || v === true);
 segment('distSeg', 'far', 's', 'tw_far', v => v === 'far' || v === true);
 
@@ -2501,10 +2577,16 @@ async function launch(B, diff, fog, far = ui.far) {
   }
   const tier = Engine.computeTiers(elev);
   G = Engine.create({ size, cell, x0, y0, elev, terr, tier, seed: (Math.random() * 4294967296) >>> 0, playerIdx, source, mapSource, diff, fog, far });
-  ui.undo = []; ui.touched = []; clearSel(); ui.info = '';
+  mpStop(); ui.mp = null;
+  ui.undo = []; ui.acts = []; ui.touched = []; clearSel(); ui.info = '';
+  if (diff === 'friend') {
+    $('loadTxt').textContent = 'Setting up the battle on the server.';
+    if (!(await mpCreate())) { G.diff = 'normal'; toast('The battle server did not answer, so this battle is against the computer instead.', 5000); }
+  }
   buildLayers();
   setPhase('play');
   persist();
+  if (ui.mp) setTimeout(showInvite, 600);
   if (source === 'generated') toast('Elevation sources did not answer, so this map uses generated hills.', 4200);
   else if (mapSource === 'none') { toast('Road data did not load, so every cell counts as open ground. Retrying in the background.', 5000); setTimeout(() => reloadMapData(true), 8000); }
   else if (mapSource === 'no buildings') { toast('Roads loaded. Buildings did not, retrying in the background.', 4200); setTimeout(() => reloadMapData(true), 8000); }
@@ -2518,7 +2600,7 @@ $('startBtn').onclick = () => {
   const f = setupFrame();
   const nw = crs.project(map.containerPointToLatLng([f.x, f.y]));
   const ne = crs.project(map.containerPointToLatLng([f.x + f.side, f.y]));
-  launch({ size: ui.size, cell: (ne.x - nw.x) / ui.size, x0: nw.x, y0: nw.y }, ui.diff, ui.fog);
+  launch({ size: ui.size, cell: (ne.x - nw.x) / ui.size, x0: nw.x, y0: nw.y }, ui.opp === 'friend' ? 'friend' : ui.diff, ui.fog);
 };
 
 function zoomForCellPx(px) {
@@ -2549,7 +2631,10 @@ function focusCommander() {
 
 function persist() {
   if (!G) return;
-  try { localStorage.setItem(SAVE_KEY, Engine.serialize(G)); } catch (e) { /* storage full or blocked */ }
+  try {
+    if (ui.mp) { localStorage.setItem(MP_SAVE, Engine.serialize(G)); mpRemember(); }
+    else localStorage.setItem(SAVE_KEY, Engine.serialize(G));
+  } catch (e) { /* storage full or blocked */ }
 }
 function readSave() {
   try { const s = localStorage.getItem(SAVE_KEY); return s ? Engine.deserialize(s) : null; } catch (e) { return null; }
@@ -2558,15 +2643,168 @@ function refreshResume() {
   const s = readSave(), b = $('resumeBtn');
   if (s && !s.over) { b.textContent = 'Continue saved battle (round ' + s.round + ')'; b.classList.remove('hidden'); }
   else b.classList.add('hidden');
+  const ms = mpSession(), mg = ms ? readMpSave() : null, mb = $('mpResumeBtn');
+  if (mg && !mg.over) { mb.textContent = 'Continue battle with a friend (round ' + mg.round + ')'; mb.classList.remove('hidden'); }
+  else mb.classList.add('hidden');
 }
 $('resumeBtn').onclick = () => {
   const s = readSave();
   if (!s) return refreshResume();
-  G = s; ui.undo = []; ui.touched = []; clearSel(); ui.info = '';
+  G = s; ui.undo = []; ui.acts = []; ui.touched = []; clearSel(); ui.info = '';
   buildLayers();
   setPhase('play');
   requestAnimationFrame(() => { fitBattle(); render(); });
 };
+
+// ---------- two player battles ----------
+// The battle server keeps the real copy of each battle. Each turn is sent as the list of small actions
+// taken, and the server replays them with the same rules before passing the turn to the other player.
+const MP_URL = 'https://topo-wars-server.vercel.app/api/battle';
+const MP_KEY = 'tw_mp_v1', MP_SAVE = 'tw_mp_save_v1';
+async function mpCall(body) {
+  try {
+    const r = await fetch(MP_URL, { method: 'POST', headers: { 'Content-Type': 'text/plain' }, body: JSON.stringify(body) });
+    const j = await r.json();
+    j._status = r.status;
+    return j;
+  } catch (e) { return null; }
+}
+function mpRemember() {
+  if (!ui.mp) return;
+  try { localStorage.setItem(MP_KEY, JSON.stringify({ ...ui.mp, acts: ui.acts })); } catch (e) { /* ignore */ }
+}
+function mpSession() {
+  try { return JSON.parse(localStorage.getItem(MP_KEY) || 'null'); } catch (e) { return null; }
+}
+function readMpSave() {
+  try { const s = localStorage.getItem(MP_SAVE); return s ? Engine.deserialize(s) : null; } catch (e) { return null; }
+}
+function mpStop() { clearTimeout(ui.mpTimer); ui.mpTimer = 0; }
+// Turn the server copy into this player's view: they are always side 1 in blue, and fog memory stays on this device.
+function mpLocal(state, prev) {
+  const g = Engine.deserialize(state), N = g.size * g.size;
+  if (ui.mp.side === 2) Engine.swapSides(g);
+  if (prev && prev.size === g.size && prev.x0 === g.x0 && prev.y0 === g.y0) {
+    g.explored = prev.explored; g.known = prev.known; g.logged = prev.logged;
+    if (prev.intel && prev.intel[1] && (!g.intel[1] || prev.intel[1].round > g.intel[1].round)) g.intel[1] = prev.intel[1];
+    if (!g.place) g.place = prev.place;
+  } else { g.explored = new Uint8Array(N); g.known = new Uint8Array(N); }
+  if (!g.place) g.place = ui.mp.place || '';
+  return g;
+}
+function mpApply(r) {
+  const old = G;
+  G = mpLocal(r.state, old);
+  ui.mp.rev = r.rev;
+  if (r.joined != null) ui.mp.joined = r.joined;
+  const before = new Map(old ? old.units.map(u => [u.id, u.idx]) : []);
+  ui.touched = G.units.filter(u => u.side === 2 && before.get(u.id) !== u.idx).map(u => u.idx);
+  if (old && old.cmd[2] !== G.cmd[2]) ui.touched.push(G.cmd[2]);
+  ui.undo = []; ui.acts = []; clearSel(); ui.info = '';
+  paintLayers(); persist(); render();
+  if (G.over) setTimeout(showOver, 350);
+}
+async function mpCreate() {
+  let place = '';
+  try { place = await Promise.race([placeName(battleCenter()), new Promise(r => setTimeout(() => r(''), 4000))]); } catch (e) { /* no name */ }
+  G.place = place || '';
+  const r = await mpCall({ op: 'create', state: Engine.serialize(G), place });
+  if (!r || !r.id) return false;
+  ui.mp = { id: r.id, token: r.token, side: 1, rev: r.rev, joined: false, place };
+  mpRemember();
+  return true;
+}
+async function mpEndTurn() {
+  if (ui.mode !== 'idle') clearSel();
+  const mp = ui.mp;
+  ui.busy = true; ui.info = ''; render();
+  const r = await mpCall({ op: 'turn', id: mp.id, token: mp.token, rev: mp.rev, actions: ui.acts });
+  ui.busy = false;
+  if (ui.mp !== mp) return;
+  if (!r) { toast('Could not reach the battle server. Your moves are still here, so press End turn to try again.', 5000); return render(); }
+  if (r.state) {
+    mpApply(r);
+    if (r._status !== 200) toast(r.error + ' Your screen now shows the saved battle.', 6000);
+    else if (!G.over) toast(mp.joined ? 'Turn sent. Waiting for your friend.' : 'Turn sent. Your friend has not joined yet.', 3500);
+  } else { toast(r.error || 'The battle server had a problem. Try End turn again.', 5000); render(); }
+  mpPoll();
+}
+async function mpPoll() {
+  mpStop();
+  if (!ui.mp || !G || ui.phase !== 'play' || G.over) return;
+  if (G.turn === 1 && ui.mp.joined) return;
+  const mp = ui.mp;
+  if (!document.hidden && !ui.busy) {
+    const r = await mpCall({ op: 'state', id: mp.id, token: mp.token, rev: mp.rev });
+    if (ui.mp !== mp || !G) return;
+    if (r && r._status === 200) {
+      const wasJoined = mp.joined;
+      mp.joined = r.joined;
+      if (r.state && (G.turn !== 1 || !ui.acts.length)) {
+        const waited = G.turn !== 1;
+        mpApply(r);
+        if (waited && !G.over && G.turn === 1) {
+          toast('Your friend finished their turn. Your move.', 3500);
+          try { if (navigator.vibrate) navigator.vibrate(150); } catch (e) { /* ignore */ }
+        }
+      } else if (!wasJoined && r.joined) { toast('Your friend joined the battle.', 3500); mpRemember(); render(); }
+    } else if (r && r._status >= 400 && r._status < 500) {
+      toast(r.error || 'This battle is no longer on the server.', 6000);
+      return;
+    }
+  }
+  if (ui.mp === mp && G && !G.over) ui.mpTimer = setTimeout(mpPoll, G.turn !== 1 ? 4000 : 10000);
+}
+document.addEventListener('visibilitychange', () => { if (!document.hidden && ui.mp) mpPoll(); });
+function inviteLink() { return location.origin + location.pathname + '#join=' + ui.mp.id; }
+function showInvite() {
+  if (!ui.mp) return;
+  $('inviteLink').value = inviteLink();
+  $('inviteShare').classList.toggle('hidden', !navigator.share);
+  open('inviteSheet');
+}
+$('inviteShare').onclick = () => {
+  navigator.share({ title: 'Topo Wars', text: 'Fight me in Topo Wars on real terrain.', url: inviteLink() }).catch(() => { /* closed */ });
+};
+$('inviteCopy').onclick = () => {
+  const done = () => toast('Link copied.');
+  const fallback = () => { $('inviteLink').select(); try { document.execCommand('copy'); done(); } catch (e) { toast('Press and hold the link to copy it.'); } };
+  if (navigator.clipboard) navigator.clipboard.writeText(inviteLink()).then(done, fallback); else fallback();
+};
+function mpEnter(g) {
+  G = g;
+  ui.undo = []; ui.touched = []; clearSel(); ui.info = '';
+  buildLayers();
+  setPhase('play');
+  persist();
+  requestAnimationFrame(() => { fitBattle(); render(); });
+  mpPoll();
+}
+$('mpResumeBtn').onclick = () => {
+  const ms = mpSession(), g = ms ? readMpSave() : null;
+  if (!g) return refreshResume();
+  ui.mp = ms; ui.acts = ms.acts || []; delete ui.mp.acts;
+  mpEnter(g);
+};
+// Opening a link that ends in #join=CODE joins that battle, or returns its creator to it.
+async function mpJoinFromLink() {
+  const m = location.hash.match(/join=([A-Za-z0-9]{4,12})/);
+  if (!m) return;
+  history.replaceState(null, '', location.pathname + location.search);
+  const id = m[1].toUpperCase(), prev = mpSession();
+  close('help');
+  setPhase('loading');
+  $('loadTxt').textContent = 'Joining the battle.';
+  $('loadBar').style.width = '50%';
+  const r = await mpCall({ op: 'join', id, token: prev && prev.id === id ? prev.token : undefined });
+  if (!r || !r.state) { setPhase('setup'); toast(r ? r.error : 'Could not reach the battle server. Try the link again in a moment.', 6000); return; }
+  const old = prev && prev.id === id ? readMpSave() : null;
+  mpStop();
+  ui.mp = { id, token: r.token, side: r.side, rev: r.rev, joined: r.joined, place: r.place || '' };
+  ui.acts = old && prev.rev === r.rev ? prev.acts || [] : [];
+  mpEnter(old && prev.rev === r.rev ? old : mpLocal(r.state, old));
+  toast(r.side === 2 && !old ? 'You joined the battle. You are blue and your friend is red.' : 'Back in your battle.', 4500);
+}
 
 // ---------- battle history ----------
 function readHistory() {
@@ -2645,11 +2883,16 @@ function showOver() {
   $('over').classList.remove('hidden');
 }
 function leaveBattle(then) {
-  if (G && !G.over && !confirm('Leave this battle and start a new one?')) return;
+  if (G && !G.over && !confirm(ui.mp ? 'Leave this battle for now? Continue battle with a friend on the setup screen brings you back.' : 'Leave this battle and start a new one?')) return;
   ['menu', 'over'].forEach(id => $(id).classList.add('hidden'));
   const mid = G ? battleCenter() : null;
+  const wasMp = ui.mp, ended = G && G.over;
+  mpStop(); ui.mp = null;
   G = null; terrCv = null; clearSel();
-  try { localStorage.removeItem(SAVE_KEY); } catch (e) { /* ignore */ }
+  try {
+    if (!wasMp) localStorage.removeItem(SAVE_KEY);
+    else if (ended) { localStorage.removeItem(MP_SAVE); localStorage.removeItem(MP_KEY); }
+  } catch (e) { /* ignore */ }
   if (then) return then();
   if (mid) map.setView(mid, map.getZoom(), { animate: false });
   setPhase('setup');
@@ -2663,6 +2906,7 @@ document.querySelectorAll('[data-close]').forEach(b => b.onclick = () => close(b
 document.querySelectorAll('.overlay').forEach(o => o.addEventListener('click', e => { if (e.target === o && o.id !== 'loading') close(o.id); }));
 $('menuBtn').onclick = () => open('menu');
 $('mClose').onclick = () => close('menu');
+$('mInvite').onclick = () => { close('menu'); showInvite(); };
 $('mHelp').onclick = () => { close('menu'); open('help'); };
 $('mReload').onclick = () => { close('menu'); reloadMapData(false); };
 $('mHistory').onclick = () => { close('menu'); showHistory(); };
@@ -2692,6 +2936,7 @@ $('mTerrain').onclick = () => {
 setPhase('setup');
 locate(true);
 try { if (!localStorage.getItem('tw_seen_help_v4')) { open('help'); localStorage.setItem('tw_seen_help_v4', '1'); } } catch (e) { /* ignore */ }
+mpJoinFromLink();
 </script>
 </body>
 </html>
