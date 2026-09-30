@@ -11,7 +11,7 @@
 <meta name="robots" content="index,follow">
 <link rel="canonical" href="https://topo-wars.vercel.app/">
 <meta name="application-name" content="Topo Wars">
-<meta name="version" content="5.8">
+<meta name="version" content="5.9">
 <meta name="apple-mobile-web-app-title" content="Topo Wars">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -156,7 +156,7 @@ button.on{background:var(--amber-soft);border-color:#f59e0b}
     <button id="ctrBtn">Center<small>on you</small></button>
     <button id="endBtn" class="primary">End turn</button>
   </div>
-  <div class="credit">Topo Wars 5.8. Map data &copy; OpenStreetMap contributors</div>
+  <div class="credit">Topo Wars 5.9. Map data &copy; OpenStreetMap contributors</div>
 </div>
 
 <div id="setup">
@@ -228,8 +228,11 @@ button.on{background:var(--amber-soft);border-color:#f59e0b}
     <p>Set Opponent to Friend on the setup screen, pick your ground and press Start battle. The game gives you a link, a QR code and a six character battle code to send. Whoever opens the link or scans the QR code first, or types the code next to Friend's code on the setup screen and presses Join, becomes your opponent on the same map, and each of you sees yourself in blue. You move first. Take your turn and press End turn, and the battle server checks every move with the same rules before passing the turn over. You do not both need to be online: open the game whenever you like, and while it is open it checks for your friend's move every few seconds. Menu, Invite a friend, shows the link again. Continue battle with a friend on the setup screen brings you back to it.</p>
     <p>Turn notifications buzz your phone when your friend finishes a turn, joins the battle or ends it, even when the game is closed. Turn them on from the invite screen, or with Menu, Turn notifications. Tapping the notification opens the battle.</p>
 
+    <h3>Moving a group</h3>
+    <p>Select any of your pieces and press Group. Tap more of your pieces to add them, or tap one again to drop it. Then tap where the group should go. Each piece heads for the same spot relative to the others, so the group keeps its shape, and moves as far as it can right away. At the start of each of your turns, pieces with orders move on by themselves until they arrive, shown by a dashed line and a small flag. They never step onto another piece. Moving a piece yourself takes it off its orders, Stop orders clears them for the pieces you pick, and Undo takes back the automatic moves.</p>
+
     <h3>Structures and roads</h3>
-    <p>Build structures from the Deploy sheet on open ground, road or forest inside your territory. A Barracks costs 30 supply and trains a free soldier beside it every turn. A Jeep factory costs 40 and builds a free jeep every other turn. A Rifle range costs 50 and trains a free rifleman every other turn. Save up supply by holding more territory. New pieces appear at the start of your turn and can act the turn after, as long as there is a free cell beside the structure. Tap your structure and press Turn to face it north, east, south or west, as often as you like. The roof points out the front, and new pieces come out on that side when there is room. Nothing can walk through a structure. Each has 3 health: every artillery shell or grenade takes 1, and destroying one is worth 10 points.</p>
+    <p>Build structures from the Deploy sheet on open ground, road or forest inside your territory. A Barracks costs 30 supply and trains a free soldier beside it every turn. A Jeep factory costs 40 and builds a free jeep every other turn. A Rifle range costs 50 and trains a free rifleman every other turn. A Drone hangar costs 40 and builds a free drone every other turn. A Gun foundry costs 60 and casts a free artillery piece every third turn. Save up supply by holding more territory. New pieces appear at the start of your turn and can act the turn after. They come out in a free cell beside the structure, or when those are full, the nearest free cell of yours up to 3 cells away. Keep a few cells around each structure clear so it never stalls. Tap your structure and press Turn to face it north, east, south or west, as often as you like. The roof points out the front, and new pieces come out on that side when there is room. Nothing can walk through a structure. Each has 3 health: every artillery shell or grenade takes 1, and destroying one is worth 10 points.</p>
     <p>A soldier can pave a road on its own cell or the cell next to it for 3 supply, using its action for the turn. Paved roads work like any road: jeeps and artillery can drive on them, and every piece moves up to 3 cells along them. Paving opens new routes for jeeps out of forest, steep ground and dug-up trenches.</p>
 
     <h3>Your turn</h3>
@@ -466,7 +469,9 @@ const Engine = (() => {
   const STRUCT = {
     barracks: { label: 'Barracks', cost: 30, makes: 'soldier', every: 1 },
     factory: { label: 'Jeep factory', cost: 40, makes: 'jeep', every: 2 },
-    range: { label: 'Rifle range', cost: 50, makes: 'rifle', every: 2 }
+    range: { label: 'Rifle range', cost: 50, makes: 'rifle', every: 2 },
+    hangar: { label: 'Drone hangar', cost: 40, makes: 'drone', every: 2 },
+    foundry: { label: 'Gun foundry', cost: 60, makes: 'arty', every: 3 }
   };
   const STRUCT_HP = 3, STRUCT_KILL = 10;
   const MOUND_MAX = 2, MOUND_METERS = 4;
@@ -1035,8 +1040,13 @@ const Engine = (() => {
     for (const b of G.builds || []) {
       if (b.side !== side || G.round < b.next) continue;
       const S = STRUCT[b.type], type = S.makes;
-      const room = nb8(G, b.idx).filter(i => !occupant(G, i) && G.owner[i] !== foe(side) && (type === 'jeep' ? vehOK(G, i) : footOK(G, i)));
-      if (!room.length) continue;
+      const fits = i => !occupant(G, i) && G.terr[i] !== T.STRUCT && G.owner[i] !== foe(side) &&
+        (type === 'jeep' || type === 'arty' ? vehOK(G, i) : type === 'drone' ? true : footOK(G, i));
+      // Right beside it first; if that is full, the nearest free cell of its own within 3.
+      let room = nb8(G, b.idx).filter(fits);
+      for (let R = 2; !room.length && R <= 3; R++) room = square(G, b.idx, R).filter(i => cheb(G, i, b.idx) === R && G.owner[i] === side && fits(i));
+      if (!room.length) { if (!b.blocked) log(G, side, S.label + ' has no free cell nearby for its ' + NAMES[type]); b.blocked = true; continue; }
+      b.blocked = false;
       // Prefer the cell straight out the front, then the front corners, then anywhere of its own.
       const [dr, dc] = [[-1, 0], [0, 1], [1, 0], [0, -1]][b.face || 0], [br, bc] = rcOf(G, b.idx);
       const frontness = c => { const [r, k] = rcOf(G, c); return (r - br) * dr + (k - bc) * dc; };
@@ -1048,7 +1058,7 @@ const Engine = (() => {
       if (G.owner[i] === 0) G.owner[i] = side;
       b.next = G.round + S.every;
       stat(G, side, 'produced');
-      log(G, side, S.label + ' turned out a ' + NAMES[type]);
+      log(G, side, S.label + ' turned out ' + (type === 'arty' ? 'artillery' : 'a ' + NAMES[type]));
     }
   }
 
@@ -1365,7 +1375,7 @@ const Engine = (() => {
     }
 
     // Structures: one of each once the score allows, on safe ground near home.
-    for (const type of ['barracks', 'range', 'factory']) {
+    for (const type of ['barracks', 'range', 'factory', 'foundry', ...(G.fog ? ['hangar'] : [])]) {
       if ((G.builds || []).some(b => b.side === me && b.type === type)) continue;
       if (G.supply[me] < STRUCT[type].cost + 1) continue;
       const cells = structCells(G, me, type);
@@ -1380,7 +1390,7 @@ const Engine = (() => {
     const MIX = { soldier: 0.32, rifle: 0.28, arty: 0.20, drone: G.fog ? 0.12 : 0, jeep: 0.08 };
     let reserve = gunsIdle && !airBusy && count(G, me, 'soldier') >= 2 ? COST.plane : 0;
     // Once income is healthy, save up for the next structure it does not have yet.
-    const saveFor = ['barracks', 'factory', 'range'].find(t => !(G.builds || []).some(b => b.side === me && b.type === t));
+    const saveFor = ['barracks', 'factory', 'range', 'foundry'].find(t => !(G.builds || []).some(b => b.side === me && b.type === t));
     if (saveFor && income(G, me) >= 8 && count(G, me, 'soldier') >= 3) reserve = Math.max(reserve, STRUCT[saveFor].cost);
     for (let k = 0; k < 4; k++) {
       const n = t => count(G, me, t), total = G.units.filter(u => u.side === me).length + 1;
@@ -1628,7 +1638,7 @@ const Engine = (() => {
       cmd: { ...G.cmd }, riding: { ...(G.riding || { 1: null, 2: null }) }, hq: { ...G.hq }, hqTaken: { ...G.hqTaken }, score: { ...G.score },
       intel: { 1: G.intel[1] && { ...G.intel[1] }, 2: G.intel[2] && { ...G.intel[2] } },
       supply: { ...G.supply }, hp: { ...G.hp }, cmdMoved: { ...G.cmdMoved }, log: G.log.slice(),
-      stats: { 1: { ...G.stats[1] }, 2: { ...G.stats[2] } }, over: G.over ? { ...G.over } : null, offer: G.offer ? { ...G.offer } : undefined, cleanup: G.cleanup ? { ...G.cleanup } : undefined
+      stats: { 1: { ...G.stats[1] }, 2: { ...G.stats[2] } }, over: G.over ? { ...G.over } : null, offer: G.offer ? { ...G.offer } : undefined, orders: G.orders ? { ...G.orders } : undefined, cleanup: G.cleanup ? { ...G.cleanup } : undefined
     };
   }
   function serialize(G) {
@@ -1696,13 +1706,15 @@ const PIECES = {
   jeep: { label: 'Jeep', desc: 'Drives 2 cells over open ground, 3 along roads or its own tire treads. Tows artillery.' },
   barracks: { label: 'Barracks', desc: 'Trains a free soldier beside it every turn.' },
   factory: { label: 'Jeep factory', desc: 'Builds a free jeep beside it every other turn.' },
-  range: { label: 'Rifle range', desc: 'Trains a free rifleman beside it every other turn.' }
+  range: { label: 'Rifle range', desc: 'Trains a free rifleman beside it every other turn.' },
+  hangar: { label: 'Drone hangar', desc: 'Builds a free drone beside it every other turn.' },
+  foundry: { label: 'Gun foundry', desc: 'Casts a free artillery piece beside it every third turn.' }
 };
 
 let G = null;
 const ui = {
   phase: 'setup', mode: 'idle', sel: null, deployType: null, info: '', warn: false,
-  busy: false, terrain: 1, touched: [], undo: [], acts: [], mp: null, mpTimer: 0, opp: 'ai', size: 128, diff: 'normal', fog: true, far: true, userLL: null, anim: null, action: null
+  busy: false, terrain: 1, touched: [], undo: [], acts: [], mp: null, mpTimer: 0, opp: 'ai', group: [], auto: false, size: 128, diff: 'normal', fog: true, far: true, userLL: null, anim: null, action: null
 };
 
 // ---------- map ----------
@@ -1941,7 +1953,7 @@ function draw() {
     ctx.restore();
     ctx.fillStyle = col;
     ctx.font = '700 ' + Math.round(bw * 0.36) + 'px system-ui, sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-    ctx.fillText({ barracks: 'B', factory: 'J', range: 'R' }[b.type], mx - fx * bw * 0.14, my - fy * bw * 0.14);
+    ctx.fillText({ barracks: 'B', factory: 'J', range: 'R', hangar: 'D', foundry: 'A' }[b.type], mx - fx * bw * 0.14, my - fy * bw * 0.14);
     for (let k = 0; k < Engine.STRUCT_HP; k++) {
       ctx.fillStyle = k < b.hp ? col : '#d1d5db';
       ctx.fillRect(bx + bw * (0.18 + k * 0.24), by + bw + Math.max(1, s * 0.02), bw * 0.16, Math.max(2, bw * 0.06));
@@ -2050,10 +2062,24 @@ function draw() {
 
   // Pieces. Enemy pieces only where you can see them.
   const R = Math.max(5, s * 0.34);
+  // Standing orders: a dashed line from each of your pieces to where it is headed, and a small flag there.
+  if (G.orders) for (const u of G.units) {
+    const goal = G.orders[u.id];
+    if (u.side !== 1 || goal == null) continue;
+    const [ax, ay] = rect(u.idx), [gx, gy] = rect(goal);
+    ctx.strokeStyle = 'rgba(37,99,235,0.7)'; ctx.lineWidth = 2; ctx.setLineDash([5, 4]);
+    ctx.beginPath(); ctx.moveTo(ax + s / 2, ay + s / 2); ctx.lineTo(gx + s / 2, gy + s / 2); ctx.stroke(); ctx.setLineDash([]);
+    ctx.fillStyle = '#2563eb'; ctx.fillRect(gx + s * 0.45, gy + s * 0.2, Math.max(1.5, s * 0.06), s * 0.6);
+    ctx.beginPath(); ctx.moveTo(gx + s * 0.5, gy + s * 0.2); ctx.lineTo(gx + s * 0.8, gy + s * 0.32); ctx.lineTo(gx + s * 0.5, gy + s * 0.44); ctx.closePath(); ctx.fill();
+  }
   for (const u of G.units) {
     if (!visible(u.idx) || (u.side === 2 && !vis[u.idx])) continue;
     const [x, y] = rect(u.idx);
     drawPiece(u, x + s / 2, y + s / 2, R);
+    if (ui.mode === 'group' && ui.group.includes(u.id)) {
+      ctx.strokeStyle = '#f59e0b'; ctx.lineWidth = 3; ctx.setLineDash([]);
+      ctx.strokeRect(x + 2, y + 2, s - 4, s - 4);
+    }
     if (ui.mode === 'unit' && ui.sel === u.id) {
       ctx.strokeStyle = '#f59e0b'; ctx.lineWidth = 3;
       ctx.beginPath(); ctx.arc(x + s / 2, y + s / 2, R * 1.4, 0, Math.PI * 2); ctx.stroke();
@@ -2301,6 +2327,7 @@ function handleTap(x, y) {
 function act(a) {
   ui.undo.push({ g: Engine.clone(G), n: ui.acts.length });
   if (ui.undo.length > 40) ui.undo.shift();
+  if (a.f === 'move' && !ui.auto && G.orders && G.orders[a.u] != null) delete G.orders[a.u];
   if (Engine.apply(G, 1, a)) ui.acts.push(a);
   paintLayers();
   if (G.over && ui.mp) { persist(); return mpEndTurn(); }
@@ -2338,9 +2365,9 @@ function actionsFor(u) {
 }
 const anyAction = u => actionsFor(u).some(k => ACTIONS[k].cells(u).length);
 function selectUnit(u) {
-  if (!Engine.ready(G, u)) { ui.info = Engine.NAMES[u.type][0].toUpperCase() + Engine.NAMES[u.type].slice(1) + ' just arrived. It can act next turn.'; return; }
+  if (!Engine.ready(G, u)) { ui.mode = 'unit'; ui.sel = u.id; ui.info = Engine.NAMES[u.type][0].toUpperCase() + Engine.NAMES[u.type].slice(1) + ' just arrived. It can act next turn. Group gives it orders now.'; return; }
   const moves = Engine.unitMoves(G, u).length, shots = Engine.shotTargets(G, u).length;
-  if (!moves && !shots && !anyAction(u) && !(u.type === 'jeep' && !Engine.hasDriver(G, u))) { ui.info = 'This piece is done for this turn.'; return; }
+  if (!moves && !shots && !anyAction(u) && !(u.type === 'jeep' && !Engine.hasDriver(G, u))) { ui.mode = 'unit'; ui.sel = u.id; ui.info = 'This piece is done for this turn. Group gives it orders for the turns ahead.'; return; }
   if (u.type === 'jeep') {
     ui.mode = 'unit'; ui.sel = u.id;
     const n = Engine.ridersOf(u).length, boss = Engine.cmdAboard(G, u);
@@ -2388,6 +2415,16 @@ function onTap(i) {
     return render();
   }
 
+  if (ui.mode === 'group') {
+    const gu = Engine.unitAt(G, i);
+    if (gu && gu.side === 1) {
+      ui.group = ui.group.includes(gu.id) ? ui.group.filter(id => id !== gu.id) : [...ui.group, gu.id];
+      if (!ui.group.length) clearSel();
+      return render();
+    }
+    sendGroup(i);
+    return render();
+  }
   if (ui.mode === 'unit' && ui.action) {
     const u = unitById(ui.sel), kind = ui.action;
     if (u && ACTIONS[kind].cells(u).includes(i)) {
@@ -2473,7 +2510,7 @@ function openDeploy() {
   head.style.margin = '10px 0 2px';
   head.textContent = 'Structures';
   list.appendChild(head);
-  for (const type of ['barracks', 'factory', 'range']) {
+  for (const type of ['barracks', 'range', 'factory', 'hangar', 'foundry']) {
     const b = document.createElement('button'), S = Engine.STRUCT[type];
     const why = Engine.structCheck(G, 1, type, null);
     const noRoom = !why && !Engine.structCells(G, 1, type).length;
@@ -2514,6 +2551,19 @@ function renderActions(u, idle) {
     bar.appendChild(b);
     return;
   }
+  if (ui.mode === 'group' && myTurn()) {
+    bar.classList.remove('hidden');
+    bar.innerHTML = '';
+    const stop = document.createElement('button');
+    stop.innerHTML = 'Stop orders<small></small>';
+    stop.querySelector('small').textContent = ui.group.length + ' picked';
+    stop.onclick = () => { for (const id of ui.group) if (G.orders) delete G.orders[id]; ui.group = []; clearSel(); ui.info = 'Orders cleared.'; persist(); render(); };
+    const cancel = document.createElement('button');
+    cancel.innerHTML = 'Cancel<small>keep orders</small>';
+    cancel.onclick = () => { ui.group = []; clearSel(); ui.info = ''; render(); };
+    bar.append(stop, cancel);
+    return;
+  }
   const kinds = idle ? actionsFor(u) : [];
   bar.classList.toggle('hidden', !kinds.length);
   bar.innerHTML = '';
@@ -2526,6 +2576,80 @@ function renderActions(u, idle) {
     b.onclick = () => { ui.action = ui.action === k ? null : k; ui.info = ''; render(); };
     bar.appendChild(b);
   }
+  if (idle && u && u.side === 1) {
+    const g = document.createElement('button');
+    g.innerHTML = 'Group<small>move several</small>';
+    g.onclick = () => startGroup(u);
+    bar.appendChild(g);
+    bar.classList.remove('hidden');
+  }
+}
+// ---------- group orders ----------
+// Pick several pieces, then tap a spot: they keep their formation and head there, moving on by
+// themselves at the start of each of your turns until they arrive.
+function startGroup(u) {
+  const first = u.id;
+  clearSel();
+  ui.mode = 'group'; ui.group = [first];
+  ui.info = '';
+  render();
+}
+function sendGroup(target) {
+  const units = ui.group.map(unitById).filter(Boolean);
+  if (!units.length) { clearSel(); return; }
+  const n = G.size, [tr, tc] = Engine.rcOf(G, target);
+  const rc = units.map(u => Engine.rcOf(G, u.idx));
+  const cr = Math.round(rc.reduce((a, p) => a + p[0], 0) / rc.length), cc = Math.round(rc.reduce((a, p) => a + p[1], 0) / rc.length);
+  G.orders = G.orders || {};
+  units.forEach((u, k) => {
+    const r = Math.max(0, Math.min(n - 1, tr + rc[k][0] - cr)), c = Math.max(0, Math.min(n - 1, tc + rc[k][1] - cc));
+    G.orders[u.id] = r * n + c;
+  });
+  const ids = units.map(u => u.id);
+  ui.group = []; clearSel();
+  const moved = advanceOrders(ids, true);
+  ui.info = units.length + ' piece' + (units.length > 1 ? 's' : '') + ' ordered there, keeping formation. ' + (moved ? moved + ' moved now. ' : '') +
+    'They move on by themselves at the start of each of your turns until they arrive. Moving one yourself takes it off its orders.';
+  persist();
+}
+// Moves every piece with orders one step closer, never onto another piece. Returns how many moved.
+function advanceOrders(ids, now) {
+  if (!G || !G.orders || !myTurn()) return 0;
+  if (!now) { if (G.ordersDone === G.round) return 0; G.ordersDone = G.round; }
+  const d = (a, b) => { const [ar, ac] = Engine.rcOf(G, a), [br, bc] = Engine.rcOf(G, b); return Math.max(Math.abs(ar - br), Math.abs(ac - bc)) + Math.hypot(ar - br, ac - bc) * 0.01; };
+  for (const id of Object.keys(G.orders)) if (!G.units.some(u => u.id === +id)) delete G.orders[id];
+  const list = G.units.filter(u => u.side === 1 && G.orders[u.id] != null && (!ids || ids.includes(u.id)));
+  list.sort((a, b) => d(a.idx, G.orders[a.id]) - d(b.idx, G.orders[b.id]));
+  let moved = 0;
+  ui.auto = true;
+  for (const u of list) {
+    const goal = G.orders[u.id];
+    if (u.idx === goal) { delete G.orders[u.id]; continue; }
+    if (!Engine.ready(G, u) || u.moved) continue;
+    let best = null, bd = d(u.idx, goal);
+    for (const i of Engine.unitMoveMap(G, u).keys()) {
+      if (Engine.occupant(G, i)) continue;
+      const di = d(i, goal);
+      if (di < bd) { bd = di; best = i; }
+    }
+    if (best == null) { if (Engine.cheb(G, u.idx, goal) <= 1) delete G.orders[u.id]; continue; }
+    act({ f: 'move', u: u.id, i: best });
+    moved++;
+    if (best === goal && G.orders) delete G.orders[u.id];
+  }
+  ui.auto = false;
+  return moved;
+}
+// What happened at the start of your turn: pieces moving on their orders and pieces from structures.
+function turnStartNote() {
+  const moved = advanceOrders();
+  const fresh = G.log.filter(e => e.s === 1 && e.r === G.round && /turned out/.test(e.t)).length;
+  const stuck = G.log.filter(e => e.s === 1 && e.r === G.round && /no free cell/.test(e.t)).map(e => e.t.split(' has ')[0].toLowerCase());
+  const bits = [];
+  if (fresh) bits.push('Your structures turned out ' + fresh + ' new piece' + (fresh > 1 ? 's' : '') + '.');
+  if (stuck.length) bits.push('Your ' + stuck.join(' and ') + ' had no free cell nearby, so clear some space around it.');
+  if (moved) bits.push(moved + ' piece' + (moved > 1 ? 's' : '') + ' moved on toward their orders. Undo takes that back.');
+  if (bits.length) ui.info = bits.join(' ');
 }
 $('undoBtn').onclick = () => {
   if (!ui.undo.length || ui.busy) return;
@@ -2543,6 +2667,7 @@ function endTurn() {
     const before = G.log.length;
     ui.touched = Engine.playerEnd(G);
     ui.busy = false;
+    if (!G.over) turnStartNote();
     paintLayers(); persist(); render();
     if (G.log.slice(before).some(e => e.s === 2 && /recon plane/.test(e.t))) toast('An enemy recon plane flew over the battlefield.');
     if (G.over) setTimeout(showOver, 350);
@@ -2554,6 +2679,7 @@ function hintText() {
   if (ui.mp && ui.busy) return 'Sending your turn to the battle server...';
   if (ui.busy) return 'Enemy is moving...';
   if (!G.over && ui.mode === 'struct') return 'Tap Turn to face it another way, or tap elsewhere to carry on.';
+  if (!G.over && ui.mode === 'group') return ui.group.length + ' picked. Tap more of your pieces, then tap where they should go.';
   if (ui.mp && !G.over && G.turn !== 1) return 'Waiting for your friend to take their turn.';
   if (G.over) return 'The battle is over.';
   if (ui.mode === 'deploy') {
@@ -2606,7 +2732,7 @@ function render() {
   $('mNotify').classList.toggle('hidden', !ui.mp || !pushSupported());
   $('mNotify').textContent = 'Turn notifications: ' + (ui.mp && ui.mp.push ? 'on' : 'off');
   const selU = ui.mode === 'unit' ? unitById(ui.sel) : null;
-  renderActions(selU, idle && (!!selU || ui.mode === 'struct'));
+  renderActions(selU, idle && (!!selU || ui.mode === 'struct' || ui.mode === 'group'));
   $('deployBtn').disabled = !idle;
   $('deployBtn').classList.toggle('on', ui.mode === 'deploy');
   $('deployBtn').querySelector('small').textContent = ui.mode === 'deploy' ? 'tap to cancel' : G.supply[1] + ' supply';
@@ -2878,8 +3004,8 @@ function updateAreaInfo() {
   const cellM = meters / ui.size;
   const km = meters >= 1000 ? (meters / 1000).toFixed(1) + ' km' : Math.round(meters) + ' m';
   $('areaInfo').textContent = 'Area about ' + km + ' across, each cell about ' + Math.round(cellM) + ' m (' + fmtFt(cellM) + ').' +
-    (cellM < 3 ? ' Zoom out a little, cells are too small.' : '');
-  $('startBtn').disabled = cellM < 3;
+    (cellM < 3 ? ' That is zoomed in very close, so Start battle will zoom out until each cell is at least 3 m.' : '');
+  return cellM;
 }
 function segment(id, key, attr, storeKey, parse = v => v) {
   try { const v = localStorage.getItem(storeKey); if (v != null) ui[key] = parse(v); } catch (e) { /* ignore */ }
@@ -2960,6 +3086,9 @@ async function launch(B, diff, fog, far = ui.far) {
 }
 
 $('startBtn').onclick = () => {
+  // Zoomed in too far for a playable grid: zoom out just enough, then start.
+  const cellM = updateAreaInfo();
+  if (cellM < 3) { map.setZoom(map.getZoom() - Math.log2(3.2 / cellM), { animate: false }); updateAreaInfo(); }
   const f = setupFrame();
   const nw = crs.project(map.containerPointToLatLng([f.x, f.y]));
   const ne = crs.project(map.containerPointToLatLng([f.x + f.side, f.y]));
@@ -3050,6 +3179,7 @@ function mpLocal(state, prev) {
   if (prev && prev.size === g.size && prev.x0 === g.x0 && prev.y0 === g.y0) {
     g.explored = prev.explored; g.known = prev.known; g.logged = prev.logged;
     if (g.offer && prev.offer && prev.offer.told) g.offer.told = true;
+    g.orders = prev.orders; g.ordersDone = prev.ordersDone;
     if (prev.intel && prev.intel[1] && (!g.intel[1] || prev.intel[1].round > g.intel[1].round)) g.intel[1] = prev.intel[1];
     if (!g.place) g.place = prev.place;
   } else { g.explored = new Uint8Array(N); g.known = new Uint8Array(N); }
@@ -3065,6 +3195,7 @@ function mpApply(r) {
   ui.touched = G.units.filter(u => u.side === 2 && before.get(u.id) !== u.idx).map(u => u.idx);
   if (old && old.cmd[2] !== G.cmd[2]) ui.touched.push(G.cmd[2]);
   ui.undo = []; ui.acts = []; clearSel(); ui.info = '';
+  if (!G.over && G.turn === 1) turnStartNote();
   paintLayers(); persist(); render();
   if (G.over) setTimeout(showOver, 350);
 }
