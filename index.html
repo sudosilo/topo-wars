@@ -11,7 +11,7 @@
 <meta name="robots" content="index,follow">
 <link rel="canonical" href="https://topo-wars.vercel.app/">
 <meta name="application-name" content="Topo Wars">
-<meta name="version" content="5.9">
+<meta name="version" content="6.0">
 <meta name="apple-mobile-web-app-title" content="Topo Wars">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -156,7 +156,7 @@ button.on{background:var(--amber-soft);border-color:#f59e0b}
     <button id="ctrBtn">Center<small>on you</small></button>
     <button id="endBtn" class="primary">End turn</button>
   </div>
-  <div class="credit">Topo Wars 5.9. Map data &copy; OpenStreetMap contributors</div>
+  <div class="credit">Topo Wars 6.0. Map data &copy; OpenStreetMap contributors</div>
 </div>
 
 <div id="setup">
@@ -239,7 +239,7 @@ button.on{background:var(--amber-soft);border-color:#f59e0b}
     <p>At the start of every turn you gain supply based on how much territory you hold. Under 20 cells pays 2, 20 to 29 pays 3, 30 to 39 pays 4, and every further 10 cells adds 1 more. The top bar shows your supply with this turn's income in brackets, and the Deploy sheet tells you how many cells you need for the next step. Spreading out with soldiers, riflemen and artillery grows your income. Your commander may move once, and every piece may move once and, if it has a gun, fire once. Do these in any order, then press End turn. Artillery that moves off road loses that turn's shot. Undo takes back anything done this turn. Every cell your commander, soldiers, riflemen and artillery stop on becomes your territory.</p>
 
     <h3>Your pieces</h3>
-    <p>Press Deploy to spend supply. There is no limit on how many of each piece you field, only on the supply you have.</p>
+    <p>Press Deploy to spend supply. After you pick a piece you can keep tapping gold squares to place as many as your supply allows. Press Done to stop placing, or Pick another to switch to a different piece. There is no limit on how many of each piece you field, only on the supply you have.</p>
     <table>
       <tr><th>Piece</th><th>Cost</th><th>What it does</th></tr>
       <tr><td>Commander (star)</td><td>Free</td><td>Moves on foot. 3 health. Sees 4 cells. Losing it loses the battle.</td></tr>
@@ -2403,15 +2403,14 @@ function onTap(i) {
       else ui.info = 'The helicopter hovers there and spots through your next 2 turns.';
       return render();
     }
-    if (Engine.STRUCT[type]) {
-      const whyS = Engine.structCheck(G, 1, type, i);
-      if (!whyS) { act({ f: 'structure', k: type, i }); clearSel(); ui.info = PIECES[type].label + ' built. ' + PIECES[type].desc; }
-      else ui.info = whyS + '.';
-      return render();
-    }
-    const why = Engine.deployCheck(G, 1, type, i);
-    if (!why) { act({ f: 'deploy', k: type, i }); clearSel(); ui.info = PIECES[type].label + ' placed. It can act next turn.'; }
-    else ui.info = why + '.';
+    const isS = !!Engine.STRUCT[type];
+    const why = isS ? Engine.structCheck(G, 1, type, i) : Engine.deployCheck(G, 1, type, i);
+    if (why) { ui.info = why + '.'; return render(); }
+    act(isS ? { f: 'structure', k: type, i } : { f: 'deploy', k: type, i });
+    const more = isS ? Engine.structCells(G, 1, type).length : !Engine.deployCheck(G, 1, type, null) && Engine.deployCells(G, 1, type).length;
+    const done = isS ? PIECES[type].label + ' built. ' + PIECES[type].desc : PIECES[type].label + ' placed. It can act next turn.';
+    if (more && !G.over) { ui.info = done + ' Tap another gold square to place more, or Done to stop.'; }
+    else { clearSel(); ui.info = done + (G.over ? '' : ' That was all your supply allows.'); }
     return render();
   }
 
@@ -2551,6 +2550,21 @@ function renderActions(u, idle) {
     bar.appendChild(b);
     return;
   }
+  if (ui.mode === 'deploy' && myTurn() && ui.deployType !== 'plane' && ui.deployType !== 'heli') {
+    bar.classList.remove('hidden');
+    bar.innerHTML = '';
+    const t = ui.deployType, cost = Engine.STRUCT[t] ? Engine.STRUCT[t].cost : Engine.COST[t];
+    const done = document.createElement('button');
+    done.innerHTML = '\u2715 Done<small></small>';
+    done.querySelector('small').textContent = 'stop placing';
+    done.onclick = () => { clearSel(); ui.info = ''; render(); };
+    const other = document.createElement('button');
+    other.innerHTML = 'Pick another<small></small>';
+    other.querySelector('small').textContent = PIECES[t].label.toLowerCase() + ', ' + cost + ' each, ' + G.supply[1] + ' left';
+    other.onclick = () => { clearSel(); openDeploy(); };
+    bar.append(done, other);
+    return;
+  }
   if (ui.mode === 'group' && myTurn()) {
     bar.classList.remove('hidden');
     bar.innerHTML = '';
@@ -2685,7 +2699,7 @@ function hintText() {
   if (ui.mode === 'deploy') {
     if (ui.deployType === 'plane') return 'Tap where the recon plane should fly over.';
     if (ui.deployType === 'heli') return 'Tap where the helicopter should hover.';
-    return 'Tap a gold square to place the ' + (Engine.NAMES[ui.deployType] || PIECES[ui.deployType].label.toLowerCase()) + '.';
+    return 'Tap gold squares to place ' + ({ soldier: 'soldiers', rifle: 'riflemen', drone: 'drones', jeep: 'jeeps', arty: 'artillery', barracks: 'barracks', factory: 'jeep factories', range: 'rifle ranges', hangar: 'drone hangars', foundry: 'gun foundries' }[ui.deployType]) + ', then press Done.';
   }
   if (ui.mode === 'unit' && ui.action) return {
     grenade: 'Tap an orange cell to throw the grenade.', trench: 'Tap a gold square to dig a trench.',
@@ -2732,7 +2746,7 @@ function render() {
   $('mNotify').classList.toggle('hidden', !ui.mp || !pushSupported());
   $('mNotify').textContent = 'Turn notifications: ' + (ui.mp && ui.mp.push ? 'on' : 'off');
   const selU = ui.mode === 'unit' ? unitById(ui.sel) : null;
-  renderActions(selU, idle && (!!selU || ui.mode === 'struct' || ui.mode === 'group'));
+  renderActions(selU, idle && (!!selU || ui.mode === 'struct' || ui.mode === 'group' || ui.mode === 'deploy'));
   $('deployBtn').disabled = !idle;
   $('deployBtn').classList.toggle('on', ui.mode === 'deploy');
   $('deployBtn').querySelector('small').textContent = ui.mode === 'deploy' ? 'tap to cancel' : G.supply[1] + ' supply';
