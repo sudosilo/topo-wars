@@ -11,7 +11,7 @@
 <meta name="robots" content="index,follow">
 <link rel="canonical" href="https://topo-wars.vercel.app/">
 <meta name="application-name" content="Topo Wars">
-<meta name="version" content="5.0">
+<meta name="version" content="5.3">
 <meta name="apple-mobile-web-app-title" content="Topo Wars">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -98,6 +98,8 @@ button.on{background:var(--amber-soft);border-color:#f59e0b}
 .seg span{font-size:13px;color:var(--muted);margin-right:4px}
 .seg button{padding:7px 12px;font-size:13px}
 .seg button.on{background:var(--ink);color:#fff;border-color:var(--ink)}
+.seg.off span{opacity:.45}
+.seg.off button,.seg.off button.on{opacity:.45;background:#f3f4f6;color:var(--muted);border-color:#e5e7eb}
 #areaInfo{min-height:16px;margin-bottom:10px}
 #resumeBtn,#mpResumeBtn{width:100%;margin-bottom:8px}
 
@@ -150,7 +152,7 @@ button.on{background:var(--amber-soft);border-color:#f59e0b}
     <button id="ctrBtn">Center<small>on you</small></button>
     <button id="endBtn" class="primary">End turn</button>
   </div>
-  <div class="credit">Topo Wars 5.0. Map data &copy; OpenStreetMap contributors</div>
+  <div class="credit">Topo Wars 5.3. Map data &copy; OpenStreetMap contributors</div>
 </div>
 
 <div id="setup">
@@ -195,11 +197,13 @@ button.on{background:var(--amber-soft);border-color:#f59e0b}
     <h2>Menu</h2>
     <div class="stack">
       <button id="mInvite" class="hidden">Invite a friend</button>
+      <button id="mNotify" class="hidden">Turn notifications: off</button>
       <button id="mHelp">Game guide</button>
       <button id="mLog">Battle log</button>
       <button id="mHistory">Battle history</button>
       <button id="mTerrain">Terrain shading: normal</button>
       <button id="mReload">Reload roads and buildings</button>
+      <button id="mSurrender">Surrender</button>
       <button id="mNew">New battle</button>
       <button id="mClose" class="primary">Close</button>
     </div>
@@ -212,10 +216,15 @@ button.on{background:var(--amber-soft);border-color:#f59e0b}
     <p>You command the blue side against a computer commander or a friend in red. The battlefield is the real place you picked: its roads, buildings, water, forest and hills all change how pieces move, see and fight.</p>
 
     <h3>How to win</h3>
-    <p>On the setup screen, Enemy starts Far places the enemy about 20 cells farther away than Close, as far as the grid allows. Close is handy for quick test fights. Take out the enemy commander, reach 150 points first, or hold the higher score when round 40 ends. A commander falls when an enemy commander, soldier or rifleman steps onto it, or when rifle and artillery hits take away its 3 health. The same can happen to you.</p>
+    <p>On the setup screen, Enemy starts Far places the enemy about 20 cells farther away than Close, as far as the grid allows. Close is handy for quick test fights. Take out the enemy commander, have the enemy surrender, or hold the higher score when round 40 ends. The first side to reach 150 points is offered the other side's surrender. Accept it for the win, or fight on to finish them off. A computer enemy that has offered to surrender pulls back to the best ground near its commander, digs trenches and puts up barricades. If the enemy reaches 150 first, it demands your surrender, and you can give up or keep fighting. Menu, Surrender, gives up at any time on your turn. A commander falls when an enemy commander, soldier or rifleman steps onto it, or when rifle and artillery hits take away its 3 health. The same can happen to you.</p>
 
     <h3>Playing a friend</h3>
     <p>Set Opponent to Friend on the setup screen, pick your ground and press Start battle. The game gives you a link to send. Whoever opens it first becomes your opponent on the same map, and each of you sees yourself in blue. You move first. Take your turn and press End turn, and the battle server checks every move with the same rules before passing the turn over. You do not both need to be online: open the game whenever you like, and while it is open it checks for your friend's move every few seconds. Menu, Invite a friend, shows the link again. Continue battle with a friend on the setup screen brings you back to it.</p>
+    <p>Turn notifications buzz your phone when your friend finishes a turn, joins the battle or ends it, even when the game is closed. Turn them on from the invite screen, or with Menu, Turn notifications. Tapping the notification opens the battle.</p>
+
+    <h3>Structures and roads</h3>
+    <p>Structures unlock as your score grows. Build them from the Deploy sheet on open ground, road or forest inside your territory. A Barracks unlocks at 20 points, costs 5 supply and trains a free soldier beside it every turn. A Jeep factory unlocks at 30 points, costs 6 and builds a free jeep every other turn. A Rifle range unlocks at 40 points, costs 6 and trains a free rifleman every other turn. New pieces appear at the start of your turn and can act the turn after, as long as there is a free cell beside the structure. Nothing can walk through a structure. Each has 3 health: every artillery shell or grenade takes 1, and destroying one is worth 10 points.</p>
+    <p>A soldier can pave a road on its own cell or the cell next to it for 3 supply, using its action for the turn. Paved roads work like any road: jeeps and artillery can drive on them, and every piece moves up to 3 cells along them. Paving opens new routes for jeeps out of forest, steep ground and dug-up trenches.</p>
 
     <h3>Your turn</h3>
     <p>At the start of every turn you gain supply based on how much territory you hold. Under 20 cells pays 2, 20 to 29 pays 3, 30 to 39 pays 4, and every further 10 cells adds 1 more. The top bar shows your supply with this turn's income in brackets, and the Deploy sheet tells you how many cells you need for the next step. Spreading out with soldiers, riflemen and artillery grows your income. Your commander may move once, and every piece may move once and, if it has a gun, fire once. Do these in any order, then press End turn. Artillery that moves off road loses that turn's shot. Undo takes back anything done this turn. Every cell your commander, soldiers, riflemen and artillery stop on becomes your territory.</p>
@@ -393,7 +402,23 @@ button.on{background:var(--amber-soft);border-color:#f59e0b}
     <h2>Invite a friend</h2>
     <p class="muted">Send this link to the friend you want to fight. The first person to open it joins as your opponent. You each take your turn whenever you open the game, and the game checks for their moves while it is open.</p>
     <input id="inviteLink" readonly>
-    <div class="stack"><button id="inviteShare">Share link</button><button id="inviteCopy">Copy link</button><button class="primary" data-close="inviteSheet">Close</button></div>
+    <div class="stack"><button id="inviteShare">Share link</button><button id="inviteCopy">Copy link</button><button id="inviteNotify">Notify me when it is my turn</button><button class="primary" data-close="inviteSheet">Close</button></div>
+  </div>
+</div>
+
+<div role="dialog" aria-modal="true" id="notifySheet" class="overlay hidden">
+  <div class="sheet">
+    <h2>Turn notifications</h2>
+    <p class="muted">Get a notification on this phone when your friend finishes their turn, even when the game is closed. Firefox will ask you to allow it.</p>
+    <div class="stack"><button id="notifyOn" class="primary">Turn on notifications</button><button data-close="notifySheet">Not now</button></div>
+  </div>
+</div>
+
+<div role="dialog" aria-modal="true" id="offerSheet" class="overlay center hidden">
+  <div class="sheet">
+    <h2 id="offerTitle"></h2>
+    <p class="muted" id="offerText"></p>
+    <div class="stack"><button id="offerYes" class="primary"></button><button id="offerNo"></button></div>
   </div>
 </div>
 
@@ -413,14 +438,22 @@ const Engine = (() => {
   const HQ_PTS = 20, ENCIRCLE_PTS = 10, CMD_HIT_PTS = 5, CMD_HP = 3, ROAD_RUN = 3, DRONE_RANGE = 4, INCOME = 2;
   const TIER_CUTS = [0.20, 0.45, 0.70, 0.90];
   // Terrain kinds stored per cell in G.terr
-  const T = { OPEN: 0, ROAD: 1, BUILDING: 2, WATER: 3, FOREST: 4, WALL: 5, CLIFF: 6, RAIL: 7, STEEP: 8, TRENCH: 9, BARRICADE: 10 };
-  const T_NAMES = ['Open ground', 'Road', 'Buildings', 'Water', 'Forest', 'Barrier', 'Cliff', 'Railway', 'Steep slope', 'Trench', 'Barricade'];
+  const T = { OPEN: 0, ROAD: 1, BUILDING: 2, WATER: 3, FOREST: 4, WALL: 5, CLIFF: 6, RAIL: 7, STEEP: 8, TRENCH: 9, BARRICADE: 10, STRUCT: 11 };
+  const T_NAMES = ['Open ground', 'Road', 'Buildings', 'Water', 'Forest', 'Barrier', 'Cliff', 'Railway', 'Steep slope', 'Trench', 'Barricade', 'Structure'];
   // Soldier engineering. Digging a trench is free, the others cost supply. Raised ground stacks twice.
   const BUILD = {
     trench: { cost: 0, label: 'Dig trench' },
     barricade: { cost: 1, label: 'Barricade' },
-    mound: { cost: 1, label: 'Raise ground' }
+    mound: { cost: 1, label: 'Raise ground' },
+    road: { cost: 3, label: 'Pave road' }
   };
+  // Structures unlock as your score grows, cost supply, and turn out a free piece on a schedule.
+  const STRUCT = {
+    barracks: { label: 'Barracks', points: 20, cost: 5, makes: 'soldier', every: 1 },
+    factory: { label: 'Jeep factory', points: 30, cost: 6, makes: 'jeep', every: 2 },
+    range: { label: 'Rifle range', points: 40, cost: 6, makes: 'rifle', every: 2 }
+  };
+  const STRUCT_HP = 3, STRUCT_KILL = 10;
   const MOUND_MAX = 2, MOUND_METERS = 4;
 
   function rng(G) {
@@ -452,7 +485,7 @@ const Engine = (() => {
     return Math.max(Math.abs(((a / n) | 0) - ((b / n) | 0)), Math.abs((a % n) - (b % n)));
   }
   // People on foot cross anything but water and cliffs. Vehicles need roads or open ground.
-  const footOK = (G, i) => { const t = G.terr[i]; return t !== T.WATER && t !== T.CLIFF && t !== T.BARRICADE; };
+  const footOK = (G, i) => { const t = G.terr[i]; return t !== T.WATER && t !== T.CLIFF && t !== T.BARRICADE && t !== T.STRUCT; };
   const vehOK = (G, i) => { const t = G.terr[i]; return t === T.ROAD || t === T.OPEN; };
   // Raised ground adds to a cell's tier, up to the peak tier of 5.
   const tierAt = (G, i) => Math.min(5, G.tier[i] + (G.mound ? G.mound[i] : 0));
@@ -486,7 +519,10 @@ const Engine = (() => {
   function award(G, side, pts, text) {
     G.score[side] += pts;
     log(G, side, text + ' +' + pts);
-    if (!G.over && G.score[side] >= WIN) finish(G, side, 'Reached ' + WIN + ' points');
+    if (!G.over && !G.offer && G.score[side] >= WIN) {
+      G.offer = { win: side, round: G.round, status: 'open' };
+      log(G, foe(side), 'Offered to surrender after the other side reached ' + WIN + ' points');
+    }
   }
   function capture(G, side, i) {
     const f = foe(side);
@@ -550,7 +586,7 @@ const Engine = (() => {
   }
 
   // ---------- line of sight and fog ----------
-  const obstacle = (G, i) => heightAt(G, i) + (G.terr[i] === T.BUILDING ? 9 : G.terr[i] === T.FOREST ? 12 : G.terr[i] === T.BARRICADE ? 3 : 0);
+  const obstacle = (G, i) => heightAt(G, i) + (G.terr[i] === T.BUILDING ? 9 : G.terr[i] === T.FOREST ? 12 : G.terr[i] === T.BARRICADE ? 3 : G.terr[i] === T.STRUCT ? 6 : 0);
   function los(G, a, b) {
     const steps = cheb(G, a, b);
     if (steps <= 1) return true;
@@ -701,7 +737,7 @@ const Engine = (() => {
     for (const i of square(G, u.idx, R)) {
       if (!vis[i]) continue;
       const o = occupant(G, i), enemyPiece = o && o.side === f;
-      if (u.type === 'arty') { if (enemyPiece || G.owner[i] === f || (G.terr[i] === T.BARRICADE && G.owner[i] !== u.side)) out.push(i); }
+      if (u.type === 'arty') { const b = structAt(G, i); if (enemyPiece || G.owner[i] === f || (G.terr[i] === T.BARRICADE && G.owner[i] !== u.side) || (b && b.side === f)) out.push(i); }
       else if (enemyPiece && G.terr[i] !== T.TRENCH && los(G, u.idx, i)) out.push(i);
     }
     return out;
@@ -718,6 +754,7 @@ const Engine = (() => {
       bump(G);
       return true;
     }
+    { const sb = structAt(G, to); if (sb && sb.side === f && !(o && o.side === f)) { hitStructure(G, u.side, sb, 'Artillery'); bump(G); return true; } }
     if (G.terr[to] === T.TRENCH && o && o.side === f) {
       G.terr[to] = T.OPEN;
       log(G, u.side, 'Artillery caved in a trench, the ' + (o.cmd ? 'commander' : NAMES[o.unit.type]) + ' inside survived');
@@ -858,7 +895,8 @@ const Engine = (() => {
     for (const i of square(G, u.idx, GRENADE_RANGE)) {
       if (i === u.idx || !vis[i]) continue;
       const o = occupant(G, i);
-      if ((o && o.side === f) || (G.terr[i] === T.BARRICADE && G.owner[i] !== u.side)) out.push(i);
+      const b = structAt(G, i);
+      if ((o && o.side === f) || (G.terr[i] === T.BARRICADE && G.owner[i] !== u.side) || (b && b.side === f)) out.push(i);
     }
     return out;
   }
@@ -868,7 +906,9 @@ const Engine = (() => {
     u.g = grenadesLeft(u) - 1;
     u.moved = true;
     stat(G, u.side, 'grenades');
+    const sb = structAt(G, to);
     if (G.terr[to] === T.BARRICADE && !(o && o.side === f)) { G.terr[to] = T.OPEN; log(G, u.side, 'Grenade blew apart a barricade'); }
+    else if (sb && sb.side === f && !(o && o.side === f)) hitStructure(G, u.side, sb, 'Grenade');
     else if (o && o.cmd) hitCommander(G, u.side, 'Grenade');
     else if (o && o.unit) killUnit(G, u.side, o.unit);
     bump(G);
@@ -882,13 +922,14 @@ const Engine = (() => {
   function buildCells(G, u, kind) {
     if (G.over || u.type !== 'soldier' || u.moved || !ready(G, u) || G.supply[u.side] < BUILD[kind].cost) return [];
     const out = [];
-    const cand = kind === 'trench' ? [u.idx, ...nb8(G, u.idx)] : nb8(G, u.idx);
+    const cand = kind === 'trench' || kind === 'road' ? [u.idx, ...nb8(G, u.idx)] : nb8(G, u.idx);
     for (const i of cand) {
       if (i !== u.idx && occupant(G, i)) continue;
       if (G.owner[i] === foe(u.side)) continue;
       if (kind === 'trench' && (G.terr[i] === T.TRENCH || !buildable(G, i))) continue;
       if (kind === 'barricade' && !buildable(G, i)) continue;
       if (kind === 'mound' && (!buildable(G, i) || G.mound[i] >= MOUND_MAX)) continue;
+      if (kind === 'road' && (G.terr[i] === T.ROAD || !buildable(G, i))) continue;
       out.push(i);
     }
     return out;
@@ -899,12 +940,71 @@ const Engine = (() => {
     u.moved = true;
     if (kind === 'trench') G.terr[i] = T.TRENCH;
     else if (kind === 'barricade') G.terr[i] = T.BARRICADE;
+    else if (kind === 'road') { G.terr[i] = T.ROAD; (G.pave = G.pave || []).push(i); }
     else { G.mound[i] += 1; if (G.terr[i] !== T.ROAD) G.terr[i] = T.OPEN; }
     if (G.owner[i] === 0) G.owner[i] = u.side;
     stat(G, u.side, 'built');
-    log(G, u.side, kind === 'trench' ? 'Dug a trench' : kind === 'barricade' ? 'Put up a barricade' : 'Raised the ground to level ' + G.mound[i]);
+    log(G, u.side, kind === 'trench' ? 'Dug a trench' : kind === 'barricade' ? 'Put up a barricade' : kind === 'road' ? 'Paved a road' : 'Raised the ground to level ' + G.mound[i]);
     bump(G);
     return true;
+  }
+
+  // ---------- structures ----------
+  const structAt = (G, i) => (G.builds || []).find(b => b.idx === i) || null;
+  function structCheck(G, side, type, i) {
+    const S = STRUCT[type];
+    if (!S) return 'Unknown structure';
+    if (G.over) return 'The battle is over';
+    if (G.score[side] < S.points) return 'Unlocks at ' + S.points + ' points';
+    if (G.supply[side] < S.cost) return 'Needs ' + S.cost + ' supply';
+    if (i == null) return null;
+    if (G.owner[i] !== side) return 'Build on your own territory';
+    if (occupant(G, i)) return 'That cell is occupied';
+    const t = G.terr[i];
+    if (t !== T.OPEN && t !== T.ROAD && t !== T.FOREST) return 'Structures need open ground, road or forest';
+    return null;
+  }
+  function structCells(G, side, type) {
+    if (structCheck(G, side, type, null)) return [];
+    const out = [];
+    for (let i = 0; i < G.owner.length; i++) if (G.owner[i] === side && !structCheck(G, side, type, i)) out.push(i);
+    return out;
+  }
+  function buildStructure(G, side, type, i) {
+    if (structCheck(G, side, type, i)) return false;
+    const S = STRUCT[type];
+    G.supply[side] -= S.cost;
+    G.builds.push({ id: G.nextId++, side, type, idx: i, hp: STRUCT_HP, base: G.terr[i], next: G.round + S.every });
+    G.terr[i] = T.STRUCT;
+    stat(G, side, 'structures');
+    log(G, side, 'Built a ' + S.label.toLowerCase());
+    bump(G);
+    return true;
+  }
+  function hitStructure(G, side, b, how) {
+    b.hp -= 1;
+    if (b.hp > 0) { log(G, side, how + ' damaged a ' + STRUCT[b.type].label.toLowerCase()); return; }
+    G.builds.splice(G.builds.indexOf(b), 1);
+    G.terr[b.idx] = b.base === T.ROAD || b.base === T.FOREST ? b.base : T.OPEN;
+    stat(G, side, 'kills'); stat(G, b.side, 'lost');
+    award(G, side, STRUCT_KILL, how + ' destroyed a ' + STRUCT[b.type].label.toLowerCase());
+  }
+  // At the start of its owner's turn a structure turns out its piece beside it, when there is room.
+  function produce(G, side) {
+    for (const b of G.builds || []) {
+      if (b.side !== side || G.round < b.next) continue;
+      const S = STRUCT[b.type], type = S.makes;
+      const room = nb8(G, b.idx).filter(i => !occupant(G, i) && G.owner[i] !== foe(side) && (type === 'jeep' ? vehOK(G, i) : footOK(G, i)));
+      if (!room.length) continue;
+      const i = room.find(c => G.owner[c] === side) ?? room[0];
+      const unit = { id: G.nextId++, side, type, idx: i, placed: G.round, moved: true, fired: true };
+      if (type === 'soldier') unit.g = GRENADES;
+      G.units.push(unit);
+      if (G.owner[i] === 0) G.owner[i] = side;
+      b.next = G.round + S.every;
+      stat(G, side, 'produced');
+      log(G, side, S.label + ' turned out a ' + NAMES[type]);
+    }
   }
 
   // ---------- deploying and aircraft ----------
@@ -914,6 +1014,7 @@ const Engine = (() => {
     if (type === 'plane' || type === 'heli' || i == null) return null;
     if (G.owner[i] !== side) return 'Place units on your own territory';
     if (occupant(G, i)) return 'That cell is occupied';
+    if (G.terr[i] === T.STRUCT) return 'A structure stands there';
     if ((type === 'arty' || type === 'jeep') && !vehOK(G, i)) return (type === 'arty' ? 'Artillery' : 'A jeep') + ' needs a road or open ground, not ' + T_NAMES[G.terr[i]].toLowerCase();
     if ((type === 'soldier' || type === 'rifle') && !footOK(G, i)) return 'Troops cannot stand on ' + T_NAMES[G.terr[i]].toLowerCase();
     return null;
@@ -963,6 +1064,7 @@ const Engine = (() => {
     G.supply[side] += income(G, side);
     G.cmdMoved[side] = false;
     for (const u of G.units) if (u.side === side) { u.moved = false; u.fired = false; u.unhitched = false; }
+    produce(G, side);
     bump(G);
   }
 
@@ -988,9 +1090,18 @@ const Engine = (() => {
   }
 
   // ---------- computer opponent ----------
+  // After turning down a surrender, the losing computer side digs in on the best ground near its commander.
+  function stronghold(G, me) {
+    const c = G.cmd[me];
+    return pickCell(G, square(G, c, 5).filter(i => footOK(G, i)), i => tierAt(G, i) * 10 - cheb(G, i, c) * 2 - cheb(G, i, G.hq[me]) * 0.5 + (G.terr[i] === T.BUILDING || G.terr[i] === T.FOREST ? 3 : 0)) ?? c;
+  }
   function aiTurn(G, me) {
     const f = foe(me), touched = [];
     if (G.over) return touched;
+    if (G.offer && G.offer.win === me && G.offer.status === 'open') { G.offer.status = 'refused'; log(G, me, 'Turned down the surrender and fought on'); }
+    const def = !!(G.offer && G.offer.win === f && G.offer.status !== 'done');
+    if (def && G.offer.home == null) G.offer.home = stronghold(G, me);
+    const home = def ? G.offer.home : null;
     const vis = () => sight(G, me);
     const cmdSeen = () => !!vis()[G.cmd[f]];
     const tgt = () => cmdSeen() ? G.cmd[f] : (G.intel[me] ? G.intel[me].idx : G.hq[f]);
@@ -998,6 +1109,7 @@ const Engine = (() => {
       const o = occupant(G, i);
       if (o && o.side === f && o.cmd) return G.diff === 'easy' && me === 2 ? 40 : 1000;
       if (o && o.side === f && o.unit) return 100 + KILL[o.unit.type];
+      { const b = structAt(G, i); if (b && b.side === f) return 90; }
       return G.tier[i] * 10 - cheb(G, i, tgt()) * 0.2 + rng(G) * 0.1;
     };
     const shootWith = u => {
@@ -1024,7 +1136,7 @@ const Engine = (() => {
     // on the highest open ground from which the enemy commander should be in range.
     for (const j of G.units.filter(u => u.side === me && u.type === 'jeep')) {
       if (!G.units.includes(j) || !ready(G, j)) continue;
-      const T0 = tgt();
+      const T0 = def ? home : tgt();
       // Pick up troops who still have a long walk ahead.
       for (const i of loadTargets(G, j)) {
         if (i === G.cmd[me] || seatsUsed(G, j) >= SEATS) continue;
@@ -1060,10 +1172,10 @@ const Engine = (() => {
       if (!G.units.includes(u) || !canShoot(G, u)) continue;
       const tow = G.units.some(j => j.side === me && j.type === 'jeep' && !j.cargo && cheb(G, j.idx, u.idx) <= 3);
       if (!shotTargets(G, u).length && u.type === 'arty' && !tow) {
-        const opts = unitMoveMap(G, u);
-        if (opts.size && cheb(G, u.idx, tgt()) > artyRange(G, u.idx) - 1) {
-          const best = pickCell(G, [...opts.keys()], i => -cheb(G, i, tgt()) + (opts.get(i).road ? 0.8 : 0) + tierAt(G, i) * 0.3 + rng(G) * 0.1);
-          if (best != null && cheb(G, best, tgt()) < cheb(G, u.idx, tgt())) { moveUnit(G, u, best); touched.push(best); }
+        const opts = unitMoveMap(G, u), A = def ? home : tgt();
+        if (opts.size && cheb(G, u.idx, A) > (def ? 2 : artyRange(G, u.idx) - 1)) {
+          const best = pickCell(G, [...opts.keys()], i => -cheb(G, i, A) + (opts.get(i).road ? 0.8 : 0) + tierAt(G, i) * 0.3 + rng(G) * 0.1);
+          if (best != null && cheb(G, best, A) < cheb(G, u.idx, A)) { moveUnit(G, u, best); touched.push(best); }
         }
         // Roll up onto freshly raised ground next door when it gives more range.
         const up = [...unitMoveMap(G, u).keys()].filter(i => G.mound[i] && tierAt(G, i) > tierAt(G, u.idx));
@@ -1079,13 +1191,26 @@ const Engine = (() => {
     {
       const { contact } = reach(G, f, vis());
       const threats = G.units.filter(v => v.side === f && (v.type === 'soldier' || v.type === 'rifle') && vis()[v.idx] && cheb(G, v.idx, G.cmd[me]) <= 3);
+      let walls = 0, paved = 0;
       for (const u of G.units.filter(u => u.side === me && u.type === 'soldier' && !u.moved && ready(G, u))) {
+        if (def && cheb(G, u.idx, home) <= 3) {
+          if (G.terr[u.idx] !== T.TRENCH && buildCells(G, u, 'trench').includes(u.idx)) { build(G, u, 'trench', u.idx); touched.push(u.idx); continue; }
+          if (walls < 2 && G.supply[me] >= BUILD.barricade.cost + 2) {
+            const T1 = tgt(), spots = buildCells(G, u, 'barricade').filter(i => cheb(G, i, home) === 2 && cheb(G, i, T1) < cheb(G, home, T1));
+            if (spots.length) { const at = pickCell(G, spots, i => -cheb(G, i, T1)); build(G, u, 'barricade', at); touched.push(at); walls++; continue; }
+          }
+        }
         if (threats.length && cheb(G, u.idx, G.cmd[me]) <= 1 && G.supply[me] >= BUILD.barricade.cost) {
           const near = threats[0].idx;
           const spots = buildCells(G, u, 'barricade').filter(i => cheb(G, i, G.cmd[me]) === 1 && cheb(G, i, near) < cheb(G, G.cmd[me], near));
           if (spots.length) { build(G, u, 'barricade', pickCell(G, spots, i => -cheb(G, i, near))); touched.push(u.idx); continue; }
           const dig = buildCells(G, u, 'trench').includes(u.idx);
           if (dig) { build(G, u, 'trench', u.idx); touched.push(u.idx); continue; }
+        }
+        // With supply to spare and a jeep to use it, pave toward the enemy from ground a jeep can already reach.
+        if (!def && paved < 1 && G.supply[me] >= BUILD.road.cost + 6 && G.units.some(j => j.side === me && j.type === 'jeep')) {
+          const T1 = tgt(), spots = buildCells(G, u, 'road').filter(i => cheb(G, i, T1) < cheb(G, u.idx, T1) && nb8(G, i).some(k => roadLike(G, k)));
+          if (spots.length) { const at = pickCell(G, spots, i => -cheb(G, i, T1)); build(G, u, 'road', at); touched.push(at); paved++; continue; }
         }
         const gun = G.units.find(a => a.side === me && a.type === 'arty' && cheb(G, a.idx, u.idx) <= 2 && !shotTargets(G, a).length);
         if (gun && G.supply[me] >= BUILD.mound.cost + 1 && tierAt(G, gun.idx) < 5) {
@@ -1106,6 +1231,7 @@ const Engine = (() => {
         const o = occupant(G, i);
         if (o && o.cmd) return 1000;
         if (o && o.unit) return { arty: 50, rifle: 40, jeep: 40, drone: 20, soldier: G.terr[i] === T.TRENCH ? 30 : 0 }[o.unit.type] || 0;
+        if (structAt(G, i)) return 35;
         return cheb(G, i, T0) < cheb(G, u.idx, T0) ? 18 : 0;
       };
       const best = pickCell(G, t, score);
@@ -1136,13 +1262,15 @@ const Engine = (() => {
       if (!opts.size) continue;
       const { contact } = reach(G, f, vis());
       if (opts.has(G.cmd[f]) && cmdSeen()) { moveUnit(G, u, G.cmd[f]); touched.push(G.cmd[f]); return touched; }
-      const want = u.type === 'rifle' ? 2 : 0, T0 = tgt(), v = vis();
+      if (def && G.terr[u.idx] === T.TRENCH && cheb(G, u.idx, home) <= 3) { if (u.type === 'rifle') { shootWith(u); if (G.over) return touched; } continue; }
+      const want = def ? (u.type === 'rifle' ? 2 : 1) : u.type === 'rifle' ? 2 : 0, T0 = def ? home : tgt(), v = vis();
       let best = null, bs = -Math.abs(cheb(G, u.idx, T0) - want) * 1.6 - 0.5 - (contact[u.idx] ? (u.type === 'rifle' ? 8 : 4) : 0);
       for (const i of opts.keys()) {
         let s = 0;
         const o = occupant(G, i);
-        if (o && o.unit && o.side === f && v[i]) s += o.unit.type === 'arty' ? 45 : 32;
-        if (G.owner[i] === f) s += G.tier[i] * 3; else if (G.owner[i] === 0) s += 1;
+        if (o && o.unit && o.side === f && v[i] && (!def || cheb(G, i, home) <= 4)) s += o.unit.type === 'arty' ? 45 : 32;
+        if (def) s += tierAt(G, i) * 0.8;
+        else if (G.owner[i] === f) s += G.tier[i] * 3; else if (G.owner[i] === 0) s += 1;
         s -= Math.abs(cheb(G, i, T0) - want) * 1.6;
         if (G.terr[i] === T.ROAD) s += 0.6;
         if (contact[i]) s -= u.type === 'rifle' ? 8 : 4;
@@ -1175,18 +1303,31 @@ const Engine = (() => {
         if (moving) {
           const o = occupant(G, i);
           if (o && o.unit && o.side === f) s += o.unit.type === 'arty' ? 40 : 30;
-          if (G.owner[i] === f) { s += G.tier[i] * 4; if (i === G.hq[f] && !G.hqTaken[f]) s += 40; }
+          if (def) { /* holding ground, not grabbing it */ }
+          else if (G.owner[i] === f) { s += G.tier[i] * 4; if (i === G.hq[f] && !G.hqTaken[f]) s += 40; }
           else if (G.owner[i] === 0) s += 1.5;
         }
         if (contact[i]) s -= 5000;
         if (shot[i]) s -= G.hp[me] <= 1 ? 800 : 14;
         s += G.tier[i];
-        s -= Math.abs(cheb(G, i, T0) - 3) * 2.5;
+        if (def) s -= cheb(G, i, home) * 3 - (G.terr[i] === T.TRENCH ? 2 : 0);
+        else s -= Math.abs(cheb(G, i, T0) - 3) * 2.5;
         return s + rng(G) * 0.5;
       };
       let best = null, bs = score(cur, false);
       for (const i of commanderMoves(G, me)) { const s = score(i, true); if (s > bs) { bs = s; best = i; } }
       if (best != null) { moveCommander(G, me, best); touched.push(best); if (G.over) return touched; }
+    }
+
+    // Structures: one of each once the score allows, on safe ground near home.
+    for (const type of ['barracks', 'range', 'factory']) {
+      if ((G.builds || []).some(b => b.side === me && b.type === type)) continue;
+      if (G.supply[me] < STRUCT[type].cost + 1) continue;
+      const cells = structCells(G, me, type);
+      if (!cells.length) continue;
+      const { contact, shot } = reach(G, f, vis()), H = def ? home : G.hq[me];
+      const at = pickCell(G, cells, i => -cheb(G, i, H) - (contact[i] ? 50 : 0) - (shot[i] ? 20 : 0) - (roadLike(G, i) ? 2 : 0) + rng(G) * 0.2);
+      if (at != null && buildStructure(G, me, type, at)) touched.push(at);
     }
 
     // Spend supply toward a mixed force: roughly 35 percent soldiers, 30 riflemen, 20 artillery
@@ -1212,12 +1353,12 @@ const Engine = (() => {
       if (G.supply[me] - COST[want] < reserve) break;
       const cells = deployCells(G, me, want);
       if (!cells.length) break;
-      const { contact } = reach(G, f, vis()), T0 = tgt();
+      const { contact } = reach(G, f, vis()), T0 = def ? home : tgt();
       const guns = G.units.filter(a => a.side === me && a.type === 'arty');
       const at = want === 'jeep'
         ? pickCell(G, cells, i => -Math.min(99, ...guns.map(a => cheb(G, a.idx, i))) + rng(G) * 0.2)
         : want === 'arty'
-        ? pickCell(G, cells, i => G.tier[i] * 3 - Math.abs(cheb(G, i, T0) - (1 + G.tier[i])) * 1.5 - (contact[i] ? 20 : 0) + (G.terr[i] === T.ROAD ? 1 : 0))
+        ? pickCell(G, cells, i => G.tier[i] * 3 - (def ? cheb(G, i, T0) : Math.abs(cheb(G, i, T0) - (1 + G.tier[i])) * 1.5) - (contact[i] ? 20 : 0) + (G.terr[i] === T.ROAD ? 1 : 0))
         : pickCell(G, cells, i => -cheb(G, i, T0) - (contact[i] ? 4 : 0) + rng(G) * 0.2);
       if (at == null || !deploy(G, me, want, at)) break;
       touched.push(at);
@@ -1254,18 +1395,37 @@ const Engine = (() => {
   // Every change a player makes is one small action, so the server can replay a turn with the same rules.
   function apply(G, side, a) {
     if (!a || G.over || G.turn !== side || typeof a.f !== 'string') return false;
+    if (a.f === 'surrender') {
+      log(G, side, 'Surrendered');
+      finish(G, foe(side), side === 1 ? 'You surrendered' : 'The enemy surrendered');
+      bump(G); return true;
+    }
+    if (a.f === 'accept' || a.f === 'fighton') {
+      if (!G.offer || G.offer.win !== side || G.offer.status === 'done') return false;
+      if (a.f === 'accept') {
+        G.offer.status = 'done';
+        log(G, side, 'Accepted the surrender');
+        finish(G, side, side === 1 ? 'The enemy surrendered' : 'You surrendered');
+      } else {
+        if (G.offer.status !== 'open') return false;
+        G.offer.status = 'refused';
+        log(G, side, 'Turned down the surrender and fought on');
+      }
+      bump(G); return true;
+    }
     const i = a.i;
     if (!Number.isInteger(i) || i < 0 || i >= G.size * G.size) return false;
     if (a.f === 'cmd') return moveCommander(G, side, i);
     if (a.f === 'deploy') return ['soldier', 'rifle', 'drone', 'jeep', 'arty'].includes(a.k) && deploy(G, side, a.k, i);
     if (a.f === 'air') return (a.k === 'plane' || a.k === 'heli') && callAir(G, side, a.k, i);
+    if (a.f === 'structure') return !!STRUCT[a.k] && buildStructure(G, side, a.k, i);
     const u = G.units.find(x => x.id === a.u && x.side === side);
     if (!u) return false;
     switch (a.f) {
       case 'move': return moveUnit(G, u, i);
       case 'fire': return fire(G, u, i);
       case 'grenade': return throwGrenade(G, u, i);
-      case 'trench': case 'barricade': case 'mound': return build(G, u, a.f, i);
+      case 'trench': case 'barricade': case 'mound': case 'road': return build(G, u, a.f, i);
       case 'hitch': return hitch(G, u, i);
       case 'unhitch': return unhitch(G, u, i);
       case 'load': return load(G, u, i);
@@ -1276,7 +1436,10 @@ const Engine = (() => {
     return false;
   }
   // Relabel the two sides so whoever is looking at the battle is always side 1 on their own screen.
-  const REASON_FLIP = { 'You took out the enemy commander': 'The enemy took out your commander', 'The enemy took out your commander': 'You took out the enemy commander' };
+  const REASON_FLIP = {
+    'You took out the enemy commander': 'The enemy took out your commander', 'The enemy took out your commander': 'You took out the enemy commander',
+    'You surrendered': 'The enemy surrendered', 'The enemy surrendered': 'You surrendered'
+  };
   function swapSides(G) {
     const sw = v => v === 1 ? 2 : v === 2 ? 1 : v;
     const pair = o => o ? { 1: o[2], 2: o[1] } : o;
@@ -1285,8 +1448,10 @@ const Engine = (() => {
     const flipUnit = u => { u.side = sw(u.side); if (u.cargo) u.cargo.side = sw(u.cargo.side); for (const r of u.riders || []) r.side = sw(r.side); };
     G.units.forEach(flipUnit);
     for (const a of G.air) a.side = sw(a.side);
+    for (const b of G.builds || []) b.side = sw(b.side);
     for (const e of G.log) e.s = sw(e.s);
     G.turn = sw(G.turn);
+    if (G.offer) G.offer = { ...G.offer, win: sw(G.offer.win) };
     if (G.over) G.over = { winner: sw(G.over.winner), reason: REASON_FLIP[G.over.reason] || G.over.reason };
     G.ver = (G.ver || 0) + 1;
     return G;
@@ -1354,7 +1519,7 @@ const Engine = (() => {
       v: 4, size: n, cell: o.cell, x0: o.x0, y0: o.y0, elev: o.elev, tier: o.tier,
       terr: o.terr || new Uint8Array(N), mound: new Uint8Array(N), tread: new Uint8Array(N),
       owner: new Uint8Array(N), known: new Uint8Array(N), explored: new Uint8Array(N),
-      units: [], air: [], riding: { 1: null, 2: null }, cmd: { 1: 0, 2: 0 }, hq: { 1: 0, 2: 0 }, intel: { 1: null, 2: null },
+      units: [], air: [], builds: [], pave: [], riding: { 1: null, 2: null }, cmd: { 1: 0, 2: 0 }, hq: { 1: 0, 2: 0 }, intel: { 1: null, 2: null },
       hqTaken: { 1: false, 2: false }, score: { 1: 0, 2: 0 }, supply: { 1: 0, 2: 0 },
       hp: { 1: CMD_HP, 2: CMD_HP }, cmdMoved: { 1: false, 2: false }, round: 1, turn: 1, ver: 0, nextId: 1,
       seed: (o.seed >>> 0) || 1, over: null, log: [], source: o.source || '', mapSource: o.mapSource || '',
@@ -1393,10 +1558,11 @@ const Engine = (() => {
     return {
       ...G, owner: G.owner.slice(), known: G.known.slice(), explored: G.explored.slice(), terr: G.terr.slice(), mound: G.mound.slice(), tread: G.tread.slice(),
       units: G.units.map(u => ({ ...u, cargo: u.cargo ? { ...u.cargo } : null, riders: u.riders ? u.riders.map(r => ({ ...r })) : undefined })), air: G.air.map(a => ({ ...a })),
+      builds: (G.builds || []).map(b => ({ ...b })), pave: (G.pave || []).slice(),
       cmd: { ...G.cmd }, riding: { ...(G.riding || { 1: null, 2: null }) }, hq: { ...G.hq }, hqTaken: { ...G.hqTaken }, score: { ...G.score },
       intel: { 1: G.intel[1] && { ...G.intel[1] }, 2: G.intel[2] && { ...G.intel[2] } },
       supply: { ...G.supply }, hp: { ...G.hp }, cmdMoved: { ...G.cmdMoved }, log: G.log.slice(),
-      stats: { 1: { ...G.stats[1] }, 2: { ...G.stats[2] } }, over: G.over ? { ...G.over } : null
+      stats: { 1: { ...G.stats[1] }, 2: { ...G.stats[2] } }, over: G.over ? { ...G.over } : null, offer: G.offer ? { ...G.offer } : undefined
     };
   }
   function serialize(G) {
@@ -1421,6 +1587,8 @@ const Engine = (() => {
     if (!o.stats) o.stats = { 1: {}, 2: {} };
     if (!o.diff) o.diff = 'normal';
     if (!o.air) o.air = [];
+    if (!o.builds) o.builds = [];
+    if (!o.pave) o.pave = [];
     if (!o.riding) o.riding = { 1: null, 2: null };
     if (!o.intel) o.intel = { 1: { idx: o.cmd[2], round: o.round }, 2: { idx: o.cmd[1], round: o.round } };
     if (o.fog == null) o.fog = o.v === 4;
@@ -1438,7 +1606,8 @@ const Engine = (() => {
     rcOf, nb8, square, cheb, footOK, vehOK, artyRange, rifleRange, unitAt, occupant, count, ready, canShoot, artyReady,
     los, sight, airActive, reach, moveOptions, commanderMoves, moveCommander, unitMoveMap, unitMoves, keepsFire, moveUnit,
     shotTargets, fire, deployCheck, deployCells, deploy, callAir, income, aiTurn, beginTurn, nextRound, playerEnd,
-    computeTiers, markSteep, noiseTerrain, create, clone, serialize, deserialize, apply, passTurn, swapSides
+    computeTiers, markSteep, noiseTerrain, create, clone, serialize, deserialize, apply, passTurn, swapSides,
+    STRUCT, STRUCT_HP, STRUCT_KILL, structAt, structCheck, structCells, buildStructure
   };
 })();
 /*ENGINE-END*/
@@ -1458,7 +1627,10 @@ const PIECES = {
   arty: { label: 'Artillery', desc: 'Shells any cell or piece you can see within 2 plus its tier. Roads and open ground only.' },
   plane: { label: 'Recon plane', desc: 'One pass that reveals 8 cells around any spot until this turn ends.' },
   heli: { label: 'Helicopter', desc: 'Hovers over any spot and reveals 4 cells around it for 3 turns.' },
-  jeep: { label: 'Jeep', desc: 'Drives 2 cells over open ground, 3 along roads or its own tire treads. Tows artillery.' }
+  jeep: { label: 'Jeep', desc: 'Drives 2 cells over open ground, 3 along roads or its own tire treads. Tows artillery.' },
+  barracks: { label: 'Barracks', desc: 'Trains a free soldier beside it every turn.' },
+  factory: { label: 'Jeep factory', desc: 'Builds a free jeep beside it every other turn.' },
+  range: { label: 'Rifle range', desc: 'Trains a free rifleman beside it every other turn.' }
 };
 
 let G = null;
@@ -1615,7 +1787,7 @@ function draw() {
       ctx.lineWidth = 1.2;
       for (let r = r0; r < r1; r++) for (let c = c0; c < c1; c++) {
         const i = r * n + c, foot = Engine.footOK(G, i);
-        if (G.terr[i] === Engine.T.BARRICADE) continue;
+        if (G.terr[i] === Engine.T.BARRICADE || G.terr[i] === Engine.T.STRUCT) continue;
         if (foot && !(vehView && !Engine.vehOK(G, i))) continue;
         const x = ox + c * s, y = oy + r * s;
         ctx.strokeStyle = foot ? 'rgba(120,53,15,0.45)' : 'rgba(30,41,59,0.55)';
@@ -1630,11 +1802,17 @@ function draw() {
   }
   // Trenches, barricades and raised ground, wherever they have been seen.
   if (s >= 6 && c1 > c0 && r1 > r0) {
+    const paved = new Set(G.pave || []);
     for (let r = r0; r < r1; r++) for (let c = c0; c < c1; c++) {
-      const i = r * n + c, t = G.terr[i], m = G.mound[i];
-      if (t !== Engine.T.TRENCH && t !== Engine.T.BARRICADE && !m && !G.tread[i]) continue;
+      const i = r * n + c, t = G.terr[i], m = G.mound[i], pv = paved.has(i) && t === Engine.T.ROAD;
+      if (t !== Engine.T.TRENCH && t !== Engine.T.BARRICADE && !m && !G.tread[i] && !pv) continue;
       if (G.fog && !G.explored[i]) continue;
       const x = ox + c * s, y = oy + r * s;
+      if (pv) {
+        ctx.fillStyle = 'rgba(75,85,99,0.55)'; ctx.fillRect(x + s * 0.06, y + s * 0.06, s * 0.88, s * 0.88);
+        ctx.strokeStyle = '#fbbf24'; ctx.lineWidth = Math.max(1, s * 0.05); ctx.setLineDash([Math.max(2, s * 0.12), Math.max(2, s * 0.1)]);
+        ctx.beginPath(); ctx.moveTo(x + s * 0.15, y + s * 0.5); ctx.lineTo(x + s * 0.85, y + s * 0.5); ctx.stroke(); ctx.setLineDash([]);
+      }
       if (G.tread[i]) {
         ctx.strokeStyle = 'rgba(92,64,40,0.55)'; ctx.lineWidth = Math.max(1, s * 0.07); ctx.setLineDash([Math.max(2, s * 0.08), Math.max(2, s * 0.06)]);
         ctx.beginPath();
@@ -1662,6 +1840,20 @@ function draw() {
         for (let k = 0; k < 4; k++) { ctx.moveTo(x + s * (0.18 + k * 0.2), y + s * 0.64); ctx.lineTo(x + s * (0.3 + k * 0.2), y + s * 0.36); }
         ctx.stroke();
       }
+    }
+  }
+  // Structures: yours always, the enemy's while you can see them.
+  if (s >= 5) for (const b of G.builds || []) {
+    if (!visible(b.idx) || (b.side === 2 && !vis[b.idx])) continue;
+    const [bx, by, bw] = rect(b.idx, s * 0.08), col = b.side === 1 ? '#2563eb' : '#dc2626';
+    ctx.fillStyle = '#fff'; ctx.strokeStyle = col; ctx.lineWidth = Math.max(1.5, s * 0.08);
+    ctx.beginPath(); ctx.roundRect ? ctx.roundRect(bx, by, bw, bw, s * 0.12) : ctx.rect(bx, by, bw, bw); ctx.fill(); ctx.stroke();
+    ctx.fillStyle = col; ctx.beginPath(); ctx.moveTo(bx + bw * 0.12, by + bw * 0.42); ctx.lineTo(bx + bw * 0.5, by + bw * 0.12); ctx.lineTo(bx + bw * 0.88, by + bw * 0.42); ctx.closePath(); ctx.fill();
+    ctx.font = '700 ' + Math.round(bw * 0.4) + 'px system-ui, sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    ctx.fillText({ barracks: 'B', factory: 'J', range: 'R' }[b.type], bx + bw / 2, by + bw * 0.66);
+    for (let k = 0; k < Engine.STRUCT_HP; k++) {
+      ctx.fillStyle = k < b.hp ? col : '#d1d5db';
+      ctx.fillRect(bx + bw * (0.18 + k * 0.24), by + bw * 0.9, bw * 0.16, Math.max(2, bw * 0.06));
     }
   }
   ctx.strokeStyle = 'rgba(31,41,55,0.75)'; ctx.lineWidth = 2;
@@ -1724,7 +1916,7 @@ function draw() {
       markCells(moves.filter(i => danger.has(i) && i !== G.cmd[2]), '#ea580c');
     }
     if (ui.mode === 'deploy' && ui.deployType !== 'plane' && ui.deployType !== 'heli') {
-      markCells(Engine.deployCells(G, 1, ui.deployType), '#b45309', true);
+      markCells(Engine.STRUCT[ui.deployType] ? Engine.structCells(G, 1, ui.deployType) : Engine.deployCells(G, 1, ui.deployType), '#b45309', true);
     }
     if (ui.mode === 'unit' && ui.action) {
       const u = unitById(ui.sel);
@@ -1964,6 +2156,14 @@ function describe(i) {
   if (seen && i === G.cmd[2]) s = 'Enemy commander, ' + G.hp[2] + ' of ' + Engine.CMD_HP + ' health. ' + s;
   else if (!seen && G.intel[1] && G.intel[1].idx === i) s = 'Enemy commander was last seen here in round ' + G.intel[1].round + '. ' + s;
   else if (i === G.cmd[1]) s = 'Your commander' + (G.riding && G.riding[1] ? ', riding in this jeep' : '') + ', ' + G.hp[1] + ' of ' + Engine.CMD_HP + ' health. ' + s;
+  const b = Engine.structAt(G, i);
+  if (b && (b.side === 1 || seen)) {
+    const S = Engine.STRUCT[b.type];
+    s = (b.side === 1 ? 'Your ' : 'Enemy ') + S.label.toLowerCase() + ', ' + b.hp + ' of ' + Engine.STRUCT_HP + ' health. ' + PIECES[b.type].desc +
+      (b.side === 1 ? ' Next ' + Engine.NAMES[S.makes] + (b.next <= G.round + 1 ? ' at the start of your next turn' : ' in round ' + b.next) + ', if a cell beside it is free.' : '') +
+      ' Artillery and grenades can destroy it for ' + Engine.STRUCT_KILL + ' points.';
+    return s;
+  }
   const u = Engine.unitAt(G, i);
   if (u && u.side === 2 && seen) s = 'Enemy ' + Engine.NAMES[u.type] + (u.cargo ? ' towing artillery' : '') + ((u.riders || []).length ? ' carrying ' + u.riders.length + ' troops' : '') + '. ' + s;
   return s;
@@ -2004,6 +2204,7 @@ function act(a) {
   if (ui.undo.length > 40) ui.undo.shift();
   if (Engine.apply(G, 1, a)) ui.acts.push(a);
   paintLayers();
+  if (G.over && ui.mp) { persist(); return mpEndTurn(); }
   persist();
   if (G.over) setTimeout(showOver, 350);
 }
@@ -2014,6 +2215,7 @@ const ACTIONS = {
   trench: { label: 'Dig trench', cells: u => Engine.buildCells(G, u, 'trench'), sub: () => 'free' },
   barricade: { label: 'Barricade', cells: u => Engine.buildCells(G, u, 'barricade'), sub: () => '1 supply' },
   mound: { label: 'Raise ground', cells: u => Engine.buildCells(G, u, 'mound'), sub: () => '1 supply' },
+  road: { label: 'Pave road', cells: u => Engine.buildCells(G, u, 'road'), sub: () => '3 supply' },
   hitch: { label: 'Hitch gun', cells: u => Engine.hitchTargets(G, u), sub: () => 'artillery beside it' },
   unhitch: { label: 'Drop gun', cells: u => Engine.unhitchCells(G, u), sub: () => 'beside the jeep' },
   load: { label: 'Load', cells: u => Engine.loadTargets(G, u), sub: u => Engine.seatsUsed(G, u) + ' of ' + Engine.SEATS + ' seats' },
@@ -2023,7 +2225,7 @@ const ACTIONS = {
 };
 function actionsFor(u) {
   if (!u || !Engine.ready(G, u) || G.over) return [];
-  if (u.type === 'soldier' && !u.moved) return ['board', 'grenade', 'trench', 'barricade', 'mound'].filter(k => k !== 'board' || Engine.boardTargets(G, u).length);
+  if (u.type === 'soldier' && !u.moved) return ['board', 'grenade', 'trench', 'barricade', 'mound', 'road'].filter(k => k !== 'board' || Engine.boardTargets(G, u).length);
   if (u.type === 'rifle' && !u.moved) return Engine.boardTargets(G, u).length ? ['board'] : [];
   if (u.type === 'jeep') {
     const k = [];
@@ -2053,7 +2255,7 @@ function selectUnit(u) {
   if (u.type === 'arty') ui.info = 'Range ' + Engine.artyRange(G, u.idx) + '. ' + (shots ? 'Orange cells can be shelled. ' : 'Nothing you can see is in range. ') + (moves ? 'Solid teal keeps the shot, dashed teal uses it.' : '');
   else if (u.type === 'rifle') ui.info = 'Range ' + Engine.rifleRange(G, u.idx) + ' with a clear line of sight. ' + (shots ? 'Orange cells can be shot. ' : '') + (moves ? 'Teal cells are moves. It can move and shoot in the same turn.' : '');
   else if (u.type === 'drone') ui.info = 'Drones fly over anything and see 6 cells around them.';
-  else ui.info = 'Moving onto an enemy piece destroys it. Or throw a grenade, dig in, block a path or raise the ground.';
+  else ui.info = 'Moving onto an enemy piece destroys it. Or throw a grenade, dig in, block a path, raise the ground or pave a road.';
 }
 // After a piece acts, keep it selected if it still has something to do.
 function keepOrClear(u) {
@@ -2075,6 +2277,12 @@ function onTap(i) {
       else ui.info = 'The helicopter hovers there and spots through your next 2 turns.';
       return render();
     }
+    if (Engine.STRUCT[type]) {
+      const whyS = Engine.structCheck(G, 1, type, i);
+      if (!whyS) { act({ f: 'structure', k: type, i }); clearSel(); ui.info = PIECES[type].label + ' built. ' + PIECES[type].desc; }
+      else ui.info = whyS + '.';
+      return render();
+    }
     const why = Engine.deployCheck(G, 1, type, i);
     if (!why) { act({ f: 'deploy', k: type, i }); clearSel(); ui.info = PIECES[type].label + ' placed. It can act next turn.'; }
     else ui.info = why + '.';
@@ -2090,6 +2298,7 @@ function onTap(i) {
         grenade: 'Grenade thrown. ' + Engine.grenadesLeft(u) + ' left.',
         trench: 'Trench dug. Rifles cannot hit a piece in it, and it soaks up one artillery shell.',
         barricade: 'Barricade up. Nothing can walk through it and it blocks sight until a shell or grenade knocks it down.',
+        road: 'Road paved. Jeeps and artillery can drive on it, and every piece runs up to 3 cells along it.',
         mound: 'Ground raised to level ' + G.mound[i] + '. That cell is now tier ' + Engine.tierAt(G, i) + ', so artillery there reaches ' + Engine.artyRange(G, i) + '.',
         hitch: 'Gun hitched. Drive the jeep, then tap Drop gun.',
         unhitch: 'Gun dropped off. It sets up and can fire next turn.',
@@ -2157,6 +2366,28 @@ function openDeploy() {
     };
     list.appendChild(b);
   }
+  const head = document.createElement('div');
+  head.className = 'muted small';
+  head.style.margin = '10px 0 2px';
+  head.textContent = 'Structures, unlocked by your score (' + G.score[1] + ' points)';
+  list.appendChild(head);
+  for (const type of ['barracks', 'factory', 'range']) {
+    const b = document.createElement('button'), S = Engine.STRUCT[type];
+    const why = Engine.structCheck(G, 1, type, null);
+    const noRoom = !why && !Engine.structCells(G, 1, type).length;
+    b.className = 'pick';
+    b.disabled = !!why || noRoom;
+    b.innerHTML = '<span><b></b><small></small></span><em></em>';
+    b.querySelector('b').textContent = PIECES[type].label;
+    b.querySelector('small').textContent = PIECES[type].desc + (G.score[1] < S.points ? ' Unlocks at ' + S.points + ' points.' : noRoom ? ' No open cell in your territory.' : '');
+    b.querySelector('em').textContent = S.cost;
+    b.onclick = () => {
+      close('deploySheet'); clearSel(); ui.mode = 'deploy'; ui.deployType = type;
+      ui.info = 'Pick open ground, road or forest with free cells around it for the new pieces.';
+      render();
+    };
+    list.appendChild(b);
+  }
   { const cells = Engine.territory(G, 1), nx = Engine.nextIncomeAt(cells); $('deploySupply').textContent = 'You have ' + G.supply[1] + ' supply. You hold ' + cells + ' cells, which pays ' + Engine.income(G, 1) + ' each turn. Hold ' + nx + ' cells to earn ' + Engine.baseIncome(nx) + '.'; }
   open('deploySheet');
 }
@@ -2206,11 +2437,11 @@ function hintText() {
   if (ui.mode === 'deploy') {
     if (ui.deployType === 'plane') return 'Tap where the recon plane should fly over.';
     if (ui.deployType === 'heli') return 'Tap where the helicopter should hover.';
-    return 'Tap a gold square to place the ' + Engine.NAMES[ui.deployType] + '.';
+    return 'Tap a gold square to place the ' + (Engine.NAMES[ui.deployType] || PIECES[ui.deployType].label.toLowerCase()) + '.';
   }
   if (ui.mode === 'unit' && ui.action) return {
     grenade: 'Tap an orange cell to throw the grenade.', trench: 'Tap a gold square to dig a trench.',
-    barricade: 'Tap a gold square to put up a barricade.', mound: 'Tap a gold square to raise the ground.',
+    barricade: 'Tap a gold square to put up a barricade.', mound: 'Tap a gold square to raise the ground.', road: 'Tap a gold square to pave it.',
     hitch: 'Tap the gun to hitch it to the jeep.', unhitch: 'Tap a gold square to drop the gun there.',
     load: 'Tap a soldier, rifleman or your commander beside the jeep.', cmdout: 'Tap a gold square for the commander to step out.', unload: 'Tap a gold square to let a trooper out.', board: 'Tap the jeep to climb in.'
   }[ui.action];
@@ -2250,6 +2481,8 @@ function render() {
 
   const idle = myTurn();
   $('mInvite').classList.toggle('hidden', !ui.mp);
+  $('mNotify').classList.toggle('hidden', !ui.mp || !pushSupported());
+  $('mNotify').textContent = 'Turn notifications: ' + (ui.mp && ui.mp.push ? 'on' : 'off');
   const selU = ui.mode === 'unit' ? unitById(ui.sel) : null;
   renderActions(selU, idle && !!selU);
   $('deployBtn').disabled = !idle;
@@ -2259,7 +2492,9 @@ function render() {
   $('endBtn').disabled = !idle;
   $('endBtn').textContent = ui.mp ? (ui.busy ? 'Sending' : !G.over && G.turn !== 1 ? 'Their turn' : 'End turn') : ui.busy ? 'Enemy turn' : 'End turn';
   $('endBtn').classList.toggle('ready', idle && hintText().startsWith('All set'));
+  $('mSurrender').disabled = !idle;
   draw();
+  checkOffer();
 }
 
 // ---------- terrain loading ----------
@@ -2397,9 +2632,10 @@ async function loadMapTerrain(B, elev, say) {
 function applyTerrain(terr) {
   const T = Engine.T;
   for (let i = 0; i < terr.length; i++) {
-    if (G.terr[i] === T.TRENCH || G.terr[i] === T.BARRICADE) continue;
+    if (G.terr[i] === T.TRENCH || G.terr[i] === T.BARRICADE || G.terr[i] === T.STRUCT) continue;
     G.terr[i] = G.mound[i] && terr[i] !== T.ROAD ? T.OPEN : terr[i];
   }
+  for (const i of G.pave || []) if (G.terr[i] !== T.TRENCH && G.terr[i] !== T.BARRICADE && G.terr[i] !== T.STRUCT) G.terr[i] = T.ROAD;
   G.ver = (G.ver || 0) + 1;
 }
 async function reloadMapData(quiet) {
@@ -2537,7 +2773,11 @@ function segment(id, key, attr, storeKey, parse = v => v) {
 segment('sizeSeg', 'size', 'n', 'tw_size', v => +v);
 segment('diffSeg', 'diff', 'd', 'tc_diff');
 segment('oppSeg', 'opp', 'o', 'tw_opp');
-function syncOpp() { $('diffSeg').classList.toggle('hidden', ui.opp === 'friend'); }
+function syncOpp() {
+  const off = ui.opp === 'friend';
+  $('diffSeg').classList.toggle('off', off);
+  document.querySelectorAll('#diffSeg button').forEach(b => { b.disabled = off; });
+}
 document.querySelectorAll('#oppSeg button').forEach(b => b.addEventListener('click', syncOpp));
 syncOpp();
 segment('fogSeg', 'fog', 'f', 'tw_fog', v => v === 'on' || v === true);
@@ -2686,6 +2926,7 @@ function mpLocal(state, prev) {
   if (ui.mp.side === 2) Engine.swapSides(g);
   if (prev && prev.size === g.size && prev.x0 === g.x0 && prev.y0 === g.y0) {
     g.explored = prev.explored; g.known = prev.known; g.logged = prev.logged;
+    if (g.offer && prev.offer && prev.offer.told) g.offer.told = true;
     if (prev.intel && prev.intel[1] && (!g.intel[1] || prev.intel[1].round > g.intel[1].round)) g.intel[1] = prev.intel[1];
     if (!g.place) g.place = prev.place;
   } else { g.explored = new Uint8Array(N); g.known = new Uint8Array(N); }
@@ -2712,6 +2953,7 @@ async function mpCreate() {
   if (!r || !r.id) return false;
   ui.mp = { id: r.id, token: r.token, side: 1, rev: r.rev, joined: false, place };
   mpRemember();
+  pushAfterStart(false);
   return true;
 }
 async function mpEndTurn() {
@@ -2761,6 +3003,8 @@ function showInvite() {
   if (!ui.mp) return;
   $('inviteLink').value = inviteLink();
   $('inviteShare').classList.toggle('hidden', !navigator.share);
+  const nb = $('inviteNotify'); nb.disabled = !pushSupported() || !!ui.mp.push;
+  nb.textContent = !pushSupported() ? 'Notifications are not available here' : ui.mp.push ? 'Notifications are on' : 'Notify me when it is my turn';
   open('inviteSheet');
 }
 $('inviteShare').onclick = () => {
@@ -2803,7 +3047,76 @@ async function mpJoinFromLink() {
   ui.mp = { id, token: r.token, side: r.side, rev: r.rev, joined: r.joined, place: r.place || '' };
   ui.acts = old && prev.rev === r.rev ? prev.acts || [] : [];
   mpEnter(old && prev.rev === r.rev ? old : mpLocal(r.state, old));
+  if (old && prev.push) ui.mp.push = true;
   toast(r.side === 2 && !old ? 'You joined the battle. You are blue and your friend is red.' : 'Back in your battle.', 4500);
+  pushAfterStart(r.side === 2 && !old);
+}
+
+// ---------- turn notifications ----------
+// sw.js, the service worker next to this page, shows a notification when the battle server sends one.
+function pushSupported() { return 'serviceWorker' in navigator && 'PushManager' in window && 'Notification' in window; }
+async function notifyPerm() {
+  try {
+    const st = (await navigator.permissions.query({ name: 'notifications' })).state;
+    return st === 'prompt' ? 'default' : st;
+  } catch (e) { return Notification.permission; }
+}
+function b64uBytes(s) {
+  const b = atob(s.replace(/-/g, '+').replace(/_/g, '/') + '==='.slice((s.length + 3) % 4));
+  return Uint8Array.from(b, c => c.charCodeAt(0));
+}
+// quiet: used when permission was already given, so nothing is shown unless it works.
+async function pushOn(quiet) {
+  const mp = ui.mp;
+  if (!mp) return;
+  if (!pushSupported()) { if (!quiet) toast('This browser cannot show notifications.'); return; }
+  try {
+    const perm = quiet ? await notifyPerm() : await Notification.requestPermission();
+    if (perm !== 'granted') { if (!quiet) toast('Notifications are blocked for this site. Allow them in the site settings, then try again.', 5000); return; }
+    const reg = await navigator.serviceWorker.register('sw.js');
+    await navigator.serviceWorker.ready;
+    const k = await mpCall({ op: 'vapid' });
+    if (!k || !k.key) { if (!quiet) toast('The battle server is not set up for notifications yet.', 4500); return; }
+    const key = b64uBytes(k.key);
+    let sub = await reg.pushManager.getSubscription();
+    if (sub) {
+      const old = sub.options && sub.options.applicationServerKey ? new Uint8Array(sub.options.applicationServerKey) : null;
+      if (old && (old.length !== key.length || old.some((v, i) => v !== key[i]))) { await sub.unsubscribe(); sub = null; }
+    }
+    if (!sub) sub = await reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: key });
+    const r = await mpCall({ op: 'subscribe', id: mp.id, token: mp.token, sub: sub.toJSON() });
+    if (!r || r._status !== 200) { if (!quiet) toast((r && r.error) || 'Could not reach the battle server.', 4500); return; }
+    if (ui.mp !== mp) return;
+    mp.push = true; mpRemember(); render();
+    close('notifySheet');
+    $('inviteNotify').disabled = true; $('inviteNotify').textContent = 'Notifications are on';
+    if (!quiet) toast('Notifications are on. Your phone will buzz when it is your turn.', 4000);
+  } catch (e) {
+    console.warn('Turn notifications:', e && e.message);
+    if (!quiet) toast('Notifications could not be turned on here.', 4500);
+  }
+}
+async function pushOff() {
+  const mp = ui.mp;
+  if (!mp) return;
+  await mpCall({ op: 'unsubscribe', id: mp.id, token: mp.token });
+  mp.push = false; mpRemember(); render();
+  toast('Notifications for this battle are off.');
+}
+$('inviteNotify').onclick = () => pushOn(false);
+$('notifyOn').onclick = () => pushOn(false);
+// Tapping a notification while the game is already open brings that battle up to date.
+if ('serviceWorker' in navigator) navigator.serviceWorker.addEventListener('message', e => {
+  const d = e.data || {};
+  if (d.type !== 'topo-wars-open') return;
+  if (ui.mp && ui.mp.id === d.id) mpPoll();
+  else if (d.id) { location.hash = '#join=' + d.id; mpJoinFromLink(); }
+});
+async function pushAfterStart(offer) {
+  if (!pushSupported()) return;
+  const perm = await notifyPerm();
+  if (perm === 'granted') pushOn(true);
+  else if (offer && perm !== 'denied') setTimeout(() => { if (ui.mp && !ui.mp.push) open('notifySheet'); }, 1200);
 }
 
 // ---------- battle history ----------
@@ -2876,7 +3189,7 @@ function showOver() {
   const st = G.stats || { 1: {}, 2: {} }, rows = [
     ['Enemy cells captured', 'captured'], ['Pieces destroyed', 'kills'], ['Pieces lost', 'lost'],
     ['Pieces deployed', 'deployed'], ['Shots fired', 'shots'], ['Hits on the commander', 'hits'],
-    ['Aircraft called', 'air'], ['Cells sealed off', 'encircled']
+    ['Aircraft called', 'air'], ['Cells sealed off', 'encircled'], ['Structures built', 'structures'], ['Pieces from structures', 'produced']
   ];
   $('overStats').innerHTML = '<tr><th></th><th>You</th><th>Enemy</th></tr>' +
     rows.map(([label, k]) => '<tr><td>' + label + '</td><td>' + (st[1][k] || 0) + '</td><td>' + (st[2][k] || 0) + '</td></tr>').join('');
@@ -2903,16 +3216,48 @@ $('overNew').onclick = () => leaveBattle();
 const open = id => $(id).classList.remove('hidden');
 const close = id => $(id).classList.add('hidden');
 document.querySelectorAll('[data-close]').forEach(b => b.onclick = () => close(b.dataset.close));
-document.querySelectorAll('.overlay').forEach(o => o.addEventListener('click', e => { if (e.target === o && o.id !== 'loading') close(o.id); }));
+document.querySelectorAll('.overlay').forEach(o => o.addEventListener('click', e => { if (e.target === o && o.id !== 'loading' && o.id !== 'offerSheet') close(o.id); }));
 $('menuBtn').onclick = () => open('menu');
 $('mClose').onclick = () => close('menu');
 $('mInvite').onclick = () => { close('menu'); showInvite(); };
+$('mNotify').onclick = () => { close('menu'); if (ui.mp && ui.mp.push) pushOff(); else pushOn(false); };
 $('mHelp').onclick = () => { close('menu'); open('help'); };
 $('mReload').onclick = () => { close('menu'); reloadMapData(false); };
 $('mHistory').onclick = () => { close('menu'); showHistory(); };
 $('sHistory').onclick = () => showHistory();
 $('sHelp').onclick = () => open('help');
 $('mNew').onclick = () => { close('menu'); leaveBattle(); };
+$('mSurrender').onclick = () => {
+  close('menu');
+  if (!myTurn()) { toast('You can surrender on your turn.'); return; }
+  if (!confirm('Surrender this battle? The enemy wins.')) return;
+  act({ f: 'surrender' }); render();
+};
+// 150 points: the side that got there decides whether to accept the other side's surrender.
+function checkOffer() {
+  const o = G && !G.over && G.offer;
+  if (!o || !$('offerSheet').classList.contains('hidden')) return;
+  if (o.win === 1 && o.status === 'open' && myTurn()) {
+    $('offerTitle').textContent = ui.mp ? 'Your friend offers to surrender' : 'The enemy offers to surrender';
+    $('offerText').textContent = 'You reached ' + Engine.WIN + ' points. Accept for the victory now, or turn it down and fight on until a commander falls or round ' + Engine.MAX_ROUNDS + ' ends.' +
+      (ui.mp ? '' : ' If you fight on, the enemy pulls back to the best ground near its commander and digs in.');
+    $('offerYes').textContent = 'Accept the surrender';
+    $('offerNo').textContent = 'Fight on';
+    $('offerYes').onclick = () => { close('offerSheet'); act({ f: 'accept' }); render(); };
+    $('offerNo').onclick = () => { close('offerSheet'); act({ f: 'fighton' }); ui.info = ui.mp ? 'You turned down the surrender. The battle goes on.' : 'You turned down the surrender. The enemy is falling back to defend its commander.'; render(); };
+    open('offerSheet');
+  } else if (o.win === 2 && !o.told) {
+    o.told = true; persist();
+    if (ui.mp) { toast('Your friend reached ' + Engine.WIN + ' points and can accept your surrender. Menu, Surrender, gives up.', 6000); return; }
+    $('offerTitle').textContent = 'The enemy demands your surrender';
+    $('offerText').textContent = 'The enemy reached ' + Engine.WIN + ' points. Surrender now, or fight on until a commander falls or round ' + Engine.MAX_ROUNDS + ' ends. Menu, Surrender, still gives up later.';
+    $('offerYes').textContent = 'Surrender';
+    $('offerNo').textContent = 'Fight on';
+    $('offerYes').onclick = () => { close('offerSheet'); if (myTurn()) act({ f: 'surrender' }); render(); };
+    $('offerNo').onclick = () => { close('offerSheet'); render(); };
+    open('offerSheet');
+  }
+}
 $('mLog').onclick = () => {
   close('menu');
   const list = $('logList');
