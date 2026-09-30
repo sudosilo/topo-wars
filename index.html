@@ -11,7 +11,7 @@
 <meta name="robots" content="index,follow">
 <link rel="canonical" href="https://topo-wars.vercel.app/">
 <meta name="application-name" content="Topo Wars">
-<meta name="version" content="6.6">
+<meta name="version" content="6.8">
 <meta name="apple-mobile-web-app-title" content="Topo Wars">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -158,7 +158,7 @@ button.on{background:var(--amber-soft);border-color:#f59e0b}
   </div>
   <div id="mid"><b id="roundTxt">Round 1</b><br><span id="supplyTxt">Supply 0</span></div>
   <div class="side">
-    <div class="row"><span class="num" id="eScore">0</span><span style="color:var(--red)">Enemy</span></div>
+    <div class="row"><span class="num" id="eScore">0</span><span id="eName" style="color:var(--red)">Enemy</span></div>
     <div class="bar"><i id="eBar" style="background:var(--red);margin-left:auto"></i></div>
   </div>
   <button id="menuBtn" aria-label="Menu">&#9776;</button>
@@ -174,7 +174,7 @@ button.on{background:var(--amber-soft);border-color:#f59e0b}
     <button id="ctrBtn">Center<small>on you</small></button>
     <button id="endBtn" class="primary">End turn</button>
   </div>
-  <div class="credit">Topo Wars 6.6. Map data &copy; OpenStreetMap contributors</div>
+  <div class="credit">Topo Wars 6.8. Map data &copy; OpenStreetMap contributors</div>
 </div>
 
 <div id="setup">
@@ -182,7 +182,7 @@ button.on{background:var(--amber-soft);border-color:#f59e0b}
     <button data-n="32">32</button><button data-n="64">64</button><button data-n="128">128</button>
   </div>
   <div class="seg" id="oppSeg"><span>Opponent</span>
-    <button data-o="ai">Computer</button><button data-o="friend">Friend</button>
+    <button data-o="ai">Computer</button><button data-o="friend">Friend</button><button data-o="zombie">Zombies</button>
   </div>
   <div class="seg" id="diffSeg"><span>Enemy</span>
     <button data-d="easy">Easy</button><button data-d="normal">Normal</button><button data-d="hard">Hard</button>
@@ -248,6 +248,13 @@ button.on{background:var(--amber-soft);border-color:#f59e0b}
 
     <h3>Buildings</h3>
     <p>Buildings come from the real map. Jeeps and artillery cannot drive through them. A soldier or rifleman standing next to one can use Enter building. That takes its whole turn: it waits at the door and is inside at the start of your next turn. Indoors it is hidden from the enemy until it walks out, fires, or an enemy piece stands right next to it, and it can move between the building's cells and walk back out. If the enemy is already inside when your troops go in, a close-quarters fight breaks out. Soldiers count 1 and riflemen 1.5, and the bigger force wins. Every piece on the losing side falls, the winners lose half as many as they killed, and everyone left spills out around the building. Artillery can shell any building outside your own territory that it can see, and a shell kills whoever is in that cell, hidden or not.</p>
+
+    <h3>Zombies</h3>
+    <p>Set Opponent to Zombies for a survival battle. There is no enemy commander, only a zombie nest where the enemy would start, shown in green with a Z. Every turn the nest births new zombies, as many as the horde's territory would pay in supply, so the horde starts slow and snowballs as it spreads. Easy births one fewer each turn and Hard one more. A zombie shuffles up to 2 cells toward the nearest living thing it can sense, and anything it steps onto is destroyed. Next to your commander it bites for 1 health instead. Zombies cannot walk through barricades or structures, so they claw at them: a barricade takes 3 hits to tear down. A trench costs a zombie a whole move to climb into and another to climb out. Win by destroying the nest and every last zombie, or by holding out for 40 rounds. Their bodies pile up where they fall.</p>
+    <p>A machine gun nest costs 40 supply and works in every battle. At the start of your turn it fires at up to 3 enemy pieces it can see within rifle range, nearest first. Like a rifleman it needs a clear line of fire and cannot hit troops in a trench.</p>
+
+    <h3>Wreckage</h3>
+    <p>Wherever a piece is destroyed, smoke rises for a round and scorched wreckage stays for a few more. A small cross marks fallen troops, twisted metal marks vehicles and guns, and rubble marks structures. You always see your own losses and anything your side destroyed. Other enemy losses show only where you can see. At the start of your turn a line sums up what you lost and what the enemy lost, and tapping wreckage tells you what it was and when it fell.</p>
 
     <h3>Moving a group</h3>
     <p>Select any of your pieces and press Group. Tap more of your pieces to add them, or tap one again to drop it. Then tap where the group should go. Each piece heads for the same spot relative to the others, so the group keeps its shape, and moves as far as it can right away. At the start of each of your turns, pieces with orders move on by themselves until they arrive, shown by a dashed line and a small flag. They never step onto another piece. Moving a piece yourself takes it off its orders, Stop orders clears them for the pieces you pick, and Undo takes back the automatic moves.</p>
@@ -399,7 +406,7 @@ button.on{background:var(--amber-soft);border-color:#f59e0b}
     <p id="overReason" class="muted"></p>
     <div class="scoreline">
       <div>You<b id="overP" style="color:var(--blue)">0</b></div>
-      <div>Enemy<b id="overE" style="color:var(--red)">0</b></div>
+      <div><span id="overEName">Enemy</span><b id="overE" style="color:var(--red)">0</b></div>
     </div>
     <table class="stats" id="overStats"></table>
     <div class="stack">
@@ -474,10 +481,10 @@ const Engine = (() => {
   // Height helps a howitzer twice as much as ordinary artillery, but its barrel cannot drop low
   // enough for close targets: nothing within 3 cells, and nothing on lower ground within 6.
   const HOW_EXTRA = 3, HOW_RELOAD = 3, HOW_KILL = 12, HOW_MIN = 3, HOW_MIN_LOW = 6;
-  const KILL = { soldier: 5, rifle: 6, drone: 4, jeep: 5, arty: 8 };
-  const NAMES = { soldier: 'soldier', rifle: 'rifleman', drone: 'drone', jeep: 'jeep', arty: 'artillery', how: 'howitzer', plane: 'recon plane', heli: 'helicopter' };
+  const KILL = { soldier: 5, rifle: 6, drone: 4, jeep: 5, arty: 8, zombie: 2 };
+  const NAMES = { soldier: 'soldier', rifle: 'rifleman', drone: 'drone', jeep: 'jeep', arty: 'artillery', how: 'howitzer', plane: 'recon plane', heli: 'helicopter', zombie: 'zombie' };
   const nameOf = u => u.heavy ? 'howitzer' : NAMES[u.type];
-  const SIGHT = { cmd: 4, soldier: 3, rifle: 4, arty: 2, drone: 6, jeep: 3 };
+  const SIGHT = { cmd: 4, soldier: 3, rifle: 4, arty: 2, drone: 6, jeep: 3, zombie: 3 };
   const GRENADES = 2, GRENADE_RANGE = 2, JEEP_RANGE = 2, SEATS = 3;
   const AIR = { plane: { r: 8, turns: 1 }, heli: { r: 4, turns: 3 } };
   const HQ_PTS = 20, ENCIRCLE_PTS = 10, CMD_HIT_PTS = 5, CMD_HP = 3, ROAD_RUN = 3, DRONE_RANGE = 4, INCOME = 2;
@@ -498,8 +505,11 @@ const Engine = (() => {
     factory: { label: 'Jeep factory', cost: 40, makes: 'jeep', every: 2 },
     range: { label: 'Rifle range', cost: 50, makes: 'rifle', every: 2 },
     hangar: { label: 'Drone hangar', cost: 40, makes: 'drone', every: 2 },
-    foundry: { label: 'Gun foundry', cost: 60, makes: 'arty', every: 3 }
+    foundry: { label: 'Gun foundry', cost: 60, makes: 'arty', every: 3 },
+    mg: { label: 'Machine gun nest', cost: 40, makes: null, every: 1 },
+    nest: { label: 'Zombie nest', cost: 0, makes: null, every: 1, hp: 6, wild: true }
   };
+  const MG_SHOTS = 3, BARRICADE_HP = 3, ZOMBIE_STEPS = 2;
   const STRUCT_HP = 3, STRUCT_KILL = 10;
   const MOUND_MAX = 2, MOUND_METERS = 4;
 
@@ -590,7 +600,7 @@ const Engine = (() => {
   function award(G, side, pts, text) {
     G.score[side] += pts;
     log(G, side, text + ' +' + pts);
-    if (!G.over && !G.offer && !G.cleanup && G.score[side] >= WIN) {
+    if (!G.over && !G.offer && !G.cleanup && G.mode !== 'zombie' && G.score[side] >= WIN) {
       G.offer = { win: side, round: G.round, status: 'open' };
       log(G, foe(side), 'Offered to surrender after the other side reached ' + WIN + ' points');
     }
@@ -607,7 +617,16 @@ const Engine = (() => {
     }
     G.owner[i] = side;
   }
+  // Wreckage marks where pieces fell, so both sides can see what happened last turn.
+  function wreck(G, idx, type, side, by) {
+    G.wrecks = G.wrecks || [];
+    G.wreckSeq = (G.wreckSeq || 0) + 1;
+    G.wrecks.push({ idx, type, side, by, round: G.round, n: G.wreckSeq });
+    if (G.wrecks.length > 160) G.wrecks.splice(0, G.wrecks.length - 160);
+  }
   function killUnit(G, side, u) {
+    wreck(G, u.idx, u.heavy ? 'how' : u.type, u.side, side);
+    for (const r of u.riders || []) wreck(G, u.idx, r.type, r.side, side);
     G.units.splice(G.units.indexOf(u), 1);
     if (u.cargo) { stat(G, side, 'kills'); stat(G, u.side, 'lost'); award(G, side, u.cargo.heavy ? HOW_KILL : KILL.arty, 'Destroyed the ' + (u.cargo.heavy ? 'howitzer' : 'artillery') + ' it was towing'); u.cargo = null; }
     for (const r of u.riders || []) { stat(G, side, 'kills'); stat(G, u.side, 'lost'); award(G, side, KILL[r.type], 'Destroyed a ' + NAMES[r.type] + ' riding in the jeep'); }
@@ -1036,7 +1055,7 @@ const Engine = (() => {
     G.supply[u.side] -= BUILD[kind].cost;
     u.moved = true;
     if (kind === 'trench') G.terr[i] = T.TRENCH;
-    else if (kind === 'barricade') G.terr[i] = T.BARRICADE;
+    else if (kind === 'barricade') { G.terr[i] = T.BARRICADE; (G.bhp = G.bhp || {})[i] = BARRICADE_HP; }
     else if (kind === 'road') { G.terr[i] = T.ROAD; (G.pave = G.pave || []).push(i); }
     else { G.mound[i] += 1; if (G.terr[i] !== T.ROAD) G.terr[i] = T.OPEN; }
     if (G.owner[i] === 0) G.owner[i] = u.side;
@@ -1120,11 +1139,98 @@ const Engine = (() => {
     }
   }
 
+  // ---------- machine gun nests ----------
+  // At the start of its owner's turn a nest fires at up to 3 enemy pieces it can see within rifle
+  // range, nearest first. Like a rifleman it needs a clear line and cannot hit troops in a trench.
+  function machineGuns(G, side) {
+    const nests = (G.builds || []).filter(b => b.side === side && b.type === 'mg');
+    if (!nests.length || G.over) return;
+    const f = foe(side), vis = sight(G, side);
+    for (const b of nests) {
+      const R = rifleRange(G, b.idx);
+      const targets = G.units.filter(u => u.side === f && vis[u.idx] && cheb(G, u.idx, b.idx) <= R && G.terr[u.idx] !== T.TRENCH && los(G, b.idx, u.idx))
+        .sort((a, c) => cheb(G, a.idx, b.idx) - cheb(G, c.idx, b.idx)).slice(0, MG_SHOTS);
+      let shots = targets.length;
+      for (const u of targets) if (G.units.includes(u)) killUnit(G, side, u);
+      if (shots < MG_SHOTS && G.cmd[f] >= 0 && vis[G.cmd[f]] && cheb(G, G.cmd[f], b.idx) <= R && los(G, b.idx, G.cmd[f]) && G.terr[G.cmd[f]] !== T.TRENCH) { hitCommander(G, side, 'Machine gun nest'); shots++; }
+      if (shots) { stat(G, side, 'shots', shots); log(G, side, 'Machine gun nest fired ' + shots + ' time' + (shots > 1 ? 's' : '')); }
+      if (G.over) return;
+    }
+  }
+
+  // ---------- zombies ----------
+  // The horde is side 2. It has no commander, only a nest that births new zombies every turn,
+  // as many as its territory would pay in supply, so an unchecked horde snowballs.
+  function zombieSpawn(G) {
+    const nest = (G.builds || []).find(b => b.side === 2 && b.type === 'nest');
+    if (!nest) return;
+    let k = Math.max(1, baseIncome(territory(G, 2)) + (G.diff === 'easy' ? -1 : G.diff === 'hard' ? 1 : 0));
+    for (let R = 1; R <= 8 && k > 0; R++) {
+      for (const i of square(G, nest.idx, R)) {
+        if (k <= 0) break;
+        if (cheb(G, i, nest.idx) !== R || occupant(G, i) || !footOK(G, i) || G.terr[i] === T.BUILDING || G.owner[i] === 1) continue;
+        G.units.push({ id: G.nextId++, side: 2, type: 'zombie', idx: i, placed: G.round, moved: true, fired: true });
+        if (G.owner[i] === 0) G.owner[i] = 2;
+        k--;
+      }
+    }
+  }
+  // Each zombie lurches up to 2 cells at the nearest living thing it can sense. A trench costs a
+  // whole move to get into and another to get out of. Barricades, structures and the commander
+  // are clawed at instead of passed, and stepping onto a piece destroys it.
+  function zombieTurn(G) {
+    const Z = 2, P = 1, touched = [];
+    if (G.over) return touched;
+    zombieSpawn(G);
+    const d = (a, b) => { const [ar, ac] = rcOf(G, a), [br, bc] = rcOf(G, b); return Math.max(Math.abs(ar - br), Math.abs(ac - bc)) + Math.hypot(ar - br, ac - bc) * 0.01; };
+    for (const z of G.units.filter(u => u.side === Z && u.type === 'zombie')) {
+      if (!G.units.includes(z) || !ready(G, z)) continue;
+      const prey = G.units.filter(u => u.side === P && u.type !== 'drone').map(u => u.idx).concat(G.cmd[P] >= 0 ? [G.cmd[P]] : [], (G.builds || []).filter(b => b.side === P).map(b => b.idx));
+      let goal = G.cmd[P] >= 0 ? G.cmd[P] : G.hq[P], bd = Infinity;
+      for (const i of prey) { const di = d(z.idx, i); if (di < bd && di <= 12) { bd = di; goal = i; } }
+      let steps = G.terr[z.idx] === T.TRENCH ? 1 : ZOMBIE_STEPS;
+      while (steps > 0 && !G.over) {
+        const cur = z.idx;
+        if (G.cmd[P] >= 0 && cheb(G, cur, G.cmd[P]) === 1) { hitCommander(G, Z, 'Zombies'); touched.push(G.cmd[P]); break; }
+        let best = null, bs = d(cur, goal);
+        for (const j of nb8(G, cur)) {
+          const t = G.terr[j], o = occupant(G, j);
+          if (t === T.WATER || t === T.CLIFF || j === G.cmd[P]) continue;
+          if (o && o.side === Z) continue;
+          const dj = d(j, goal);
+          if (dj < bs) { bs = dj; best = j; }
+        }
+        if (best == null) break;
+        const t = G.terr[best], o = occupant(G, best), sb = structAt(G, best);
+        if (t === T.BARRICADE) {
+          G.bhp = G.bhp || {};
+          G.bhp[best] = (G.bhp[best] == null ? BARRICADE_HP : G.bhp[best]) - 1;
+          if (G.bhp[best] <= 0) { G.terr[best] = T.OPEN; delete G.bhp[best]; log(G, Z, 'Zombies tore down a barricade'); }
+          touched.push(best); break;
+        }
+        if (sb) { if (sb.side === P) hitStructure(G, Z, sb, 'Zombies'); touched.push(best); break; }
+        if (o && o.unit && o.side === P) { killUnit(G, Z, o.unit); z.idx = best; capture(G, Z, best); touched.push(best); break; }
+        if ((t === T.BUILDING || t === T.TRENCH) && steps < ZOMBIE_STEPS) break;
+        z.idx = best; capture(G, Z, best); touched.push(best);
+        if (t === T.BUILDING || t === T.TRENCH) break;
+        steps--;
+      }
+      z.moved = true;
+    }
+    bump(G);
+    return touched;
+  }
+  function zombieCheck(G) {
+    if (G.mode !== 'zombie' || G.over) return;
+    const nest = (G.builds || []).some(b => b.side === 2 && b.type === 'nest');
+    if (!nest && !G.units.some(u => u.side === 2)) finish(G, 1, 'You wiped out the horde and its nest');
+  }
+
   // ---------- structures ----------
   const structAt = (G, i) => (G.builds || []).find(b => b.idx === i) || null;
   function structCheck(G, side, type, i) {
     const S = STRUCT[type];
-    if (!S) return 'Unknown structure';
+    if (!S || S.wild) return 'Unknown structure';
     if (G.over) return 'The battle is over';
     if (G.supply[side] < S.cost) return 'Needs ' + S.cost + ' supply';
     if (i == null) return null;
@@ -1155,6 +1261,7 @@ const Engine = (() => {
     b.hp -= 1;
     if (b.hp > 0) { log(G, side, how + ' damaged a ' + STRUCT[b.type].label.toLowerCase()); return; }
     G.builds.splice(G.builds.indexOf(b), 1);
+    wreck(G, b.idx, 'struct', b.side, side);
     G.terr[b.idx] = b.base === T.ROAD || b.base === T.FOREST ? b.base : T.OPEN;
     stat(G, side, 'kills'); stat(G, b.side, 'lost');
     award(G, side, STRUCT_KILL, how + ' destroyed a ' + STRUCT[b.type].label.toLowerCase());
@@ -1162,7 +1269,7 @@ const Engine = (() => {
   // At the start of its owner's turn a structure turns out its piece beside it, when there is room.
   function produce(G, side) {
     for (const b of G.builds || []) {
-      if (b.side !== side || G.round < b.next) continue;
+      if (b.side !== side || G.round < b.next || !STRUCT[b.type].makes) continue;
       const S = STRUCT[b.type], type = S.makes;
       const fits = i => !occupant(G, i) && G.terr[i] !== T.STRUCT && G.owner[i] !== foe(side) &&
         (type === 'jeep' || type === 'arty' ? vehOK(G, i) : type === 'drone' ? true : footOK(G, i));
@@ -1246,6 +1353,7 @@ const Engine = (() => {
     for (const u of G.units) if (u.side === side) { u.moved = false; u.fired = false; u.unhitched = false; u.reveal = false; }
     resolveEntries(G, side);
     produce(G, side);
+    machineGuns(G, side);
     bump(G);
   }
 
@@ -1258,6 +1366,7 @@ const Engine = (() => {
     for (const u of G.units) {
       if (u.side !== side || !seen(u.idx)) continue;
       if (u.type === 'soldier' || u.type === 'rifle') for (const i of moveOptions(G, side, u.idx, 'foot').keys()) contact[i] = 1;
+      if (u.type === 'zombie') for (const i of square(G, u.idx, 2)) contact[i] = 1;
       if (u.type === 'rifle') for (const i of square(G, u.idx, rifleRange(G, u.idx))) shot[i] = 1;
       if (u.type === 'arty') for (const i of square(G, u.idx, gunRange(G, u))) if (!tooClose(G, u, i)) shot[i] = 1;
     }
@@ -1505,7 +1614,7 @@ const Engine = (() => {
     }
 
     // Structures: one of each once the score allows, on safe ground near home.
-    for (const type of ['barracks', 'range', 'factory', 'foundry', ...(G.fog ? ['hangar'] : [])]) {
+    for (const type of ['barracks', 'mg', 'range', 'factory', 'foundry', ...(G.fog ? ['hangar'] : [])]) {
       if ((G.builds || []).some(b => b.side === me && b.type === type)) continue;
       if (G.supply[me] < STRUCT[type].cost + 1) continue;
       const cells = structCells(G, me, type);
@@ -1516,7 +1625,9 @@ const Engine = (() => {
     }
 
     // A howitzer once there are a couple of ordinary guns and supply to spare.
-    if (G.round >= 4 && G.supply[me] >= COST.how + 3 && G.units.filter(u => u.side === me && u.heavy).length < 2 && count(G, me, 'arty') >= 2) {
+    const saving = ['barracks', 'factory', 'range', 'foundry'].find(t => !(G.builds || []).some(b => b.side === me && b.type === t));
+    const keep = saving && income(G, me) >= 8 ? STRUCT[saving].cost : 0;
+    if (G.round >= 4 && G.supply[me] - keep >= COST.how + 3 && G.units.filter(u => u.side === me && u.heavy).length < 2 && count(G, me, 'arty') >= 2) {
       const cells = deployCells(G, me, 'how');
       if (cells.length) {
         const { contact } = reach(G, f, vis()), T0 = def ? home : tgt();
@@ -1567,11 +1678,13 @@ const Engine = (() => {
   function nextRound(G) {
     if (G.over) return;
     G.round += 1;
+    if (G.wrecks) G.wrecks = G.wrecks.filter(w => G.round - w.round <= (w.type === 'zombie' ? 8 : 4));
     G.air = G.air.filter(a => a.until >= G.round);
     if (G.round > MAX_ROUNDS) {
       G.round = MAX_ROUNDS;
       const a = G.score[1], b = G.score[2];
-      finish(G, a > b ? 1 : b > a ? 2 : 0, 'Scores after ' + MAX_ROUNDS + ' rounds');
+      if (G.mode === 'zombie') finish(G, 1, 'You held out for ' + MAX_ROUNDS + ' rounds');
+      else finish(G, a > b ? 1 : b > a ? 2 : 0, 'Scores after ' + MAX_ROUNDS + ' rounds');
       return;
     }
     beginTurn(G, 1);
@@ -1579,8 +1692,9 @@ const Engine = (() => {
   function playerEnd(G) {
     if (G.over) return [];
     beginTurn(G, 2);
-    const touched = aiTurn(G, 2);
+    const touched = G.mode === 'zombie' ? zombieTurn(G) : aiTurn(G, 2);
     checkWipe(G);
+    zombieCheck(G);
     nextRound(G);
     return touched;
   }
@@ -1595,7 +1709,7 @@ const Engine = (() => {
   const i0 = a => (Number.isInteger(a.i) && a.i >= 0 ? a.i : -1);
   function apply(G, side, a) {
     const ok = applyOne(G, side, a);
-    if (ok) checkWipe(G);
+    if (ok) { checkWipe(G); zombieCheck(G); }
     return ok;
   }
   function applyOne(G, side, a) {
@@ -1666,6 +1780,7 @@ const Engine = (() => {
     G.units.forEach(flipUnit);
     for (const a of G.air) a.side = sw(a.side);
     for (const b of G.builds || []) b.side = sw(b.side);
+    for (const w of G.wrecks || []) { w.side = sw(w.side); w.by = sw(w.by); }
     for (const e of G.log) e.s = sw(e.s);
     G.turn = sw(G.turn);
     if (G.offer) G.offer = { ...G.offer, win: sw(G.offer.win) };
@@ -1736,7 +1851,7 @@ const Engine = (() => {
       v: 4, size: n, cell: o.cell, x0: o.x0, y0: o.y0, elev: o.elev, tier: o.tier,
       terr: o.terr || new Uint8Array(N), mound: new Uint8Array(N), tread: new Uint8Array(N),
       owner: new Uint8Array(N), known: new Uint8Array(N), explored: new Uint8Array(N),
-      units: [], air: [], builds: [], pave: [], riding: { 1: null, 2: null }, cmd: { 1: 0, 2: 0 }, hq: { 1: 0, 2: 0 }, intel: { 1: null, 2: null },
+      units: [], air: [], builds: [], pave: [], wrecks: [], wreckSeq: 0, riding: { 1: null, 2: null }, cmd: { 1: 0, 2: 0 }, hq: { 1: 0, 2: 0 }, intel: { 1: null, 2: null },
       hqTaken: { 1: false, 2: false }, score: { 1: 0, 2: 0 }, supply: { 1: 0, 2: 0 },
       hp: { 1: CMD_HP, 2: CMD_HP }, cmdMoved: { 1: false, 2: false }, round: 1, turn: 1, ver: 0, nextId: 1,
       seed: (o.seed >>> 0) || 1, over: null, log: [], source: o.source || '', mapSource: o.mapSource || '',
@@ -1766,7 +1881,15 @@ const Engine = (() => {
       G.owner[G.hq[s]] = s;
       for (const i of nb8(G, G.hq[s])) if (G.owner[i] === 0) G.owner[i] = s;
     }
-    log(G, 0, 'Battle started');
+    if (o.mode === 'zombie') {
+      G.mode = 'zombie';
+      G.cmd[2] = -1; G.intel = { 1: null, 2: null };
+      G.builds.push({ id: G.nextId++, side: 2, type: 'nest', idx: e, hp: STRUCT.nest.hp, base: G.terr[e], next: 0, face: 0 });
+      G.terr[e] = T.STRUCT;
+      let k = 3;
+      for (const i of nb8(G, e)) if (k > 0 && footOK(G, i) && G.terr[i] !== T.BUILDING) { G.units.push({ id: G.nextId++, side: 2, type: 'zombie', idx: i, placed: 0, moved: false, fired: false }); k--; }
+    }
+    log(G, 0, G.mode === 'zombie' ? 'The dead are walking' : 'Battle started');
     beginTurn(G, 1);
     return G;
   }
@@ -1775,7 +1898,7 @@ const Engine = (() => {
     return {
       ...G, owner: G.owner.slice(), known: G.known.slice(), explored: G.explored.slice(), terr: G.terr.slice(), mound: G.mound.slice(), tread: G.tread.slice(),
       units: G.units.map(u => ({ ...u, cargo: u.cargo ? { ...u.cargo } : null, riders: u.riders ? u.riders.map(r => ({ ...r })) : undefined })), air: G.air.map(a => ({ ...a })),
-      builds: (G.builds || []).map(b => ({ ...b })), pave: (G.pave || []).slice(),
+      bhp: { ...(G.bhp || {}) }, builds: (G.builds || []).map(b => ({ ...b })), pave: (G.pave || []).slice(), wrecks: (G.wrecks || []).map(w => ({ ...w })),
       cmd: { ...G.cmd }, riding: { ...(G.riding || { 1: null, 2: null }) }, hq: { ...G.hq }, hqTaken: { ...G.hqTaken }, score: { ...G.score },
       intel: { 1: G.intel[1] && { ...G.intel[1] }, 2: G.intel[2] && { ...G.intel[2] } },
       supply: { ...G.supply }, hp: { ...G.hp }, cmdMoved: { ...G.cmdMoved }, log: G.log.slice(),
@@ -1804,7 +1927,9 @@ const Engine = (() => {
     if (!o.stats) o.stats = { 1: {}, 2: {} };
     if (!o.diff) o.diff = 'normal';
     if (!o.air) o.air = [];
+    if (!o.bhp) o.bhp = {};
     if (!o.builds) o.builds = [];
+    if (!o.wrecks) o.wrecks = [];
     if (!o.pave) o.pave = [];
     if (!o.riding) o.riding = { 1: null, 2: null };
     if (!o.intel) o.intel = { 1: { idx: o.cmd[2], round: o.round }, 2: { idx: o.cmd[1], round: o.round } };
@@ -1824,6 +1949,7 @@ const Engine = (() => {
     los, sight, airActive, reach, moveOptions, commanderMoves, moveCommander, unitMoveMap, unitMoves, keepsFire, moveUnit,
     shotTargets, fire, deployCheck, deployCells, deploy, callAir, income, aiTurn, beginTurn, nextRound, playerEnd,
     computeTiers, markSteep, noiseTerrain, create, clone, serialize, deserialize, apply, passTurn, swapSides, keepPlaying, checkWipe,
+    MG_SHOTS, BARRICADE_HP, zombieTurn, zombieCheck,
     HOW_EXTRA, HOW_RELOAD, HOW_KILL, HOW_MIN, HOW_MIN_LOW, tooClose, gunRange, reloading, nameOf, buildingGroup, enterCells, enterBuilding, sightRaw,
     STRUCT, STRUCT_HP, STRUCT_KILL, structAt, structCheck, structCells, buildStructure
   };
@@ -1851,7 +1977,9 @@ const PIECES = {
   factory: { label: 'Jeep factory', desc: 'Builds a free jeep beside it every other turn.' },
   range: { label: 'Rifle range', desc: 'Trains a free rifleman beside it every other turn.' },
   hangar: { label: 'Drone hangar', desc: 'Builds a free drone beside it every other turn.' },
-  foundry: { label: 'Gun foundry', desc: 'Casts a free artillery piece beside it every third turn.' }
+  foundry: { label: 'Gun foundry', desc: 'Casts a free artillery piece beside it every third turn.' },
+  mg: { label: 'Machine gun nest', desc: 'At the start of your turn it fires at up to 3 enemies it can see within rifle range.' },
+  nest: { label: 'Zombie nest', desc: 'Births new zombies every turn. Destroy it to stop the horde.' }
 };
 
 let G = null;
@@ -1910,7 +2038,7 @@ function paintLayers() {
     const k = i * 4, o = G.owner[i];
     let r = 0, g = 0, b = 0, a = 0;
     if (o === 1) { r = 37; g = 99; b = 235; a = 112; }
-    else if (vis[i] ? o === 2 : G.known[i] === 2) { r = 220; g = 38; b = 38; a = vis[i] ? 112 : 64; }
+    else if (vis[i] ? o === 2 : G.known[i] === 2) { if (G.mode === 'zombie') { r = 77; g = 124; b = 15; } else { r = 220; g = 38; b = 38; } a = vis[i] ? 112 : 64; }
     d[k] = r; d[k + 1] = g; d[k + 2] = b; d[k + 3] = a;
     f[k] = 71; f[k + 1] = 85; f[k + 2] = 105;
     f[k + 3] = !G.fog || vis[i] ? 0 : G.explored[i] ? 55 : 100;
@@ -2081,6 +2209,9 @@ function draw() {
         for (let k = 0; k <= 6; k++) ctx.lineTo(x + s * (0.12 + k * 0.127), y + s * (k % 2 ? 0.42 : 0.58));
         ctx.stroke();
       });
+      if (t === Engine.T.BARRICADE && G.bhp && G.bhp[i] != null && G.bhp[i] < Engine.BARRICADE_HP) {
+        for (let k = 0; k < Engine.BARRICADE_HP; k++) { ctx.fillStyle = k < G.bhp[i] ? '#fbbf24' : '#6b7280'; ctx.fillRect(x + s * (0.2 + k * 0.22), y + s * 0.8, s * 0.16, Math.max(2, s * 0.07)); }
+      }
       if (t === Engine.T.BARRICADE) turned(x, y, runOf(i, k => G.terr[k] === Engine.T.BARRICADE), () => {
         ctx.fillStyle = '#374151'; ctx.fillRect(x + s * 0.1, y + s * 0.34, s * 0.8, s * 0.32);
         ctx.strokeStyle = '#fbbf24'; ctx.lineWidth = Math.max(1, s * 0.06); ctx.beginPath();
@@ -2092,7 +2223,7 @@ function draw() {
   // Structures: yours always, the enemy's while you can see them.
   if (s >= 5) for (const b of G.builds || []) {
     if (!visible(b.idx) || (b.side === 2 && !vis[b.idx])) continue;
-    const [bx, by, bw] = rect(b.idx, s * 0.08), col = b.side === 1 ? '#2563eb' : '#dc2626';
+    const [bx, by, bw] = rect(b.idx, s * 0.08), col = b.side === 1 ? '#2563eb' : foeCol();
     ctx.fillStyle = '#fff'; ctx.strokeStyle = col; ctx.lineWidth = Math.max(1.5, s * 0.08);
     ctx.beginPath(); ctx.roundRect ? ctx.roundRect(bx, by, bw, bw, s * 0.12) : ctx.rect(bx, by, bw, bw); ctx.fill(); ctx.stroke();
     // The roof points out the front, the side new pieces come out of.
@@ -2102,10 +2233,11 @@ function draw() {
     ctx.restore();
     ctx.fillStyle = col;
     ctx.font = '700 ' + Math.round(bw * 0.36) + 'px system-ui, sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-    ctx.fillText({ barracks: 'B', factory: 'J', range: 'R', hangar: 'D', foundry: 'A' }[b.type], mx - fx * bw * 0.14, my - fy * bw * 0.14);
-    for (let k = 0; k < Engine.STRUCT_HP; k++) {
+    ctx.fillText({ barracks: 'B', factory: 'J', range: 'R', hangar: 'D', foundry: 'A', mg: 'M', nest: 'Z' }[b.type], mx - fx * bw * 0.14, my - fy * bw * 0.14);
+    for (let k = 0; k < Math.max(Engine.STRUCT_HP, b.hp); k++) {
       ctx.fillStyle = k < b.hp ? col : '#d1d5db';
-      ctx.fillRect(bx + bw * (0.18 + k * 0.24), by + bw + Math.max(1, s * 0.02), bw * 0.16, Math.max(2, bw * 0.06));
+      const per = Math.max(Engine.STRUCT_HP, b.hp);
+      ctx.fillRect(bx + bw * (0.06 + k * 0.88 / per), by + bw + Math.max(1, s * 0.02), bw * 0.88 / per - bw * 0.05, Math.max(2, bw * 0.06));
     }
     if (ui.mode === 'struct' && ui.sel === b.id) { ctx.strokeStyle = '#f59e0b'; ctx.lineWidth = 3; ctx.strokeRect(bx - 3, by - 3, bw + 6, bw + 6); }
   }
@@ -2211,6 +2343,43 @@ function draw() {
 
   // Pieces. Enemy pieces only where you can see them.
   const R = Math.max(5, s * 0.34);
+  // Wreckage: fresh smoke over anything destroyed in the last round, then scorched debris that
+  // fades over the next few rounds. A cross marks fallen troops. Enemy losses show only where you
+  // can see, or where your side did the damage.
+  for (const w of G.wrecks || []) {
+    if (!visible(w.idx) || !(w.side === 1 || w.by === 1 || vis[w.idx])) continue;
+    const age = G.round - w.round, [x, y] = rect(w.idx), cx = x + s / 2, cy = y + s / 2;
+    if (w.type === 'zombie') {
+      const pile = (G.wrecks || []).filter(v => v.idx === w.idx && v.type === 'zombie' && v.n <= w.n).length;
+      ctx.globalAlpha = Math.max(0.3, 1 - age * 0.1);
+      ctx.fillStyle = 'rgba(54,83,20,0.55)';
+      const sp = [[0, 0.15], [-0.18, 0.08], [0.18, 0.1], [-0.08, -0.05], [0.1, -0.08], [0, -0.2]];
+      const [dx, dy] = sp[(pile - 1) % sp.length];
+      ctx.beginPath(); ctx.ellipse(cx + dx * s, cy + dy * s, s * 0.22, s * 0.1, (pile % 3 - 1) * 0.6, 0, Math.PI * 2); ctx.fill();
+      ctx.globalAlpha = 1;
+      continue;
+    }
+    ctx.globalAlpha = Math.max(0.25, 1 - age * 0.2);
+    ctx.fillStyle = 'rgba(41,37,36,0.45)';
+    ctx.beginPath(); ctx.ellipse(cx, cy + s * 0.12, s * 0.42, s * 0.26, 0, 0, Math.PI * 2); ctx.fill();
+    const col = w.side === 1 ? '#1e3a8a' : G.mode === 'zombie' ? '#365314' : '#7f1d1d';
+    ctx.strokeStyle = col; ctx.fillStyle = col; ctx.lineWidth = Math.max(1.5, s * 0.06); ctx.lineCap = 'round';
+    if (w.type === 'soldier' || w.type === 'rifle') {
+      ctx.beginPath(); ctx.moveTo(cx, cy - s * 0.24); ctx.lineTo(cx, cy + s * 0.24); ctx.moveTo(cx - s * 0.14, cy - s * 0.1); ctx.lineTo(cx + s * 0.14, cy - s * 0.1); ctx.stroke();
+    } else if (w.type === 'struct') {
+      for (const [dx, dy, r] of [[-0.2, 0.12, 0.13], [0.05, 0.16, 0.15], [0.22, 0.08, 0.1], [-0.02, -0.04, 0.11]]) { ctx.beginPath(); ctx.arc(cx + dx * s, cy + dy * s, r * s, 0, Math.PI * 2); ctx.fill(); }
+    } else {
+      ctx.beginPath(); ctx.moveTo(cx - s * 0.3, cy + s * 0.15); ctx.lineTo(cx - s * 0.1, cy - s * 0.12); ctx.lineTo(cx + s * 0.05, cy + s * 0.1); ctx.lineTo(cx + s * 0.28, cy - s * 0.18); ctx.stroke();
+      ctx.beginPath(); ctx.arc(cx + s * 0.18, cy + s * 0.18, s * 0.08, 0, Math.PI * 2); ctx.stroke();
+    }
+    ctx.lineCap = 'butt';
+    if (age <= 1) {
+      ctx.fillStyle = 'rgba(107,114,128,0.5)';
+      for (const [dx, dy, r] of [[-0.12, -0.3, 0.14], [0.08, -0.42, 0.17], [0.22, -0.58, 0.2]]) { ctx.beginPath(); ctx.arc(cx + dx * s, cy + dy * s, r * s, 0, Math.PI * 2); ctx.fill(); }
+    }
+    ctx.globalAlpha = 1;
+  }
+
   // Standing orders: a dashed line from each of your pieces to where it is headed, and a small flag there.
   if (G.orders) for (const u of G.units) {
     const goal = G.orders[u.id];
@@ -2232,7 +2401,7 @@ function draw() {
     drawPiece(u, x + s / 2, y + s / 2, R);
     if (G.terr[u.idx] === Engine.T.BUILDING) {
       // A small roof over troops indoors.
-      ctx.fillStyle = u.side === 1 ? '#2563eb' : '#dc2626';
+      ctx.fillStyle = u.side === 1 ? '#2563eb' : foeCol();
       ctx.beginPath(); ctx.moveTo(x + s * 0.12, y + s * 0.26); ctx.lineTo(x + s * 0.5, y + s * 0.04); ctx.lineTo(x + s * 0.88, y + s * 0.26); ctx.closePath(); ctx.fill();
     }
     if (ui.mode === 'group' && ui.group.includes(u.id)) {
@@ -2285,8 +2454,9 @@ function draw() {
   if (ui.anim) drawPlanePass(W, H, ox, oy, s);
 }
 
+function foeCol() { return G && G.mode === 'zombie' ? '#4d7c0f' : '#dc2626'; }
 function drawPiece(u, cx, cy, R) {
-  const col = u.side === 1 ? '#2563eb' : '#dc2626';
+  const col = u.side === 1 ? '#2563eb' : foeCol();
   const setting = !Engine.ready(G, u);
   const spent = u.side === 1 && !setting && !G.over && !Engine.unitMoves(G, u).length && !Engine.canShoot(G, u);
   ctx.globalAlpha = spent ? 0.55 : 1;
@@ -2295,7 +2465,13 @@ function drawPiece(u, cx, cy, R) {
   if (setting) ctx.setLineDash([3, 2]);
   ctx.beginPath();
   const ink = setting ? col : '#fff';
-  if (u.type === 'soldier' || u.type === 'rifle') {
+  if (u.type === 'zombie') {
+    const k = R * 0.95;
+    ctx.arc(cx, cy, k, 0, Math.PI * 2);
+    ctx.fillStyle = fill; ctx.fill(); ctx.stroke();
+    ctx.setLineDash([]);
+    zombieFigure(cx, cy, k, ink);
+  } else if (u.type === 'soldier' || u.type === 'rifle') {
     // A round badge with a helmeted figure; riflemen carry a rifle across the chest.
     const k = R * 0.98;
     ctx.arc(cx, cy, k, 0, Math.PI * 2);
@@ -2387,6 +2563,16 @@ function person(cx, cy, k, ink, rifle) {
     ctx.lineCap = 'butt';
   }
 }
+// A hunched figure with both arms reaching forward.
+function zombieFigure(cx, cy, k, ink) {
+  ctx.fillStyle = ink; ctx.strokeStyle = ink; ctx.lineCap = 'round';
+  ctx.beginPath(); ctx.arc(cx - k * 0.08, cy - k * 0.3, k * 0.2, 0, Math.PI * 2); ctx.fill();
+  ctx.beginPath(); ctx.moveTo(cx - k * 0.4, cy + k * 0.62); ctx.quadraticCurveTo(cx - k * 0.42, cy - k * 0.08, cx - k * 0.05, cy - k * 0.08);
+  ctx.quadraticCurveTo(cx + k * 0.3, cy - k * 0.06, cx + k * 0.3, cy + k * 0.62); ctx.closePath(); ctx.fill();
+  ctx.lineWidth = Math.max(2, k * 0.14);
+  ctx.beginPath(); ctx.moveTo(cx, cy + k * 0.02); ctx.lineTo(cx + k * 0.66, cy - k * 0.06); ctx.moveTo(cx, cy + k * 0.2); ctx.lineTo(cx + k * 0.64, cy + k * 0.14); ctx.stroke();
+  ctx.lineCap = 'butt';
+}
 // A field gun: a spoked wheel with the barrel raised toward the upper right.
 function cannon(cx, cy, k, ink, heavy) {
   ctx.strokeStyle = ink; ctx.fillStyle = ink; ctx.lineCap = 'round';
@@ -2468,20 +2654,25 @@ function describe(i) {
   const moveNote = !Engine.footOK(G, i) ? ' Nobody can enter.' : Engine.vehOK(G, i) ? (k === Engine.T.ROAD ? ' Pieces can run up to 3 cells along roads.' : '') : ' Artillery cannot enter.';
   let s = Engine.T_NAMES[k] + ' on ' + TIER_NAMES[t - 1].toLowerCase() + ' (tier ' + t + '), ' + fmtFt(Engine.heightAt(G, i)) + ', ' + who + '.' + moveNote;
   if (G.mound[i]) s += ' Ground raised ' + G.mound[i] + ' level' + (G.mound[i] > 1 ? 's' : '') + '.';
-  if (k === Engine.T.TRENCH) s += ' Rifles cannot hit a piece in this trench, and it soaks up one shell.';
+  if (k === Engine.T.TRENCH) s += ' Rifles cannot hit a piece in this trench, and it soaks up one shell.' + (G.mode === 'zombie' ? ' A zombie spends a whole move climbing in and another climbing out.' : '');
   if (G.tread[i]) s += ' Tire treads: pieces can run along them like a road.';
-  if (k === Engine.T.BARRICADE) s += ' Blocks movement and sight until artillery knocks it down.';
+  if (k === Engine.T.BARRICADE) s += ' Blocks movement and sight until artillery knocks it down.' + (G.mode === 'zombie' ? ' Zombies claw at it: ' + (G.bhp && G.bhp[i] != null ? G.bhp[i] : Engine.BARRICADE_HP) + ' of ' + Engine.BARRICADE_HP + ' health left.' : '');
   if (o === 2) s += ' Worth ' + t + ' to capture.';
   s += ' Artillery here reaches ' + (2 + t) + '.';
   if (G.fog && !seen) s = 'Hidden by fog. ' + s;
   if (seen && i === G.cmd[2]) s = 'Enemy commander, ' + G.hp[2] + ' of ' + Engine.CMD_HP + ' health. ' + s;
   else if (!seen && G.intel[1] && G.intel[1].idx === i) s = 'Enemy commander was last seen here in round ' + G.intel[1].round + '. ' + s;
   else if (i === G.cmd[1]) s = 'Your commander' + (G.riding && G.riding[1] ? ', riding in this jeep' : '') + ', ' + G.hp[1] + ' of ' + Engine.CMD_HP + ' health. ' + s;
+  const wr = (G.wrecks || []).filter(w => w.idx === i && (w.side === 1 || w.by === 1 || seen));
+  if (wr.length) {
+    const WN = { soldier: 'soldier', rifle: 'rifleman', drone: 'drone', jeep: 'jeep', arty: 'artillery', how: 'howitzer', struct: 'structure', zombie: 'zombie' };
+    s = wr.map(w => 'Wreckage of ' + (w.side === 1 ? 'your ' : 'an enemy ') + WN[w.type] + ', destroyed in round ' + w.round + '.').join(' ') + ' ' + s;
+  }
   const b = Engine.structAt(G, i);
   if (b && (b.side === 1 || seen)) {
     const S = Engine.STRUCT[b.type];
-    s = (b.side === 1 ? 'Your ' : 'Enemy ') + S.label.toLowerCase() + ', facing ' + FACE_NAMES[b.face || 0] + ', ' + b.hp + ' of ' + Engine.STRUCT_HP + ' health. ' + PIECES[b.type].desc +
-      (b.side === 1 ? ' Next ' + Engine.NAMES[S.makes] + (b.next <= G.round + 1 ? ' at the start of your next turn' : ' in round ' + b.next) + ', if a cell beside it is free.' : '') +
+    s = (b.side === 1 ? 'Your ' : b.type === 'nest' ? 'The ' : 'Enemy ') + S.label.toLowerCase() + (b.type === 'nest' ? '' : ', facing ' + FACE_NAMES[b.face || 0]) + ', ' + b.hp + ' of ' + Math.max(Engine.STRUCT_HP, S.hp || 0) + ' health. ' + PIECES[b.type].desc +
+      (b.side === 1 && S.makes ? ' Next ' + Engine.NAMES[S.makes] + (b.next <= G.round + 1 ? ' at the start of your next turn' : ' in round ' + b.next) + ', if a cell beside it is free.' : '') +
       ' Artillery and grenades can destroy it for ' + Engine.STRUCT_KILL + ' points.';
     return s;
   }
@@ -2710,7 +2901,7 @@ function openDeploy() {
   head.style.margin = '10px 0 2px';
   head.textContent = 'Structures';
   list.appendChild(head);
-  for (const type of ['barracks', 'range', 'factory', 'hangar', 'foundry']) {
+  for (const type of ['mg', 'barracks', 'range', 'factory', 'hangar', 'foundry']) {
     const b = document.createElement('button'), S = Engine.STRUCT[type];
     const why = Engine.structCheck(G, 1, type, null);
     const noRoom = !why && !Engine.structCells(G, 1, type).length;
@@ -2856,7 +3047,25 @@ function advanceOrders(ids, now) {
   return moved;
 }
 // What happened at the start of your turn: pieces moving on their orders and pieces from structures.
+// Losses since you last looked, as a line at the start of your turn.
+function lossesNote() {
+  const seen = G.seenWreck || 0, vis = Engine.sight(G, 1);
+  const fresh = (G.wrecks || []).filter(w => w.n > seen);
+  G.seenWreck = G.wreckSeq || 0;
+  const WN = { soldier: ['soldier', 'soldiers'], rifle: ['rifleman', 'riflemen'], drone: ['drone', 'drones'], jeep: ['jeep', 'jeeps'], arty: ['artillery piece', 'artillery pieces'], how: ['howitzer', 'howitzers'], struct: ['structure', 'structures'], zombie: ['zombie', 'zombies'] };
+  const say = list => {
+    const c = {};
+    for (const w of list) c[w.type] = (c[w.type] || 0) + 1;
+    return Object.entries(c).map(([t, k]) => (k === 1 ? (t === 'arty' ? 'an ' : 'a ') + WN[t][0] : k + ' ' + WN[t][1])).join(', ');
+  };
+  const mine = fresh.filter(w => w.side === 1 && w.by === 2), theirs = fresh.filter(w => w.side === 2 && w.by === 1 && vis[w.idx] !== undefined);
+  const bits = [];
+  if (mine.length) bits.push('Last turn you lost ' + say(mine) + ', marked by smoke and wreckage.');
+  if (theirs.length) bits.push((G.mode === 'zombie' ? 'You put down ' : 'The enemy lost ') + say(theirs) + '.');
+  return bits.join(' ');
+}
 function turnStartNote() {
+  const losses = lossesNote();
   const moved = advanceOrders();
   const fresh = G.log.filter(e => e.s === 1 && e.r === G.round && /turned out/.test(e.t)).length;
   const stuck = G.log.filter(e => e.s === 1 && e.r === G.round && /no free cell/.test(e.t)).map(e => e.t.split(' has ')[0].toLowerCase());
@@ -2864,6 +3073,7 @@ function turnStartNote() {
   if (fresh) bits.push('Your structures turned out ' + fresh + ' new piece' + (fresh > 1 ? 's' : '') + '.');
   if (stuck.length) bits.push('Your ' + stuck.join(' and ') + ' had no free cell nearby, so clear some space around it.');
   if (moved) bits.push(moved + ' piece' + (moved > 1 ? 's' : '') + ' moved on toward their orders. Undo takes that back.');
+  if (losses) bits.unshift(losses);
   if (bits.length) ui.info = bits.join(' ');
 }
 $('undoBtn').onclick = () => {
@@ -2875,6 +3085,7 @@ $('endBtn').onclick = () => endTurn();
 
 function endTurn() {
   if (!G || !myTurn()) return;
+  G.seenWreck = G.wreckSeq || 0;
   if (ui.mp) return mpEndTurn();
   if (ui.mode !== 'idle') clearSel();
   ui.busy = true; ui.undo = []; ui.acts = []; ui.touched = []; ui.info = ''; render();
@@ -2892,7 +3103,7 @@ function endTurn() {
 // ---------- HUD ----------
 function hintText() {
   if (ui.mp && ui.busy) return 'Sending your turn to the battle server...';
-  if (ui.busy) return 'Enemy is moving...';
+  if (ui.busy) return G.mode === 'zombie' ? 'The dead are moving...' : 'Enemy is moving...';
   if (!G.over && ui.mode === 'struct') return 'Tap Turn to face it another way, or tap elsewhere to carry on.';
   if (!G.over && ui.mode === 'group') return ui.group.length + ' picked. Tap more of your pieces, then tap where they should go.';
   if (ui.mp && !G.over && G.turn !== 1) return 'Waiting for your friend to take their turn.';
@@ -2900,7 +3111,7 @@ function hintText() {
   if (ui.mode === 'deploy') {
     if (ui.deployType === 'plane') return 'Tap where the recon plane should fly over.';
     if (ui.deployType === 'heli') return 'Tap where the helicopter should hover.';
-    return 'Tap gold squares to place ' + ({ soldier: 'soldiers', rifle: 'riflemen', drone: 'drones', jeep: 'jeeps', arty: 'artillery', how: 'howitzers', barracks: 'barracks', factory: 'jeep factories', range: 'rifle ranges', hangar: 'drone hangars', foundry: 'gun foundries' }[ui.deployType]) + ', then press Done.';
+    return 'Tap gold squares to place ' + ({ soldier: 'soldiers', rifle: 'riflemen', drone: 'drones', jeep: 'jeeps', arty: 'artillery', how: 'howitzers', mg: 'machine gun nests', barracks: 'barracks', factory: 'jeep factories', range: 'rifle ranges', hangar: 'drone hangars', foundry: 'gun foundries' }[ui.deployType]) + ', then press Done.';
   }
   if (ui.mode === 'unit' && ui.action) return {
     grenade: 'Tap an orange cell to throw the grenade.', trench: 'Tap a gold square to dig a trench.',
@@ -2923,6 +3134,8 @@ function render() {
   if (!G) return draw();
   $('pScore').textContent = G.score[1];
   $('eScore').textContent = G.score[2];
+  $('eName').textContent = G.mode === 'zombie' ? 'Zombies' : 'Enemy';
+  $('eName').style.color = G.mode === 'zombie' ? '#4d7c0f' : 'var(--red)';
   $('pBar').style.width = Math.min(100, G.score[1] / Engine.WIN * 100) + '%';
   $('eBar').style.width = Math.min(100, G.score[2] / Engine.WIN * 100) + '%';
   $('roundTxt').textContent = 'Round ' + G.round + '/' + Engine.MAX_ROUNDS;
@@ -2936,6 +3149,7 @@ function render() {
   }
   if (!info && G.mapSource === 'none') info = 'Road and building data is missing, so roads will not speed anything up. Menu, Reload roads and buildings tries again.';
   if (!info && ui.mp && !ui.mp.joined && !G.over) info = 'Your friend has not joined yet. Menu, Invite a friend, shows the link to send.';
+  if (!info && G.round === 1 && !G.cmdMoved[1] && G.mode === 'zombie') info = 'The zombie nest, in green, is about ' + Engine.cheb(G, G.cmd[1], G.hq[2]) + ' cells away. It births more zombies every turn, and more as the horde spreads. Destroy the nest and every zombie to win, or hold out for ' + Engine.MAX_ROUNDS + ' rounds.';
   if (!info && G.round === 1 && !G.cmdMoved[1]) info = G.fog
     ? 'The enemy started about ' + Engine.cheb(G, G.cmd[1], G.hq[2]) + ' cells away, marked with a faded star. Scout with drones or aircraft to find them.'
     : 'The enemy HQ is ' + Engine.cheb(G, G.cmd[1], G.hq[2]) + ' cells away. Pinch out to scout it.';
@@ -3320,7 +3534,8 @@ async function launch(B, diff, fog, far = ui.far) {
     if (r >= 0 && c >= 0 && r < size && c < size) playerIdx = r * size + c;
   }
   const tier = Engine.computeTiers(elev);
-  G = Engine.create({ size, cell, x0, y0, elev, terr, tier, seed: (Math.random() * 4294967296) >>> 0, playerIdx, source, mapSource, diff, fog, far });
+  G = Engine.create({ size, cell, x0, y0, elev, terr, tier, seed: (Math.random() * 4294967296) >>> 0, playerIdx, source, mapSource, diff, fog, far, mode: diff !== 'friend' ? ui.launchMode : '' });
+  ui.launchMode = '';
   mpStop(); ui.mp = null;
   ui.undo = []; ui.acts = []; ui.touched = []; clearSel(); ui.info = '';
   if (diff === 'friend') {
@@ -3347,6 +3562,7 @@ $('startBtn').onclick = () => {
   const f = setupFrame();
   const nw = crs.project(map.containerPointToLatLng([f.x, f.y]));
   const ne = crs.project(map.containerPointToLatLng([f.x + f.side, f.y]));
+  ui.launchMode = ui.opp === 'zombie' ? 'zombie' : '';
   launch({ size: ui.size, cell: (ne.x - nw.x) / ui.size, x0: nw.x, y0: nw.y }, ui.opp === 'friend' ? 'friend' : ui.diff, ui.fog);
 };
 
@@ -3434,7 +3650,7 @@ function mpLocal(state, prev) {
   if (prev && prev.size === g.size && prev.x0 === g.x0 && prev.y0 === g.y0) {
     g.explored = prev.explored; g.known = prev.known; g.logged = prev.logged;
     if (g.offer && prev.offer && prev.offer.told) g.offer.told = true;
-    g.orders = prev.orders; g.ordersDone = prev.ordersDone;
+    g.orders = prev.orders; g.ordersDone = prev.ordersDone; g.seenWreck = prev.seenWreck;
     if (prev.intel && prev.intel[1] && (!g.intel[1] || prev.intel[1].round > g.intel[1].round)) g.intel[1] = prev.intel[1];
     if (!g.place) g.place = prev.place;
   } else { g.explored = new Uint8Array(N); g.known = new Uint8Array(N); }
@@ -3669,7 +3885,7 @@ function recordHistory() {
     place: G.place || mid.lat.toFixed(3) + ', ' + mid.lng.toFixed(3),
     lat: +mid.lat.toFixed(5), lng: +mid.lng.toFixed(5),
     grid: G.size, cellMeters: Math.round(groundCell()), x0: G.x0, y0: G.y0, cell: G.cell,
-    difficulty: G.diff, fog: G.fog, far: G.far !== false, winner: G.over.winner === 1 ? 'you' : G.over.winner === 2 ? 'enemy' : 'draw',
+    difficulty: G.diff, mode: G.mode || '', fog: G.fog, far: G.far !== false, winner: G.over.winner === 1 ? 'you' : G.over.winner === 2 ? 'enemy' : 'draw',
     reason: G.over.reason, rounds: G.round, score: { you: G.score[1], enemy: G.score[2] },
     stats: { you: G.stats[1], enemy: G.stats[2] }
   };
@@ -3695,11 +3911,11 @@ function showHistory() {
     title.querySelector('span').textContent = e.place;
     const meta = document.createElement('div');
     meta.className = 'muted small';
-    meta.textContent = new Date(e.date).toLocaleString() + ', grid ' + e.grid + ', ' + e.difficulty + (e.fog ? ', fog' : '') +
+    meta.textContent = new Date(e.date).toLocaleString() + ', grid ' + e.grid + ', ' + (e.mode === 'zombie' ? 'zombies ' : '') + e.difficulty + (e.fog ? ', fog' : '') +
       ', ' + e.score.you + ' to ' + e.score.enemy + ' in ' + e.rounds + ' rounds. ' + e.reason + '.';
     const again = document.createElement('button');
     again.textContent = 'Fight here again';
-    again.onclick = () => { close('historySheet'); close('menu'); leaveBattle(() => launch({ size: e.grid, cell: e.cell, x0: e.x0, y0: e.y0 }, e.difficulty, e.fog, e.far !== false)); };
+    again.onclick = () => { close('historySheet'); close('menu'); leaveBattle(() => { ui.launchMode = e.mode || ''; launch({ size: e.grid, cell: e.cell, x0: e.x0, y0: e.y0 }, e.difficulty, e.fog, e.far !== false); }); };
     d.append(title, meta, again);
     list.appendChild(d);
   }
@@ -3723,15 +3939,16 @@ function showOver() {
   $('overReason').textContent = G.over.reason + '. Round ' + G.round + '.';
   $('overP').textContent = G.score[1];
   $('overE').textContent = G.score[2];
+  $('overEName').textContent = G.mode === 'zombie' ? 'Zombies' : 'Enemy';
   const st = G.stats || { 1: {}, 2: {} }, rows = [
     ['Enemy cells captured', 'captured'], ['Pieces destroyed', 'kills'], ['Pieces lost', 'lost'],
     ['Pieces deployed', 'deployed'], ['Shots fired', 'shots'], ['Hits on the commander', 'hits'],
     ['Aircraft called', 'air'], ['Cells sealed off', 'encircled'], ['Structures built', 'structures'], ['Pieces from structures', 'produced']
   ];
-  $('overStats').innerHTML = '<tr><th></th><th>You</th><th>Enemy</th></tr>' +
+  $('overStats').innerHTML = '<tr><th></th><th>You</th><th>' + (G.mode === 'zombie' ? 'Zombies' : 'Enemy') + '</th></tr>' +
     rows.map(([label, k]) => '<tr><td>' + label + '</td><td>' + (st[1][k] || 0) + '</td><td>' + (st[2][k] || 0) + '</td></tr>').join('');
   const leftovers = G.units.some(u => u.side === 2) || (G.builds || []).some(b => b.side === 2) || G.cmd[2] >= 0;
-  const canKeep = !ui.mp && w === 1 && !G.cleanup && leftovers;
+  const canKeep = !ui.mp && G.mode !== 'zombie' && w === 1 && !G.cleanup && leftovers;
   $('overKeep').disabled = !canKeep;
   $('overKeep').textContent = canKeep ? 'Keep playing and clear out the enemy' : G.cleanup ? 'Mop-up finished' : ui.mp ? 'Keep playing is for battles against the computer' : 'Keep playing';
   $('over').classList.remove('hidden');
