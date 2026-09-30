@@ -11,7 +11,7 @@
 <meta name="robots" content="index,follow">
 <link rel="canonical" href="https://topo-wars.vercel.app/">
 <meta name="application-name" content="Topo Wars">
-<meta name="version" content="6.0">
+<meta name="version" content="6.2">
 <meta name="apple-mobile-web-app-title" content="Topo Wars">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -90,13 +90,27 @@ button.on{background:var(--amber-soft);border-color:#f59e0b}
 #endBtn.ready{box-shadow:0 0 0 3px rgba(21,128,61,.25)}
 .credit{font-size:10px;color:var(--muted);text-align:right;margin-top:6px}
 
-#setup{position:fixed;left:0;right:0;bottom:0;z-index:1100;background:#fff;border-top:1px solid var(--line);
-  border-radius:16px 16px 0 0;padding:14px 14px calc(12px + env(safe-area-inset-bottom));box-shadow:0 -6px 24px rgba(0,0,0,.08)}
+#setup{position:fixed;top:0;right:0;bottom:0;width:clamp(220px,60vw,360px);z-index:1100;background:#fff;border-left:1px solid var(--line);
+  padding:calc(12px + env(safe-area-inset-top)) 12px calc(12px + env(safe-area-inset-bottom));box-shadow:-6px 0 24px rgba(0,0,0,.08);
+  overflow-y:auto;overscroll-behavior:contain;display:flex;flex-direction:column}
 #setup h2{font-size:17px;margin-bottom:4px}
-#setup p{font-size:13px;line-height:1.4;margin-bottom:10px}
+#setup p{font-size:12px;line-height:1.4;margin-bottom:10px}
+#setup .seg{flex-wrap:wrap;gap:6px;margin-bottom:10px}
+#setup .seg span{flex-basis:100%;margin:0;font-size:12px;font-weight:600;color:var(--muted)}
+#setup .seg button{flex:1 1 0;min-width:0;padding:9px 4px;text-align:center}
+#setup .seg.joinrow input{flex:1 1 0}
+#setup .seg.joinrow button{flex:0 0 auto;padding:9px 14px}
+#setup #areaInfo{display:none}
+#setup #resumeBtn,#setup #mpResumeBtn{padding:10px 8px;font-size:13px}
+#setup .btns{flex-direction:column;gap:8px}
+#setup .btns button{padding:12px 6px;font-size:14px}
+#setup .btns #startBtn{order:-1}
+#setup .links{flex-wrap:wrap;gap:4px 12px}
+#setup .credit{text-align:center;margin-top:auto;padding-top:8px}
 .seg{display:flex;gap:6px;align-items:center;margin-bottom:8px}
 .joinrow input{flex:1;min-width:0;font:inherit;font-size:15px;letter-spacing:2px;text-transform:uppercase;padding:7px 10px;border:1px solid #d1d5db;border-radius:10px;background:#fff;color:var(--ink)}
-#joinMsg{min-height:18px;color:var(--red);margin:-2px 0 6px}
+#joinMsg{color:var(--red);margin:-4px 0 8px}
+#joinMsg:empty{display:none}
 #inviteQr{display:block;width:220px;height:220px;margin:4px auto 8px;background:#fff;border:1px solid #e5e7eb;border-radius:12px}
 #inviteCode{font-size:28px;font-weight:800;letter-spacing:4px;text-align:center;margin:4px 0 2px;color:var(--ink)}
 .seg span{font-size:13px;color:var(--muted);margin-right:4px}
@@ -156,12 +170,10 @@ button.on{background:var(--amber-soft);border-color:#f59e0b}
     <button id="ctrBtn">Center<small>on you</small></button>
     <button id="endBtn" class="primary">End turn</button>
   </div>
-  <div class="credit">Topo Wars 6.0. Map data &copy; OpenStreetMap contributors</div>
+  <div class="credit">Topo Wars 6.2. Map data &copy; OpenStreetMap contributors</div>
 </div>
 
 <div id="setup">
-  <h2>Choose your battlefield</h2>
-  <p class="muted">Pan and zoom until the square covers the ground you want to fight over. Real elevation inside the square becomes the high ground.</p>
   <div class="seg" id="sizeSeg"><span>Grid</span>
     <button data-n="32">32</button><button data-n="64">64</button><button data-n="128">128</button>
   </div>
@@ -177,7 +189,7 @@ button.on{background:var(--amber-soft);border-color:#f59e0b}
   <div class="seg" id="fogSeg"><span>Fog of war</span>
     <button data-f="on">On</button><button data-f="off">Off</button>
   </div>
-  <div class="seg joinrow"><span>Friend's code</span><input id="joinCode" maxlength="8" autocomplete="off" autocapitalize="characters" spellcheck="false" aria-label="Battle code from your friend"><button id="joinBtn">Join</button></div>
+  <div class="seg joinrow"><span>Join a battle</span><input id="joinCode" maxlength="8" autocomplete="off" autocapitalize="characters" spellcheck="false" aria-label="Battle code from your friend"><button id="joinBtn">Join</button></div>
   <div id="joinMsg" class="small"></div>
   <div id="areaInfo" class="muted small"></div>
   <button id="resumeBtn" class="hidden"></button>
@@ -225,7 +237,7 @@ button.on{background:var(--amber-soft);border-color:#f59e0b}
     <p>On the setup screen, Enemy starts Far places the enemy about 20 cells farther away than Close, as far as the grid allows. Close is handy for quick test fights. Take out the enemy commander, have the enemy surrender, or hold the higher score when round 40 ends. The first side to reach 150 points is offered the other side's surrender. Accept it for the win, or fight on to finish them off. A computer enemy that has offered to surrender pulls back to the best ground near its commander, digs trenches and puts up barricades. If the enemy reaches 150 first, it demands your surrender, and you can give up or keep fighting. Menu, Surrender, gives up at any time on your turn. After a win against the computer, Keep playing on the victory screen lets you carry on and wipe out whatever is left. The win is already recorded, and Menu, Finish battle, ends the mop-up whenever you like. A commander falls when an enemy commander, soldier or rifleman steps onto it, or when rifle and artillery hits take away its 3 health. The same can happen to you.</p>
 
     <h3>Playing a friend</h3>
-    <p>Set Opponent to Friend on the setup screen, pick your ground and press Start battle. The game gives you a link, a QR code and a six character battle code to send. Whoever opens the link or scans the QR code first, or types the code next to Friend's code on the setup screen and presses Join, becomes your opponent on the same map, and each of you sees yourself in blue. You move first. Take your turn and press End turn, and the battle server checks every move with the same rules before passing the turn over. You do not both need to be online: open the game whenever you like, and while it is open it checks for your friend's move every few seconds. Menu, Invite a friend, shows the link again. Continue battle with a friend on the setup screen brings you back to it.</p>
+    <p>Set Opponent to Friend on the setup screen, pick your ground and press Start battle. The game gives you a link, a QR code and a six character battle code to send. Whoever opens the link or scans the QR code first, or types the code under Join a battle on the setup screen and presses Join, becomes your opponent on the same map, and each of you sees yourself in blue. You move first. Take your turn and press End turn, and the battle server checks every move with the same rules before passing the turn over. You do not both need to be online: open the game whenever you like, and while it is open it checks for your friend's move every few seconds. Menu, Invite a friend, shows the link again. Continue battle with a friend on the setup screen brings you back to it.</p>
     <p>Turn notifications buzz your phone when your friend finishes a turn, joins the battle or ends it, even when the game is closed. Turn them on from the invite screen, or with Menu, Turn notifications. Tapping the notification opens the battle.</p>
 
     <h3>Moving a group</h3>
@@ -414,7 +426,7 @@ button.on{background:var(--amber-soft);border-color:#f59e0b}
     <canvas id="inviteQr" width="440" height="440" aria-label="QR code for the battle link"></canvas>
     <div class="muted small" style="text-align:center">Battle code</div>
     <div id="inviteCode"></div>
-    <p class="muted small" style="text-align:center;margin-top:0">Your friend can scan the square with their phone camera, open the link, or open topo-wars.vercel.app and type this code next to Friend's code on the setup screen.</p>
+    <p class="muted small" style="text-align:center;margin-top:0">Your friend can scan the square with their phone camera, open the link, or open topo-wars.vercel.app and type this code under Join a battle on the setup screen.</p>
     <input id="inviteLink" readonly>
     <div class="stack"><button id="inviteShare">Share link</button><button id="inviteCopy">Copy link</button><button id="inviteNotify">Notify me when it is my turn</button><button class="primary" data-close="inviteSheet">Close</button></div>
   </div>
@@ -1802,11 +1814,17 @@ function barHeights() {
   const b = $('bottom').classList.contains('hidden') ? 0 : $('bottom').getBoundingClientRect().height;
   return { t, b };
 }
+// The battlefield square sits in the open map to the left of the setup panel.
 function setupFrame() {
-  const W = innerWidth, cardTop = $('setup').getBoundingClientRect().top;
-  const top = 14, bottom = Math.max(top + 80, cardTop - 14);
-  const side = Math.max(80, Math.min(W - 28, bottom - top));
-  return { x: (W - side) / 2, y: top + (bottom - top - side) / 2, side };
+  const H = innerHeight, left = $('setup').getBoundingClientRect().left || innerWidth;
+  const side = Math.max(80, Math.min(left - 24, H - 28));
+  return { x: Math.max(12, (left - side) / 2), y: (H - side) / 2, side };
+}
+// Put a spot in the middle of that square rather than the middle of the screen.
+function centerInFrame(ll, zoom) {
+  map.setView(ll, zoom, { animate: false });
+  const f = setupFrame();
+  map.panBy([innerWidth / 2 - (f.x + f.side / 2), innerHeight / 2 - (f.y + f.side / 2)], { animate: false });
 }
 
 // ---------- drawing ----------
@@ -3049,7 +3067,7 @@ segment('distSeg', 'far', 's', 'tw_far', v => v === 'far' || v === true);
 function locate(fly) {
   if (!navigator.geolocation) { toast('Location is not available in this browser.'); return; }
   navigator.geolocation.getCurrentPosition(
-    p => { ui.userLL = L.latLng(p.coords.latitude, p.coords.longitude); if (fly && ui.phase === 'setup') map.setView(ui.userLL, 15); draw(); },
+    p => { ui.userLL = L.latLng(p.coords.latitude, p.coords.longitude); if (fly && ui.phase === 'setup') centerInFrame(ui.userLL, 15); draw(); },
     () => { if (fly) toast('Could not get your location. Pan the map to pick a place.'); },
     { enableHighAccuracy: true, timeout: 12000, maximumAge: 60000 }
   );
@@ -3516,8 +3534,8 @@ function leaveBattle(then) {
     else if (ended) { localStorage.removeItem(MP_SAVE); localStorage.removeItem(MP_KEY); }
   } catch (e) { /* ignore */ }
   if (then) return then();
-  if (mid) map.setView(mid, map.getZoom(), { animate: false });
   setPhase('setup');
+  if (mid) centerInFrame(mid, map.getZoom());
 }
 $('overNew').onclick = () => leaveBattle();
 
