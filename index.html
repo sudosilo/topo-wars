@@ -11,7 +11,7 @@
 <meta name="robots" content="index,follow">
 <link rel="canonical" href="https://topo-wars.vercel.app/">
 <meta name="application-name" content="Topo Wars">
-<meta name="version" content="5.5">
+<meta name="version" content="5.6">
 <meta name="apple-mobile-web-app-title" content="Topo Wars">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -95,6 +95,9 @@ button.on{background:var(--amber-soft);border-color:#f59e0b}
 #setup h2{font-size:17px;margin-bottom:4px}
 #setup p{font-size:13px;line-height:1.4;margin-bottom:10px}
 .seg{display:flex;gap:6px;align-items:center;margin-bottom:8px}
+.joinrow input{flex:1;min-width:0;font:inherit;font-size:15px;letter-spacing:2px;text-transform:uppercase;padding:7px 10px;border:1px solid #d1d5db;border-radius:10px;background:#fff;color:var(--ink)}
+#joinMsg{min-height:18px;color:var(--red);margin:-2px 0 6px}
+#inviteCode{font-size:28px;font-weight:800;letter-spacing:4px;text-align:center;margin:4px 0 2px;color:var(--ink)}
 .seg span{font-size:13px;color:var(--muted);margin-right:4px}
 .seg button{padding:7px 12px;font-size:13px}
 .seg button.on{background:var(--ink);color:#fff;border-color:var(--ink)}
@@ -152,7 +155,7 @@ button.on{background:var(--amber-soft);border-color:#f59e0b}
     <button id="ctrBtn">Center<small>on you</small></button>
     <button id="endBtn" class="primary">End turn</button>
   </div>
-  <div class="credit">Topo Wars 5.5. Map data &copy; OpenStreetMap contributors</div>
+  <div class="credit">Topo Wars 5.6. Map data &copy; OpenStreetMap contributors</div>
 </div>
 
 <div id="setup">
@@ -173,6 +176,8 @@ button.on{background:var(--amber-soft);border-color:#f59e0b}
   <div class="seg" id="fogSeg"><span>Fog of war</span>
     <button data-f="on">On</button><button data-f="off">Off</button>
   </div>
+  <div class="seg joinrow"><span>Friend's code</span><input id="joinCode" maxlength="8" autocomplete="off" autocapitalize="characters" spellcheck="false" aria-label="Battle code from your friend"><button id="joinBtn">Join</button></div>
+  <div id="joinMsg" class="small"></div>
   <div id="areaInfo" class="muted small"></div>
   <button id="resumeBtn" class="hidden"></button>
   <button id="mpResumeBtn" class="hidden"></button>
@@ -219,7 +224,7 @@ button.on{background:var(--amber-soft);border-color:#f59e0b}
     <p>On the setup screen, Enemy starts Far places the enemy about 20 cells farther away than Close, as far as the grid allows. Close is handy for quick test fights. Take out the enemy commander, have the enemy surrender, or hold the higher score when round 40 ends. The first side to reach 150 points is offered the other side's surrender. Accept it for the win, or fight on to finish them off. A computer enemy that has offered to surrender pulls back to the best ground near its commander, digs trenches and puts up barricades. If the enemy reaches 150 first, it demands your surrender, and you can give up or keep fighting. Menu, Surrender, gives up at any time on your turn. A commander falls when an enemy commander, soldier or rifleman steps onto it, or when rifle and artillery hits take away its 3 health. The same can happen to you.</p>
 
     <h3>Playing a friend</h3>
-    <p>Set Opponent to Friend on the setup screen, pick your ground and press Start battle. The game gives you a link to send. Whoever opens it first becomes your opponent on the same map, and each of you sees yourself in blue. You move first. Take your turn and press End turn, and the battle server checks every move with the same rules before passing the turn over. You do not both need to be online: open the game whenever you like, and while it is open it checks for your friend's move every few seconds. Menu, Invite a friend, shows the link again. Continue battle with a friend on the setup screen brings you back to it.</p>
+    <p>Set Opponent to Friend on the setup screen, pick your ground and press Start battle. The game gives you a link and a six letter battle code to send. Whoever opens the link first, or types the code next to Friend's code on the setup screen and presses Join, becomes your opponent on the same map, and each of you sees yourself in blue. You move first. Take your turn and press End turn, and the battle server checks every move with the same rules before passing the turn over. You do not both need to be online: open the game whenever you like, and while it is open it checks for your friend's move every few seconds. Menu, Invite a friend, shows the link again. Continue battle with a friend on the setup screen brings you back to it.</p>
     <p>Turn notifications buzz your phone when your friend finishes a turn, joins the battle or ends it, even when the game is closed. Turn them on from the invite screen, or with Menu, Turn notifications. Tapping the notification opens the battle.</p>
 
     <h3>Structures and roads</h3>
@@ -401,6 +406,9 @@ button.on{background:var(--amber-soft);border-color:#f59e0b}
   <div class="sheet">
     <h2>Invite a friend</h2>
     <p class="muted">Send this link to the friend you want to fight. The first person to open it joins as your opponent. You each take your turn whenever you open the game, and the game checks for their moves while it is open.</p>
+    <div class="muted small" style="text-align:center">Battle code</div>
+    <div id="inviteCode"></div>
+    <p class="muted small" style="text-align:center;margin-top:0">Your friend can open the link, or open topo-wars.vercel.app and type this code next to Friend's code on the setup screen.</p>
     <input id="inviteLink" readonly>
     <div class="stack"><button id="inviteShare">Share link</button><button id="inviteCopy">Copy link</button><button id="inviteNotify">Notify me when it is my turn</button><button class="primary" data-close="inviteSheet">Close</button></div>
   </div>
@@ -3033,17 +3041,18 @@ async function mpPoll() {
   if (ui.mp === mp && G && !G.over) ui.mpTimer = setTimeout(mpPoll, G.turn !== 1 ? 4000 : 10000);
 }
 document.addEventListener('visibilitychange', () => { if (!document.hidden && ui.mp) mpPoll(); });
-function inviteLink() { return location.origin + location.pathname + '#join=' + ui.mp.id; }
+function inviteLink() { return location.origin + location.pathname + '?join=' + ui.mp.id; }
 function showInvite() {
   if (!ui.mp) return;
   $('inviteLink').value = inviteLink();
+  $('inviteCode').textContent = ui.mp.id;
   $('inviteShare').classList.toggle('hidden', !navigator.share);
   const nb = $('inviteNotify'); nb.disabled = !pushSupported() || !!ui.mp.push;
   nb.textContent = !pushSupported() ? 'Notifications are not available here' : ui.mp.push ? 'Notifications are on' : 'Notify me when it is my turn';
   open('inviteSheet');
 }
 $('inviteShare').onclick = () => {
-  navigator.share({ title: 'Topo Wars', text: 'Fight me in Topo Wars on real terrain.', url: inviteLink() }).catch(() => { /* closed */ });
+  navigator.share({ title: 'Topo Wars', text: 'Fight me in Topo Wars on real terrain. Battle code ' + ui.mp.id + '. ' + inviteLink() }).catch(() => { /* closed */ });
 };
 $('inviteCopy').onclick = () => {
   const done = () => toast('Link copied.');
@@ -3067,16 +3076,31 @@ $('mpResumeBtn').onclick = () => {
 };
 // Opening a link that ends in #join=CODE joins that battle, or returns its creator to it.
 async function mpJoinFromLink() {
-  const m = location.hash.match(/join=([A-Za-z0-9]{4,12})/);
+  const m = (location.search + location.hash).match(/join=([A-Za-z0-9]{4,12})/);
   if (!m) return;
-  history.replaceState(null, '', location.pathname + location.search);
-  const id = m[1].toUpperCase(), prev = mpSession();
+  history.replaceState(null, '', location.pathname);
+  return mpJoin(m[1]);
+}
+$('joinBtn').onclick = () => {
+  const id = $('joinCode').value.trim().toUpperCase().replace(/[^A-Z0-9]/g, '');
+  if (id.length < 4) { $('joinMsg').textContent = 'Type the battle code your friend sent you.'; return; }
+  mpJoin(id);
+};
+$('joinCode').addEventListener('keydown', e => { if (e.key === 'Enter') $('joinBtn').click(); });
+async function mpJoin(code) {
+  const id = code.toUpperCase(), prev = mpSession();
   close('help');
+  $('joinMsg').textContent = '';
   setPhase('loading');
-  $('loadTxt').textContent = 'Joining the battle.';
+  $('loadTxt').textContent = 'Joining battle ' + id + '.';
   $('loadBar').style.width = '50%';
   const r = await mpCall({ op: 'join', id, token: prev && prev.id === id ? prev.token : undefined });
-  if (!r || !r.state) { setPhase('setup'); toast(r ? r.error : 'Could not reach the battle server. Try the link again in a moment.', 6000); return; }
+  if (!r || !r.state) {
+    setPhase('setup');
+    $('joinCode').value = id;
+    $('joinMsg').textContent = r ? r.error : 'Could not reach the battle server. Check the connection and press Join again.';
+    return;
+  }
   const old = prev && prev.id === id ? readMpSave() : null;
   mpStop();
   ui.mp = { id, token: r.token, side: r.side, rev: r.rev, joined: r.joined, place: r.place || '' };
@@ -3145,7 +3169,7 @@ if ('serviceWorker' in navigator) navigator.serviceWorker.addEventListener('mess
   const d = e.data || {};
   if (d.type !== 'topo-wars-open') return;
   if (ui.mp && ui.mp.id === d.id) mpPoll();
-  else if (d.id) { location.hash = '#join=' + d.id; mpJoinFromLink(); }
+  else if (d.id) mpJoin(d.id);
 });
 async function pushAfterStart(offer) {
   if (!pushSupported()) return;
