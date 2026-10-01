@@ -11,7 +11,7 @@
 <meta name="robots" content="index,follow">
 <link rel="canonical" href="https://topo-wars.vercel.app/">
 <meta name="application-name" content="Topo Wars">
-<meta name="version" content="7.2">
+<meta name="version" content="7.3">
 <meta name="apple-mobile-web-app-title" content="Topo Wars">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -86,6 +86,8 @@ button.on{background:var(--amber-soft);border-color:#f59e0b}
 .btns{display:flex;gap:6px}
 .btns button{flex:1;padding:9px 3px;font-size:13px;line-height:1.2}
 .btns button small{display:block;font-size:10px;color:var(--muted);margin-top:2px}
+#actionBar{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px}
+#actionBar button{padding:8px 2px;min-height:48px}
 #endBtn{flex:1.5}
 #endBtn.ready{box-shadow:0 0 0 3px rgba(21,128,61,.25)}
 .credit{font-size:10px;color:var(--muted);text-align:right;margin-top:6px}
@@ -175,7 +177,7 @@ button.on{background:var(--amber-soft);border-color:#f59e0b}
     <button id="ctrBtn">Center<small>on you</small></button>
     <button id="endBtn" class="primary">End turn</button>
   </div>
-  <div class="credit">Topo Wars 7.2. Map data &copy; OpenStreetMap contributors</div>
+  <div class="credit">Topo Wars 7.3. Map data &copy; OpenStreetMap contributors</div>
 </div>
 
 <div id="setup">
@@ -291,19 +293,22 @@ button.on{background:var(--amber-soft);border-color:#f59e0b}
       <tr><th>Build</th><th>Cost</th><th>Effect</th></tr>
       <tr><td>Dig trench</td><td>Free</td><td>Riflemen cannot hit a piece in the trench. The first artillery shell caves it in and the piece inside survives. Vehicles cannot cross it.</td></tr>
       <tr><td>Barricade</td><td>1</td><td>Nothing can walk or drive through it and it blocks line of sight. It has 3 health. An artillery shell, a grenade or a kamikaze drone takes 2, so a fresh barricade needs two blasts. A howitzer shell flattens it in one. Yellow marks under it show what is left once it is damaged.</td></tr>
-      <tr><td>Raise ground</td><td>1</td><td>Piles earth on a cell, adding 1 tier and about 13 feet of height, up to 2 levels. Artillery on a raised cell reaches farther, and riflemen get their longer range from tier 4 up. Artillery can drive onto it.</td></tr>
+      <tr><td>Raise ground</td><td>1</td><td>Piles earth on a cell, adding 1 tier and about 13 feet of height, up to 2 levels. Artillery on a raised cell reaches farther, and riflemen get their longer range from tier 4 up. A rifleman on ground raised the full 2 levels is a sniper and reaches 1 cell farther still. Artillery can drive onto it.</td></tr>
     </table>
     <p>A good pattern is to raise the ground next to your artillery for two turns, then roll the gun up onto it. Barricades across the approach to your commander force the enemy to go around or spend two shells on each. Your own artillery and grenades can knock down your own barricades too, if you ever wall yourself in: select the gun and your barricades in range show in orange.</p>
+
+    <h3>Bomber run</h3>
+    <p>For 30 supply, Deploy, Bomber run sends a bomber along a straight line. Tap where the run starts, then tap toward where it should fly, in any of 8 directions. A red strip 3 cells wide and 10 long shows what it will hit, and a warning shows if any of your own pieces are in it. Tap inside the strip to send it. Every cell in the strip is hit 7 times in 10. A hit destroys any piece on the ground, yours included, takes 1 health from a commander, damages a structure, takes 2 from a barricade, or caves in a trench while whoever is in it survives. Troops inside buildings are sheltered and drones in the air are untouched. The strip stays scorched on the map for a round so both sides can see where it fell. It is the answer to a big zombie horde, and the computer uses it when it can see a crowd of your pieces with none of its own in the way.</p>
 
     <h3>Supply crates</h3>
     <p>Wooden crates with a question mark are scattered across the map. Move your commander, a soldier, a rifleman, a jeep or artillery onto one to open it. Drones and zombies cannot open them. Inside is 10 or 20 supply, an abandoned jeep, an abandoned artillery piece, a crated kamikaze drone, or a medic kit that gives your commander back 1 health. A piece found in a crate appears beside it and can act the next turn. A medic kit opened at full health counts as 10 supply instead. Crates come in matching pairs, one on your side of the halfway point and one on the enemy's, holding the same thing, so it is a race. The computer goes after the ones it can see.</p>
 
     <h3>Grenades</h3>
-    <p>Only soldiers carry grenades, 2 each. Throwing one takes the soldier's turn and reaches 2 cells in any direction, over walls and into trenches, at anything you can see. A grenade destroys any piece, takes 2 of a barricade's 3 health, or takes 1 health from a commander. They are the answer to troops dug into trenches and to barricades when no artillery is close.</p>
+    <p>Only soldiers carry grenades, 2 each. Throwing one takes the soldier's turn and reaches 2 cells in any direction, over walls and into trenches, at anything you can see. A soldier can throw one after walking, but not after attacking, building or entering a building. A grenade destroys any piece, takes 2 of a barricade's 3 health, or takes 1 health from a commander. They are the answer to troops dug into trenches and to barricades when no artillery is close.</p>
 
     <h3>Jeeps and towing</h3>
-    <p>Park a jeep beside one of your guns that has not acted this turn, select the jeep and tap Hitch gun. The gun rides along while the jeep drives. After driving, tap Drop gun and pick an open or road cell beside the jeep. The gun sets up there and fires from the next turn. That turns a slow gun that crawls 1 cell a turn into one that can cross the map in a few turns and set up on distant high ground. If the jeep is destroyed while towing, the gun is lost with it.</p>
-    <p>A jeep will not move without a driver. It has 3 seats, and any soldier, rifleman or your commander can drive. A new jeep arrives empty, so park a trooper next to it or put it beside your commander. Select the jeep and tap Load, then tap a soldier, rifleman or your commander beside it. A trooper can also climb in by selecting it and tapping Get in jeep. Climbing in uses that piece's turn. A small star on the jeep means your commander is aboard, and an orange number shows how many troops are with them. Tap Unload to let troops out beside the jeep. They act again from the next turn. Tap Commander out to put your commander back on foot. While riding, your commander moves with the jeep and cannot be stepped on separately, but anything that attacks the jeep's cell attacks your commander: a rifle, grenade or shell takes 1 health, and an enemy piece stepping onto the jeep ends the battle. If the jeep is destroyed, the troops aboard are lost.</p>
+    <p>Park a jeep beside one of your guns that has not acted this turn, select the jeep and tap the gun, which shows in a gold square. The gun rides along while the jeep drives. After driving, tap Drop gun and pick an open or road cell beside the jeep. The gun sets up there and fires from the next turn. That turns a slow gun that crawls 1 cell a turn into one that can cross the map in a few turns and set up on distant high ground. If the jeep is destroyed while towing, the gun is lost with it.</p>
+    <p>A jeep will not move without a driver. It has 3 seats, and any soldier, rifleman or your commander can drive. A new jeep arrives empty, so park a trooper next to it or put it beside your commander. Select the jeep and tap Load, then tap a soldier, rifleman or your commander beside it. A trooper can also climb in by selecting it and tapping the jeep beside it, which shows in a gold square. Climbing in uses that piece's turn. A small star on the jeep means your commander is aboard, and an orange number shows how many troops are with them. Tap Unload to let troops out beside the jeep. They act again from the next turn. Tap Commander out to put your commander back on foot. While riding, your commander moves with the jeep and cannot be stepped on separately, but anything that attacks the jeep's cell attacks your commander: a rifle, grenade or shell takes 1 health, and an enemy piece stepping onto the jeep ends the battle. If the jeep is destroyed, the troops aboard are lost.</p>
     <p>A jeep with a driver can run down enemy soldiers, riflemen, zombies and a commander on foot. Any of them within its drive shows in orange when the jeep is selected, and driving onto one destroys it. The road to it has to be clear, and troops in a trench, a building or forest are out of reach, because a jeep cannot drive there. Guns, jeeps and drones cannot be run over.</p>
     <p>Everywhere a jeep drives it leaves tire treads. Treads count as road for every piece that starts on them, so a jeep that has driven a route once can run 3 cells along it next time, and so can your troops and guns.</p>
 
@@ -484,7 +489,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
 /*ENGINE-START*/
 const Engine = (() => {
   const WIN = 150, MAX_ROUNDS = 40;
-  const COST = { soldier: 1, rifle: 2, drone: 2, kami: 3, jeep: 2, arty: 3, how: 6, plane: 3, heli: 4 };
+  const COST = { soldier: 1, rifle: 2, drone: 2, kami: 3, jeep: 2, arty: 3, how: 6, plane: 3, heli: 4, bomber: 30 };
   // A howitzer is artillery with 3 more range that needs 2 full rounds to reload after each shot.
   // Height helps a howitzer twice as much as ordinary artillery, but its barrel cannot drop low
   // enough for close targets: nothing within 3 cells, and nothing on lower ground within 6.
@@ -564,7 +569,8 @@ const Engine = (() => {
   const gunRange = (G, u, at = u.idx) => artyRange(G, at) + (u.heavy ? HOW_EXTRA + tierAt(G, at) : 0);
   const tooClose = (G, u, i) => { if (!u.heavy) return false; const d = cheb(G, u.idx, i); return d <= HOW_MIN || (d <= HOW_MIN_LOW && tierAt(G, i) < tierAt(G, u.idx)); };
   const reloading = (G, u) => !!(u.heavy && u.cool && G.round < u.cool);
-  const rifleRange = (G, i) => (tierAt(G, i) >= 4 ? 3 : 2);
+  // Riflemen reach 3 from tier 4 up. On ground raised two levels they become snipers with 1 more.
+  const rifleRange = (G, i) => (tierAt(G, i) >= 4 ? 3 : 2) + (G.mound && G.mound[i] >= MOUND_MAX ? 1 : 0);
   const unitAt = (G, i) => { for (const u of G.units) if (u.idx === i) return u; return null; };
   const count = (G, side, type) => G.units.reduce((k, u) => {
     if (u.side !== side) return k;
@@ -607,7 +613,7 @@ const Engine = (() => {
   function checkWipe(G) {
     if (!G.cleanup || G.over) return;
     const l = foe(G.cleanup.winner);
-    if (G.cmd[l] < 0 && !G.units.some(u => u.side === l) && !(G.builds || []).some(b => b.side === l)) finish(G, G.cleanup.winner, 'The enemy army was wiped out');
+    if (G.cmd[l] < 0 && !G.units.some(u => u.side === l) && !(G.builds || []).some(b => b.side === l)) finish(G, G.cleanup.winner, G.mode === 'zombie' ? 'You wiped out the horde and its nest' : 'The enemy army was wiped out');
   }
   const stat = (G, side, key, k = 1) => { G.stats[side][key] = (G.stats[side][key] || 0) + k; };
   function award(G, side, pts, text) {
@@ -829,6 +835,7 @@ const Engine = (() => {
     const opts = unitMoveMap(G, u);
     if (!opts.has(to)) return false;
     const { road, path } = opts.get(to), o = occupant(G, to);
+    if (o && (o.unit || o.cmd)) u.acted = true;
     if (o && o.unit) killUnit(G, u.side, o.unit);
     if (u.type === 'jeep') {
       for (const i of [u.idx, ...path]) if (G.terr[i] !== T.ROAD) G.tread[i] = 1;
@@ -1052,7 +1059,8 @@ const Engine = (() => {
   // barricade, or takes 1 health from a commander.
   const grenadesLeft = u => (u.g == null ? GRENADES : u.g);
   function grenadeTargets(G, u) {
-    if (G.over || u.type !== 'soldier' || u.moved || !ready(G, u) || grenadesLeft(u) <= 0) return [];
+    // A soldier can throw after walking, but not after attacking, building or entering a building.
+    if (G.over || u.type !== 'soldier' || u.acted || u.entering != null || !ready(G, u) || grenadesLeft(u) <= 0) return [];
     const f = foe(u.side), vis = sight(G, u.side), out = [];
     for (const i of square(G, u.idx, GRENADE_RANGE)) {
       if (i === u.idx || !vis[i]) continue;
@@ -1066,7 +1074,7 @@ const Engine = (() => {
     if (!grenadeTargets(G, u).includes(to)) return false;
     const f = foe(u.side), o = occupant(G, to);
     u.g = grenadesLeft(u) - 1;
-    u.moved = true;
+    u.moved = true; u.acted = true;
     stat(G, u.side, 'grenades');
     const sb = structAt(G, to);
     if (G.terr[u.idx] === T.BUILDING) u.reveal = true;
@@ -1100,7 +1108,7 @@ const Engine = (() => {
   function build(G, u, kind, i) {
     if (!buildCells(G, u, kind).includes(i)) return false;
     G.supply[u.side] -= BUILD[kind].cost;
-    u.moved = true;
+    u.moved = true; u.acted = true;
     if (kind === 'trench') G.terr[i] = T.TRENCH;
     else if (kind === 'barricade') { G.terr[i] = T.BARRICADE; (G.bhp = G.bhp || {})[i] = BARRICADE_HP; }
     else if (kind === 'road') { G.terr[i] = T.ROAD; (G.pave = G.pave || []).push(i); }
@@ -1344,7 +1352,7 @@ const Engine = (() => {
   function deployCheck(G, side, type, i) {
     if (G.over) return 'The battle is over';
     if (G.supply[side] < COST[type]) return 'Needs ' + COST[type] + ' supply';
-    if (type === 'plane' || type === 'heli' || i == null) return null;
+    if (type === 'plane' || type === 'heli' || type === 'bomber' || i == null) return null;
     if (G.owner[i] !== side) return 'Place units on your own territory';
     if (occupant(G, i)) return 'That cell is occupied';
     if (G.terr[i] === T.STRUCT) return 'A structure stands there';
@@ -1379,6 +1387,75 @@ const Engine = (() => {
     return true;
   }
 
+  // ---------- bomber run ----------
+  // A bomber flies a straight line BOMB_LEN cells long from the start cell in one of 8 directions and
+  // carpets a strip about 3 cells wide. Each cell in the strip is hit with a BOMB_HIT chance, and it
+  // does not care whose pieces are underneath. Pieces in buildings are sheltered, a trench caves in
+  // and saves whoever is in it, a commander loses 1 health, drones in the air are untouched.
+  const DIRS8 = [[-1, 0], [-1, 1], [0, 1], [1, 1], [1, 0], [1, -1], [0, -1], [-1, -1]];
+  const BOMB_LEN = 10, BOMB_HIT = 0.7;
+  function bombCells(G, start, d) {
+    const n = G.size, D = DIRS8[d];
+    if (!D || !Number.isInteger(start) || start < 0 || start >= n * n) return [];
+    const [r0, c0] = rcOf(G, start), r1 = r0 + D[0] * (BOMB_LEN - 1), c1 = c0 + D[1] * (BOMB_LEN - 1);
+    const dr = r1 - r0, dc = c1 - c0, L2 = dr * dr + dc * dc, out = [];
+    for (let r = Math.max(0, Math.min(r0, r1) - 1); r <= Math.min(n - 1, Math.max(r0, r1) + 1); r++)
+      for (let c = Math.max(0, Math.min(c0, c1) - 1); c <= Math.min(n - 1, Math.max(c0, c1) + 1); c++) {
+        const t = ((r - r0) * dr + (c - c0) * dc) / L2;
+        if (t < -0.01 || t > 1.01) continue;
+        if (Math.hypot(r - (r0 + t * dr), c - (c0 + t * dc)) <= 1.05) out.push(r * n + c);
+      }
+    return out;
+  }
+  function bomberRun(G, side, start, d) {
+    if (G.over || G.supply[side] < COST.bomber) return false;
+    const cells = bombCells(G, start, d);
+    if (!cells.length) return false;
+    const f = foe(side);
+    G.supply[side] -= COST.bomber;
+    stat(G, side, 'air');
+    let mine = 0, theirs = 0, boss = '';
+    log(G, side, 'Sent a bomber run');
+    for (const i of cells) {
+      if (rng(G) >= BOMB_HIT || G.over) continue;
+      const o = occupant(G, i), sb = structAt(G, i);
+      if (G.terr[i] === T.BUILDING) continue;
+      if (G.terr[i] === T.BARRICADE) { hitBarricade(G, side, i, BLAST, 'A bomb'); continue; }
+      if (G.terr[i] === T.TRENCH && o) { G.terr[i] = T.OPEN; log(G, side, 'A bomb caved in a trench, the ' + (o.cmd ? 'commander' : NAMES[o.unit.type]) + ' inside survived'); continue; }
+      if (sb) {
+        if (sb.side === f) hitStructure(G, side, sb, 'A bomb');
+        else { sb.hp -= 1; if (sb.hp <= 0) { G.builds.splice(G.builds.indexOf(sb), 1); wreck(G, sb.idx, 'struct', sb.side, side); G.terr[sb.idx] = sb.base === T.ROAD || sb.base === T.FOREST ? sb.base : T.OPEN; stat(G, side, 'lost'); } log(G, side, 'A bomb hit one of our own structures'); }
+        continue;
+      }
+      if (!o) continue;
+      if (o.cmd) {
+        if (o.side === f) { hitCommander(G, side, 'A bomb'); boss = 'the enemy commander'; }
+        else {
+          boss = boss || 'our own commander';
+          G.hp[side] -= 1;
+          log(G, side, 'A bomb hit our own commander, ' + Math.max(0, G.hp[side]) + ' health left');
+          if (G.hp[side] <= 0) finish(G, f, side === 1 ? 'Your own bomber took out your commander' : 'The enemy bomber took out its own commander');
+        }
+        if (o.unit && !isAir(o.unit) && !G.over) { if (o.side === f) { killUnit(G, side, o.unit); theirs++; } else { friendlyLoss(G, o.unit, side); mine++; } }
+        continue;
+      }
+      if (isAir(o.unit)) continue;
+      if (o.side === f) { killUnit(G, side, o.unit); theirs++; } else { friendlyLoss(G, o.unit, side); mine++; }
+    }
+    G.bomb = { cells, round: G.round, side };
+    log(G, side, 'The bomber destroyed ' + theirs + ' enemy piece' + (theirs === 1 ? '' : 's') + (mine ? ' and ' + mine + ' of our own' : '') + (boss ? ', and hit ' + boss : ''));
+    bump(G);
+    return true;
+  }
+  // A piece lost to its own side's bombs: no points to anyone.
+  function friendlyLoss(G, u, side) {
+    wreck(G, u.idx, u.heavy ? 'how' : u.type, u.side, side);
+    for (const r of u.riders || []) { wreck(G, u.idx, r.type, r.side, side); stat(G, u.side, 'lost'); }
+    G.units.splice(G.units.indexOf(u), 1);
+    if (G.riding && G.riding[u.side] === u.id) G.riding[u.side] = null;
+    stat(G, u.side, 'lost');
+  }
+
   const INCOME_STEP = 10;
   function territory(G, side) {
     let n = 0;
@@ -1397,7 +1474,7 @@ const Engine = (() => {
     G.turn = side;
     G.supply[side] += income(G, side);
     G.cmdMoved[side] = false;
-    for (const u of G.units) if (u.side === side) { u.moved = false; u.fired = false; u.unhitched = false; u.reveal = false; }
+    for (const u of G.units) if (u.side === side) { u.moved = false; u.fired = false; u.unhitched = false; u.reveal = false; u.acted = false; }
     resolveEntries(G, side);
     produce(G, side);
     machineGuns(G, side);
@@ -1483,6 +1560,29 @@ const Engine = (() => {
     if (((blind >= 2 && !droneNear) || (gunsIdle && G.supply[me] >= COST.plane + 2)) && !airBusy && G.round >= 3) {
       const kind = G.supply[me] >= COST.heli + 2 ? 'heli' : G.supply[me] >= COST.plane ? 'plane' : null;
       if (kind && callAir(G, me, kind, tgt())) { G.lastAir = G.lastAir || {}; G.lastAir[me] = G.round; touched.push(tgt()); }
+    }
+
+    // Bomber: with plenty of supply, carpet the best strip it can see that holds none of its own pieces.
+    if (!def && G.mode !== 'zombie' && G.round >= 6 && G.supply[me] >= COST.bomber + 6) {
+      const v = vis(), aims = [];
+      if (G.cmd[f] >= 0 && v[G.cmd[f]]) aims.push(G.cmd[f]);
+      for (const u of G.units) if (u.side === f && v[u.idx] && !isAir(u) && aims.length < 24) aims.push(u.idx);
+      let best = null, bv = 0;
+      for (const p of aims) for (let d = 0; d < 8; d++) for (const back of [0, 3, 6]) {
+        const [pr, pc] = rcOf(G, p), sr = pr - DIRS8[d][0] * back, sc = pc - DIRS8[d][1] * back;
+        if (sr < 0 || sc < 0 || sr >= G.size || sc >= G.size) continue;
+        const start = sr * G.size + sc;
+        let val = 0, own = false;
+        for (const i of bombCells(G, start, d)) {
+          const o = occupant(G, i);
+          if (o && o.side === me) { own = true; break; }
+          if (G.terr[i] === T.BUILDING || G.terr[i] === T.TRENCH) continue;
+          if (o && o.cmd) val += 60; else if (o && o.unit && !isAir(o.unit) && v[i]) val += KILL[o.unit.type] || 4;
+          const b = structAt(G, i); if (b && b.side === f) val += 6;
+        }
+        if (!own && val > bv) { bv = val; best = [start, d]; }
+      }
+      if (best && bv * BOMB_HIT >= 24) { bomberRun(G, me, best[0], best[1]); touched.push(best[0]); if (G.over) return touched; }
     }
 
     // Jeeps: hitch up guns that have nothing in range, haul them toward the enemy, and drop them
@@ -1776,8 +1876,9 @@ const Engine = (() => {
     G.round += 1;
     if (G.wrecks) G.wrecks = G.wrecks.filter(w => G.round - w.round <= (w.type === 'zombie' ? 8 : 4));
     G.air = G.air.filter(a => a.until >= G.round);
-    if (G.round > MAX_ROUNDS) {
-      G.round = MAX_ROUNDS;
+    // After choosing to keep playing, the mop-up can run past the usual last round, up to 99.
+    if (G.round > (G.cleanup ? 99 : MAX_ROUNDS)) {
+      G.round -= 1;
       const a = G.score[1], b = G.score[2];
       if (G.mode === 'zombie') finish(G, 1, 'You held out for ' + MAX_ROUNDS + ' rounds');
       else if (G.mode === 'watch') finish(G, a > b ? 1 : b > a ? 2 : 0, 'Scores after ' + MAX_ROUNDS + ' rounds');
@@ -1853,6 +1954,7 @@ const Engine = (() => {
     if (a.f === 'cmd') return moveCommander(G, side, i);
     if (a.f === 'deploy') return ['soldier', 'rifle', 'drone', 'kami', 'jeep', 'arty', 'how'].includes(a.k) && deploy(G, side, a.k, i);
     if (a.f === 'air') return (a.k === 'plane' || a.k === 'heli') && callAir(G, side, a.k, i);
+    if (a.f === 'bomb') return Number.isInteger(a.d) && a.d >= 0 && a.d < 8 && bomberRun(G, side, i, a.d);
     if (a.f === 'structure') return !!STRUCT[a.k] && buildStructure(G, side, a.k, i);
     const u = G.units.find(x => x.id === a.u && x.side === side);
     if (!u) return false;
@@ -1889,6 +1991,7 @@ const Engine = (() => {
     for (const e of G.log) e.s = sw(e.s);
     G.turn = sw(G.turn);
     if (G.offer) G.offer = { ...G.offer, win: sw(G.offer.win) };
+    if (G.bomb) G.bomb = { ...G.bomb, side: sw(G.bomb.side) };
     if (G.over) G.over = { winner: sw(G.over.winner), reason: REASON_FLIP[G.over.reason] || G.over.reason };
     G.ver = (G.ver || 0) + 1;
     return G;
@@ -2123,7 +2226,7 @@ const Engine = (() => {
     los, sight, airActive, reach, moveOptions, commanderMoves, moveCommander, unitMoveMap, unitMoves, keepsFire, moveUnit,
     shotTargets, fire, deployCheck, deployCells, deploy, callAir, income, aiTurn, beginTurn, nextRound, playerEnd, watchHalf,
     computeTiers, markSteep, noiseTerrain, create, clone, serialize, deserialize, apply, passTurn, swapSides, keepPlaying, checkWipe,
-    MG_SHOTS, BARRICADE_HP, KAMI_RANGE, LOOT_NAMES, cacheAt, BLAST, isAir, zombieTurn, zombieCheck,
+    MG_SHOTS, BARRICADE_HP, KAMI_RANGE, DIRS8, BOMB_LEN, BOMB_HIT, bombCells, bomberRun, LOOT_NAMES, cacheAt, BLAST, isAir, zombieTurn, zombieCheck,
     HOW_EXTRA, HOW_RELOAD, HOW_KILL, HOW_MIN, HOW_MIN_LOW, tooClose, gunRange, reloading, nameOf, buildingGroup, enterCells, enterBuilding, sightRaw,
     STRUCT, STRUCT_HP, STRUCT_KILL, structAt, structCheck, structCells, buildStructure
   };
@@ -2147,6 +2250,7 @@ const PIECES = {
   how: { label: 'Howitzer', desc: 'Heavy artillery that gains twice as much range from height. Cannot hit anything within 3 cells, or lower ground within 6. Reloads for 2 rounds after each shot.' },
   plane: { label: 'Recon plane', desc: 'One pass that reveals 8 cells around any spot until this turn ends.' },
   heli: { label: 'Helicopter', desc: 'Hovers over any spot and reveals 4 cells around it for 3 turns.' },
+  bomber: { label: 'Bomber run', desc: 'Carpets a strip 3 wide and 10 long. Each cell in it is hit 7 times in 10, your own pieces too.' },
   jeep: { label: 'Jeep', desc: 'Drives 2 cells over open ground, 3 along roads or its own tire treads. Tows artillery.' },
   barracks: { label: 'Barracks', desc: 'Trains a free soldier beside it every turn.' },
   factory: { label: 'Jeep factory', desc: 'Builds a free jeep beside it every other turn.' },
@@ -2475,7 +2579,12 @@ function draw() {
       markCells(moves.filter(i => !danger.has(i) || i === G.cmd[2]), '#15803d');
       markCells(moves.filter(i => danger.has(i) && i !== G.cmd[2]), '#ea580c');
     }
-    if (ui.mode === 'deploy' && ui.deployType !== 'plane' && ui.deployType !== 'heli') {
+    if (ui.mode === 'deploy' && ui.deployType === 'bomber' && ui.bomb) {
+      const strip = ui.bomb.d == null ? [] : Engine.bombCells(G, ui.bomb.start, ui.bomb.d);
+      fillCells(strip, 'rgba(220,38,38,0.28)', '#b91c1c');
+      markCells([ui.bomb.start], '#b91c1c');
+    }
+    if (ui.mode === 'deploy' && ui.deployType !== 'plane' && ui.deployType !== 'heli' && ui.deployType !== 'bomber') {
       markCells(Engine.STRUCT[ui.deployType] ? Engine.structCells(G, 1, ui.deployType) : Engine.deployCells(G, 1, ui.deployType), '#b45309', true);
     }
     if (ui.mode === 'unit' && ui.action) {
@@ -2491,6 +2600,7 @@ function draw() {
         }
         const shots = Engine.shotTargets(G, u);
         fillCells(shots, 'rgba(234,88,12,0.38)', '#c2410c');
+        markCells(tapTargets(u), '#b45309', true);
         if (shots.includes(G.cmd[2])) crosshair(G.cmd[2]);
         const mm = Engine.unitMoveMap(G, u), moves = [...mm.keys()];
         if (u.type === 'arty') {
@@ -2557,6 +2667,12 @@ function draw() {
       for (const [dx, dy, r] of [[-0.12, -0.3, 0.14], [0.08, -0.42, 0.17], [0.22, -0.58, 0.2]]) { ctx.beginPath(); ctx.arc(cx + dx * s, cy + dy * s, r * s, 0, Math.PI * 2); ctx.fill(); }
     }
     ctx.globalAlpha = 1;
+  }
+
+  // The last bomber run leaves a scorched strip for the rest of that round and the next.
+  if (G.bomb && G.round - G.bomb.round <= 1) {
+    ctx.fillStyle = 'rgba(68,64,60,0.22)';
+    for (const i of G.bomb.cells) { if (!visible(i)) continue; const [x, y] = rect(i); ctx.fillRect(x, y, s, s); }
   }
 
   // Supply crates: a wooden box with a question mark, shown where your side can see or has seen.
@@ -2838,7 +2954,7 @@ function dangerSet(kind = 'both') {
   return set;
 }
 function myTurn() { return !!G && !G.over && !ui.busy && G.mode !== 'watch' && !(ui.mp && G.turn !== 1); }
-function clearSel() { ui.mode = 'idle'; ui.sel = null; ui.deployType = null; ui.action = null; }
+function clearSel() { ui.mode = 'idle'; ui.sel = null; ui.deployType = null; ui.action = null; ui.bomb = null; }
 function toast(msg, ms = 2600) {
   const t = $('toast'); t.textContent = msg; t.classList.remove('hidden');
   clearTimeout(toast._t); toast._t = setTimeout(() => t.classList.add('hidden'), ms);
@@ -2928,11 +3044,11 @@ function act(a) {
 // Extra actions beyond moving and shooting: soldiers throw grenades and build, jeeps tow guns.
 const ACTIONS = {
   grenade: { label: 'Grenade', cells: u => Engine.grenadeTargets(G, u), sub: u => Engine.grenadesLeft(u) + ' left' },
-  trench: { label: 'Dig trench', cells: u => Engine.buildCells(G, u, 'trench'), sub: () => 'free' },
+  trench: { label: 'Trench', cells: u => Engine.buildCells(G, u, 'trench'), sub: () => 'free' },
   barricade: { label: 'Barricade', cells: u => Engine.buildCells(G, u, 'barricade'), sub: () => '1 supply' },
-  mound: { label: 'Raise ground', cells: u => Engine.buildCells(G, u, 'mound'), sub: () => '1 supply' },
-  road: { label: 'Pave road', cells: u => Engine.buildCells(G, u, 'road'), sub: () => '3 supply' },
-  enter: { label: 'Enter building', cells: u => Engine.enterCells(G, u), sub: () => 'takes the turn' },
+  mound: { label: 'Raise', cells: u => Engine.buildCells(G, u, 'mound'), sub: () => '1 supply' },
+  road: { label: 'Road', cells: u => Engine.buildCells(G, u, 'road'), sub: () => '3 supply' },
+  enter: { label: 'Enter', cells: u => Engine.enterCells(G, u), sub: () => 'building' },
   hitch: { label: 'Hitch gun', cells: u => Engine.hitchTargets(G, u), sub: () => 'artillery beside it' },
   unhitch: { label: 'Drop gun', cells: u => Engine.unhitchCells(G, u), sub: () => 'beside the jeep' },
   load: { label: 'Load', cells: u => Engine.loadTargets(G, u), sub: u => Engine.seatsUsed(G, u) + ' of ' + Engine.SEATS + ' seats' },
@@ -2942,11 +3058,16 @@ const ACTIONS = {
 };
 function actionsFor(u) {
   if (!u || !Engine.ready(G, u) || G.over) return [];
-  if (u.type === 'soldier' && !u.moved) return ['board', 'enter', 'grenade', 'trench', 'barricade', 'mound', 'road'].filter(k => (k !== 'board' || Engine.boardTargets(G, u).length) && (k !== 'enter' || Engine.enterCells(G, u).length));
-  if (u.type === 'rifle' && !u.moved) return ['board', 'enter'].filter(k => k === 'board' ? Engine.boardTargets(G, u).length : Engine.enterCells(G, u).length);
+  // Getting into a jeep is done by tapping the jeep, so it has no button.
+  if (u.type === 'soldier') {
+    if (!u.moved) return ['grenade', 'trench', 'barricade', 'mound', 'road', 'enter'].filter(k => k !== 'enter' || Engine.enterCells(G, u).length);
+    return Engine.grenadeTargets(G, u).length ? ['grenade'] : [];
+  }
+  if (u.type === 'rifle' && !u.moved) return Engine.enterCells(G, u).length ? ['enter'] : [];
   if (u.type === 'jeep') {
     const k = [];
-    if (u.cargo) k.push('unhitch'); else if (!u.unhitched) k.push('hitch');
+    // Hitching is done by tapping the gun, so only Drop gun has a button.
+    if (u.cargo) k.push('unhitch');
     if (Engine.seatsUsed(G, u) < Engine.SEATS) k.push('load');
     if (Engine.ridersOf(u).length) k.push('unload');
     if (Engine.cmdAboard(G, u)) k.push('cmdout');
@@ -2954,7 +3075,9 @@ function actionsFor(u) {
   }
   return [];
 }
-const anyAction = u => actionsFor(u).some(k => ACTIONS[k].cells(u).length);
+// Gold squares you tap directly: a gun beside the selected jeep, or a jeep beside the selected trooper.
+const tapTargets = u => !u || !Engine.ready(G, u) || G.over ? [] : u.type === 'jeep' && !u.cargo ? Engine.hitchTargets(G, u) : u.type === 'soldier' || u.type === 'rifle' ? Engine.boardTargets(G, u) : [];
+const anyAction = u => actionsFor(u).some(k => ACTIONS[k].cells(u).length) || tapTargets(u).length > 0;
 function selectUnit(u) {
   if (!Engine.ready(G, u)) { ui.mode = 'unit'; ui.sel = u.id; ui.info = Engine.nameOf(u)[0].toUpperCase() + Engine.nameOf(u).slice(1) + ' just arrived. It can act next turn. Group gives it orders now.'; return; }
   const moves = Engine.unitMoves(G, u).length, shots = Engine.shotTargets(G, u).length;
@@ -2965,16 +3088,16 @@ function selectUnit(u) {
     ui.info = !Engine.hasDriver(G, u)
       ? 'No driver. Tap Load, then tap a soldier, rifleman or your commander beside the jeep. It cannot move until someone is aboard.'
       : (boss ? 'Your commander is aboard. ' : '') + (n ? n + ' trooper' + (n > 1 ? 's' : '') + ' aboard. ' : '') +
-        (u.cargo ? 'Towing artillery, tap Drop gun beside the jeep after driving. ' : '') + 'Jeeps drive 2 cells, or 3 along roads and tire treads. Tap an orange enemy trooper to run it down.';
+        (u.cargo ? 'Towing artillery, tap Drop gun beside the jeep after driving. ' : Engine.hitchTargets(G, u).length ? 'Tap a gun in a gold square to hitch it. ' : '') + 'Jeeps drive 2 cells, or 3 along roads and tire treads. Tap an orange enemy trooper to run it down.';
     return;
   }
   ui.mode = 'unit'; ui.sel = u.id;
   if (u.type === 'arty' && Engine.reloading(G, u)) ui.info = 'Howitzer reloading. It can fire again in round ' + u.cool + '.' + (moves ? ' It can still move.' : '');
   else if (u.type === 'arty') ui.info = (u.heavy ? 'Howitzer, range ' : 'Range ') + Engine.gunRange(G, u) + ', shown by the blue square. ' + (u.heavy ? 'Its barrel cannot drop low enough for the gray inner square, 3 cells out, or for lower ground inside the outer gray square, 6 cells out. ' : '') + (shots ? 'Orange cells can be shelled. ' : 'It can only shell what your side can see, so nothing is a target yet. A drone, helicopter or recon plane over that square spots targets for it. ') + (moves ? 'Solid teal keeps the shot, dashed teal uses it.' : '');
-  else if (u.type === 'rifle') ui.info = 'Range ' + Engine.rifleRange(G, u.idx) + ' with a clear line of sight. ' + (shots ? 'Orange cells can be shot. ' : '') + (moves ? 'Teal cells are moves. It can move and shoot in the same turn.' : '');
+  else if (u.type === 'rifle') ui.info = (G.mound[u.idx] >= Engine.MOUND_MAX ? 'Sniper on raised ground. ' : '') + 'Range ' + Engine.rifleRange(G, u.idx) + ' with a clear line of sight. ' + (Engine.boardTargets(G, u).length ? 'Tap the jeep in a gold square to climb in. ' : '') + (shots ? 'Orange cells can be shot. ' : '') + (moves ? 'Teal cells are moves. It can move and shoot in the same turn.' : '');
   else if (u.type === 'drone') ui.info = 'Scout drones fly over anything and see 6 cells around them.';
   else if (u.type === 'kami') ui.info = Engine.canShoot(G, u) ? 'Tap orange to dive onto it, within 3 cells, or teal to fly closer. A dive destroys the drone. It only sees 2 cells, so scout for it.' : 'It flew this turn, so it can dive next turn.';
-  else ui.info = 'Moving onto an enemy piece destroys it. Or throw a grenade, dig in, block a path, raise the ground or pave a road.';
+  else ui.info = u.moved ? 'It can still throw a grenade at an enemy within 2 cells.' : 'Moving onto an enemy piece destroys it. It can also throw a grenade after walking. ' + (Engine.boardTargets(G, u).length ? 'Tap the jeep in a gold square to climb in.' : 'Or dig in, block a path, raise the ground or pave a road.');
 }
 // After a piece acts, keep it selected if it still has something to do.
 function keepOrClear(u) {
@@ -2989,6 +3112,27 @@ function onTap(i) {
 
   if (ui.mode === 'deploy') {
     const type = ui.deployType;
+    if (type === 'bomber') {
+      // First tap sets where the run starts, the next aims it, a tap inside the red strip sends it.
+      const strip = ui.bomb && ui.bomb.d != null ? Engine.bombCells(G, ui.bomb.start, ui.bomb.d) : [];
+      if (!ui.bomb) { ui.bomb = { start: i, d: null }; ui.info = 'Run starts here. Now tap toward where the bomber should fly.'; return render(); }
+      if (strip.includes(i) && ui.bomb.d != null) {
+        const before = G.log.length, d = ui.bomb.d, start = ui.bomb.start;
+        act({ f: 'bomb', i: start, d });
+        clearSel();
+        const res = G.log.slice(before).find(e => /The bomber destroyed/.test(e.t));
+        ui.info = res ? res.t + '.' : 'The bomber flew its run.';
+        return render();
+      }
+      if (i === ui.bomb.start) return render();
+      const [r0, c0] = Engine.rcOf(G, ui.bomb.start), [r1, c1] = Engine.rcOf(G, i);
+      ui.bomb.d = ((Math.round(Math.atan2(c1 - c0, -(r1 - r0)) / (Math.PI / 4)) % 8) + 8) % 8;
+      const cells = Engine.bombCells(G, ui.bomb.start, ui.bomb.d);
+      const mine = cells.filter(j => { const o = Engine.occupant(G, j); return o && o.side === 1 && !(o.unit && Engine.isAir(o.unit)); }).length;
+      ui.info = 'The red strip is the run. ' + (mine ? mine + ' of your pieces ' + (mine === 1 ? 'is' : 'are') + ' in it and could be hit. ' : '') + 'Tap inside it to send the bomber for ' + Engine.COST.bomber + ' supply, or tap elsewhere to aim another way.';
+      ui.warn = mine > 0;
+      return render();
+    }
     if (type === 'plane' || type === 'heli') {
       act({ f: 'air', k: type, i });
       clearSel();
@@ -3045,6 +3189,9 @@ function onTap(i) {
     const u = unitById(ui.sel);
     if (u) {
       if (Engine.shotTargets(G, u).includes(i)) { act({ f: 'fire', u: u.id, i }); ui.info = ''; keepOrClear(u); return render(); }
+      // Tap a gun beside the selected jeep to hitch it, or the jeep beside a selected trooper to climb in.
+      if (u.type === 'jeep' && !u.cargo && Engine.hitchTargets(G, u).includes(i)) { act({ f: 'hitch', u: u.id, i }); ui.info = 'Gun hitched. Drive the jeep, then tap Drop gun.'; keepOrClear(u); return render(); }
+      if ((u.type === 'soldier' || u.type === 'rifle') && Engine.boardTargets(G, u).includes(i)) { act({ f: 'board', u: u.id, i }); clearSel(); ui.info = 'Trooper aboard. Select the jeep to drive, then tap Unload beside it.'; return render(); }
       const mm = Engine.unitMoveMap(G, u);
       if (mm.has(i)) {
         const road = mm.get(i).road;
@@ -3081,10 +3228,10 @@ function openDeploy() {
   if (ui.mode === 'deploy') { clearSel(); ui.info = ''; return render(); }
   const list = $('deployList');
   list.innerHTML = '';
-  for (const type of ['soldier', 'rifle', 'drone', 'kami', 'jeep', 'arty', 'how', 'plane', 'heli']) {
+  for (const type of ['soldier', 'rifle', 'drone', 'kami', 'jeep', 'arty', 'how', 'plane', 'heli', 'bomber']) {
     const b = document.createElement('button');
     const why = Engine.deployCheck(G, 1, type, null);
-    const noRoom = !why && type !== 'plane' && type !== 'heli' && !Engine.deployCells(G, 1, type).length;
+    const noRoom = !why && type !== 'plane' && type !== 'heli' && type !== 'bomber' && !Engine.deployCells(G, 1, type).length;
     b.className = 'pick';
     b.disabled = !!why || noRoom;
     b.innerHTML = '<span><b></b><small></small></span><em></em>';
@@ -3093,7 +3240,7 @@ function openDeploy() {
     b.querySelector('em').textContent = Engine.COST[type];
     b.onclick = () => {
       close('deploySheet'); clearSel(); ui.mode = 'deploy'; ui.deployType = type;
-      ui.info = type === 'plane' || type === 'heli' ? 'Tap any cell on the battlefield, even under fog.' : type === 'arty' || type === 'how' ? 'Higher ground gives longer range.' : '';
+      ui.info = type === 'bomber' ? 'Tap where the bomber starts its run, even under fog.' : type === 'plane' || type === 'heli' ? 'Tap any cell on the battlefield, even under fog.' : type === 'arty' || type === 'how' ? 'Higher ground gives longer range.' : '';
       render();
     };
     list.appendChild(b);
@@ -3345,6 +3492,7 @@ function hintText() {
   if (ui.mode === 'deploy') {
     if (ui.deployType === 'plane') return 'Tap where the recon plane should fly over.';
     if (ui.deployType === 'heli') return 'Tap where the helicopter should hover.';
+    if (ui.deployType === 'bomber') return !ui.bomb ? 'Tap where the bomber run starts.' : ui.bomb.d == null ? 'Tap toward where it should fly.' : 'Tap inside the red strip to send it.';
     return 'Tap gold squares to place ' + ({ soldier: 'soldiers', rifle: 'riflemen', drone: 'scout drones', kami: 'kamikaze drones', jeep: 'jeeps', arty: 'artillery', how: 'howitzers', mg: 'machine gun nests', barracks: 'barracks', factory: 'jeep factories', range: 'rifle ranges', hangar: 'drone hangars', foundry: 'gun foundries' }[ui.deployType]) + ', then press Done.';
   }
   if (ui.mode === 'unit' && ui.action) return {
@@ -3375,7 +3523,7 @@ function render() {
   $('eName').style.color = G.mode === 'zombie' ? '#4d7c0f' : 'var(--red)';
   $('pBar').style.width = Math.min(100, G.score[1] / Engine.WIN * 100) + '%';
   $('eBar').style.width = Math.min(100, G.score[2] / Engine.WIN * 100) + '%';
-  $('roundTxt').textContent = 'Round ' + G.round + '/' + Engine.MAX_ROUNDS;
+  $('roundTxt').textContent = 'Round ' + G.round + (G.round > Engine.MAX_ROUNDS || G.cleanup ? '' : '/' + Engine.MAX_ROUNDS);
   $('supplyTxt').textContent = watching ? 'Health ' + Math.max(0, G.hp[1]) + ' blue, ' + Math.max(0, G.hp[2]) + ' red' : 'Supply ' + G.supply[1] + ' (+' + Engine.income(G, 1) + '), health ' + G.hp[1];
   $('hint').textContent = hintText();
 
@@ -4193,7 +4341,7 @@ function showOver() {
   $('overStats').innerHTML = '<tr><th></th><th>' + (watching ? 'Blue' : 'You') + '</th><th>' + (G.mode === 'zombie' ? 'Zombies' : watching ? 'Red' : 'Enemy') + '</th></tr>' +
     rows.map(([label, k]) => '<tr><td>' + label + '</td><td>' + (st[1][k] || 0) + '</td><td>' + (st[2][k] || 0) + '</td></tr>').join('');
   const leftovers = G.units.some(u => u.side === 2) || (G.builds || []).some(b => b.side === 2) || G.cmd[2] >= 0;
-  const canKeep = !ui.mp && G.mode !== 'zombie' && !watching && w === 1 && !G.cleanup && leftovers;
+  const canKeep = !ui.mp && !watching && w === 1 && !G.cleanup && leftovers;
   $('overKeep').disabled = !canKeep;
   $('overKeep').textContent = canKeep ? 'Keep playing and clear out the enemy' : G.cleanup ? 'Mop-up finished' : ui.mp ? 'Keep playing is for battles against the computer' : watching ? 'Keep playing is for your own battles' : 'Keep playing';
   $('over').classList.remove('hidden');
@@ -4202,7 +4350,9 @@ $('overKeep').onclick = () => {
   if (!G || !Engine.keepPlaying(G)) return;
   close('over');
   ui.undo = []; ui.acts = []; clearSel();
-  ui.info = G.cmd[2] < 0
+  ui.info = G.mode === 'zombie'
+    ? 'Your victory is recorded. Keep going until the nest and every zombie are gone, up to round 99. Menu, Finish battle, ends it whenever you like.'
+    : G.cmd[2] < 0
     ? 'Your victory is recorded. The enemy has lost its commander, so clear out what is left of its army. Menu, Finish battle, ends it whenever you like.'
     : 'Your victory is recorded. Keep fighting as long as you like. Menu, Finish battle, ends it.';
   paintLayers(); persist(); render();
