@@ -11,7 +11,7 @@
 <meta name="robots" content="index,follow">
 <link rel="canonical" href="https://topo-wars.vercel.app/">
 <meta name="application-name" content="Topo Wars">
-<meta name="version" content="6.8">
+<meta name="version" content="7.1">
 <meta name="apple-mobile-web-app-title" content="Topo Wars">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -98,6 +98,7 @@ button.on{background:var(--amber-soft);border-color:#f59e0b}
 #setup .seg{flex-wrap:wrap;gap:4px;margin-bottom:8px}
 #setup .seg span{flex-basis:100%;margin:0;font-size:11px;font-weight:600;color:var(--muted)}
 #setup .seg button{flex:1 1 0;min-width:0;padding:6px 2px;font-size:12px;text-align:center}
+#setup #oppSeg button{flex:1 1 40%}
 #setup .seg.joinrow input{flex:1 1 0}
 #setup .seg.joinrow input{font-size:13px;padding:5px 6px;letter-spacing:1px}
 #setup .seg.joinrow button{flex:0 0 auto;padding:6px 8px}
@@ -153,7 +154,7 @@ button.on{background:var(--amber-soft);border-color:#f59e0b}
 
 <div id="top" class="hidden">
   <div class="side">
-    <div class="row"><span style="color:var(--blue)">You</span><span class="num" id="pScore">0</span></div>
+    <div class="row"><span id="pName" style="color:var(--blue)">You</span><span class="num" id="pScore">0</span></div>
     <div class="bar"><i id="pBar" style="background:var(--blue)"></i></div>
   </div>
   <div id="mid"><b id="roundTxt">Round 1</b><br><span id="supplyTxt">Supply 0</span></div>
@@ -174,7 +175,7 @@ button.on{background:var(--amber-soft);border-color:#f59e0b}
     <button id="ctrBtn">Center<small>on you</small></button>
     <button id="endBtn" class="primary">End turn</button>
   </div>
-  <div class="credit">Topo Wars 6.8. Map data &copy; OpenStreetMap contributors</div>
+  <div class="credit">Topo Wars 7.1. Map data &copy; OpenStreetMap contributors</div>
 </div>
 
 <div id="setup">
@@ -182,7 +183,7 @@ button.on{background:var(--amber-soft);border-color:#f59e0b}
     <button data-n="32">32</button><button data-n="64">64</button><button data-n="128">128</button>
   </div>
   <div class="seg" id="oppSeg"><span>Opponent</span>
-    <button data-o="ai">Computer</button><button data-o="friend">Friend</button><button data-o="zombie">Zombies</button>
+    <button data-o="ai">Computer</button><button data-o="friend">Friend</button><button data-o="zombie">Zombies</button><button data-o="watch">Watch</button>
   </div>
   <div class="seg" id="diffSeg"><span>Enemy</span>
     <button data-d="easy">Easy</button><button data-d="normal">Normal</button><button data-d="hard">Hard</button>
@@ -250,6 +251,7 @@ button.on{background:var(--amber-soft);border-color:#f59e0b}
     <p>Buildings come from the real map. Jeeps and artillery cannot drive through them. A soldier or rifleman standing next to one can use Enter building. That takes its whole turn: it waits at the door and is inside at the start of your next turn. Indoors it is hidden from the enemy until it walks out, fires, or an enemy piece stands right next to it, and it can move between the building's cells and walk back out. If the enemy is already inside when your troops go in, a close-quarters fight breaks out. Soldiers count 1 and riflemen 1.5, and the bigger force wins. Every piece on the losing side falls, the winners lose half as many as they killed, and everyone left spills out around the building. Artillery can shell any building outside your own territory that it can see, and a shell kills whoever is in that cell, hidden or not.</p>
 
     <h3>Zombies</h3>
+    <p>Set Opponent to Watch to see the computer fight itself, blue against red, on the ground you picked. Fog is off so you see both armies. Nothing moves until you press Next, which plays blue's move, then red's, one at a time, so you can study each one. Tap any piece between moves to read what it is. Auto plays a move every couple of seconds by itself, and Stop goes back to one at a time. The side that reaches 150 points takes the surrender straight away, so a watched battle ends sooner. Watched battles are not saved and do not go into your battle history.</p>
     <p>Set Opponent to Zombies for a survival battle. There is no enemy commander, only a zombie nest where the enemy would start, shown in green with a Z. Every turn the nest births new zombies, as many as the horde's territory would pay in supply, so the horde starts slow and snowballs as it spreads. Easy births one fewer each turn and Hard one more. A zombie shuffles up to 2 cells toward the nearest living thing it can sense, and anything it steps onto is destroyed. Next to your commander it bites for 1 health instead. Zombies cannot walk through barricades or structures, so they claw at them: a barricade takes 3 hits to tear down. A trench costs a zombie a whole move to climb into and another to climb out. Win by destroying the nest and every last zombie, or by holding out for 40 rounds. Their bodies pile up where they fall.</p>
     <p>A machine gun nest costs 40 supply and works in every battle. At the start of your turn it fires at up to 3 enemy pieces it can see within rifle range, nearest first. Like a rifleman it needs a clear line of fire and cannot hit troops in a trench.</p>
 
@@ -273,7 +275,8 @@ button.on{background:var(--amber-soft);border-color:#f59e0b}
       <tr><td>Commander (star)</td><td>Free</td><td>Moves on foot. 3 health. Sees 4 cells. Losing it loses the battle.</td></tr>
       <tr><td>Soldier (figure in a helmet)</td><td>1</td><td>Moves on foot. Destroys any enemy piece it steps onto. Carries 2 grenades and can build instead of moving. Sees 3 cells.</td></tr>
       <tr><td>Rifleman (figure with a rifle)</td><td>2</td><td>Moves on foot and shoots an enemy piece 2 cells away, 3 from ridge or peak, with a clear line of sight. Can move and shoot in one turn. Sees 4 cells.</td></tr>
-      <tr><td>Drone (four rotors)</td><td>2</td><td>Flies 4 cells over anything, including water and buildings. Sees 6 cells around it over any obstacle. Cannot attack or claim ground.</td></tr>
+      <tr><td>Scout drone (four rotors)</td><td>2</td><td>Flies 4 cells over anything, including water and buildings. Sees 6 cells around it over any obstacle. Cannot attack or claim ground.</td></tr>
+      <tr><td>Kamikaze drone (dart with an orange nose)</td><td>3</td><td>Flies 4 cells over anything, or instead of flying dives onto an enemy it can see within 3 cells, and is destroyed with it. Hits like an artillery shell: destroys a piece, takes 1 health from a commander, damages a structure, takes 2 from a barricade, or caves in a trench while the piece inside survives. It only sees 2 cells, so pair it with a scout drone. Riflemen and machine gun nests can shoot it down.</td></tr>
       <tr><td>Jeep (box on wheels)</td><td>2</td><td>Needs someone aboard to drive. Drives 2 cells over open ground or road, or up to 3 along roads and tire treads. Leaves tire treads everywhere it drives. Tows 1 gun and has 3 seats for soldiers, riflemen and your commander. Cannot attack. Sees 3 cells.</td></tr>
       <tr><td>Artillery (field gun)</td><td>3</td><td>Shells any cell or piece you can see within 2 plus its tier. Moves 1 cell on roads or open ground, or up to 3 along a road and still fires. Sees 2 cells.</td></tr>
       <tr><td>Howitzer (big field gun, long barrel)</td><td>6</td><td>Reaches 5 plus twice its tier. Cannot hit within 3 cells, or lower ground within 6. Reloads for 2 rounds after each shot, shown by orange dots.</td></tr>
@@ -287,17 +290,18 @@ button.on{background:var(--amber-soft);border-color:#f59e0b}
     <table>
       <tr><th>Build</th><th>Cost</th><th>Effect</th></tr>
       <tr><td>Dig trench</td><td>Free</td><td>Riflemen cannot hit a piece in the trench. The first artillery shell caves it in and the piece inside survives. Vehicles cannot cross it.</td></tr>
-      <tr><td>Barricade</td><td>1</td><td>Nothing can walk or drive through it and it blocks line of sight. One artillery shell or one grenade knocks it down.</td></tr>
+      <tr><td>Barricade</td><td>1</td><td>Nothing can walk or drive through it and it blocks line of sight. It has 3 health. An artillery shell, a grenade or a kamikaze drone takes 2, so a fresh barricade needs two blasts. A howitzer shell flattens it in one. Yellow marks under it show what is left once it is damaged.</td></tr>
       <tr><td>Raise ground</td><td>1</td><td>Piles earth on a cell, adding 1 tier and about 13 feet of height, up to 2 levels. Artillery on a raised cell reaches farther, and riflemen get their longer range from tier 4 up. Artillery can drive onto it.</td></tr>
     </table>
-    <p>A good pattern is to raise the ground next to your artillery for two turns, then roll the gun up onto it. Barricades across the approach to your commander force the enemy to go around or spend a shell.</p>
+    <p>A good pattern is to raise the ground next to your artillery for two turns, then roll the gun up onto it. Barricades across the approach to your commander force the enemy to go around or spend two shells on each. Your own artillery and grenades can knock down your own barricades too, if you ever wall yourself in: select the gun and your barricades in range show in orange.</p>
 
     <h3>Grenades</h3>
-    <p>Only soldiers carry grenades, 2 each. Throwing one takes the soldier's turn and reaches 2 cells in any direction, over walls and into trenches, at anything you can see. A grenade destroys any piece, knocks down a barricade, or takes 1 health from a commander. They are the answer to troops dug into trenches and to barricades when no artillery is close.</p>
+    <p>Only soldiers carry grenades, 2 each. Throwing one takes the soldier's turn and reaches 2 cells in any direction, over walls and into trenches, at anything you can see. A grenade destroys any piece, takes 2 of a barricade's 3 health, or takes 1 health from a commander. They are the answer to troops dug into trenches and to barricades when no artillery is close.</p>
 
     <h3>Jeeps and towing</h3>
     <p>Park a jeep beside one of your guns that has not acted this turn, select the jeep and tap Hitch gun. The gun rides along while the jeep drives. After driving, tap Drop gun and pick an open or road cell beside the jeep. The gun sets up there and fires from the next turn. That turns a slow gun that crawls 1 cell a turn into one that can cross the map in a few turns and set up on distant high ground. If the jeep is destroyed while towing, the gun is lost with it.</p>
     <p>A jeep will not move without a driver. It has 3 seats, and any soldier, rifleman or your commander can drive. A new jeep arrives empty, so park a trooper next to it or put it beside your commander. Select the jeep and tap Load, then tap a soldier, rifleman or your commander beside it. A trooper can also climb in by selecting it and tapping Get in jeep. Climbing in uses that piece's turn. A small star on the jeep means your commander is aboard, and an orange number shows how many troops are with them. Tap Unload to let troops out beside the jeep. They act again from the next turn. Tap Commander out to put your commander back on foot. While riding, your commander moves with the jeep and cannot be stepped on separately, but anything that attacks the jeep's cell attacks your commander: a rifle, grenade or shell takes 1 health, and an enemy piece stepping onto the jeep ends the battle. If the jeep is destroyed, the troops aboard are lost.</p>
+    <p>A jeep with a driver can run down enemy soldiers, riflemen, zombies and a commander on foot. Any of them within its drive shows in orange when the jeep is selected, and driving onto one destroys it. The road to it has to be clear, and troops in a trench, a building or forest are out of reach, because a jeep cannot drive there. Guns, jeeps and drones cannot be run over.</p>
     <p>Everywhere a jeep drives it leaves tire treads. Treads count as road for every piece that starts on them, so a jeep that has driven a route once can run 3 cells along it next time, and so can your troops and guns.</p>
 
     <h3>Moving fast on roads</h3>
@@ -339,6 +343,7 @@ button.on{background:var(--amber-soft);border-color:#f59e0b}
       <tr><th>Action</th><th>Points</th></tr>
       <tr><td>Capture an enemy cell</td><td>Its tier, 1 to 5</td></tr>
       <tr><td>Destroy a drone</td><td>4</td></tr>
+      <tr><td>Destroy a kamikaze drone</td><td>3</td></tr>
       <tr><td>Destroy a soldier</td><td>5</td></tr>
       <tr><td>Destroy a rifleman</td><td>6</td></tr>
       <tr><td>Destroy artillery</td><td>8</td></tr>
@@ -405,7 +410,7 @@ button.on{background:var(--amber-soft);border-color:#f59e0b}
     <h2 id="overTitle" style="font-size:26px">Victory</h2>
     <p id="overReason" class="muted"></p>
     <div class="scoreline">
-      <div>You<b id="overP" style="color:var(--blue)">0</b></div>
+      <div><span id="overPName">You</span><b id="overP" style="color:var(--blue)">0</b></div>
       <div><span id="overEName">Enemy</span><b id="overE" style="color:var(--red)">0</b></div>
     </div>
     <table class="stats" id="overStats"></table>
@@ -476,15 +481,20 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
 /*ENGINE-START*/
 const Engine = (() => {
   const WIN = 150, MAX_ROUNDS = 40;
-  const COST = { soldier: 1, rifle: 2, drone: 2, jeep: 2, arty: 3, how: 6, plane: 3, heli: 4 };
+  const COST = { soldier: 1, rifle: 2, drone: 2, kami: 3, jeep: 2, arty: 3, how: 6, plane: 3, heli: 4 };
   // A howitzer is artillery with 3 more range that needs 2 full rounds to reload after each shot.
   // Height helps a howitzer twice as much as ordinary artillery, but its barrel cannot drop low
   // enough for close targets: nothing within 3 cells, and nothing on lower ground within 6.
   const HOW_EXTRA = 3, HOW_RELOAD = 3, HOW_KILL = 12, HOW_MIN = 3, HOW_MIN_LOW = 6;
-  const KILL = { soldier: 5, rifle: 6, drone: 4, jeep: 5, arty: 8, zombie: 2 };
-  const NAMES = { soldier: 'soldier', rifle: 'rifleman', drone: 'drone', jeep: 'jeep', arty: 'artillery', how: 'howitzer', plane: 'recon plane', heli: 'helicopter', zombie: 'zombie' };
+  const KILL = { soldier: 5, rifle: 6, drone: 4, kami: 3, jeep: 5, arty: 8, zombie: 2 };
+  const NAMES = { soldier: 'soldier', rifle: 'rifleman', drone: 'drone', kami: 'kamikaze drone', jeep: 'jeep', arty: 'artillery', how: 'howitzer', plane: 'recon plane', heli: 'helicopter', zombie: 'zombie' };
   const nameOf = u => u.heavy ? 'howitzer' : NAMES[u.type];
-  const SIGHT = { cmd: 4, soldier: 3, rifle: 4, arty: 2, drone: 6, jeep: 3, zombie: 3 };
+  const SIGHT = { cmd: 4, soldier: 3, rifle: 4, arty: 2, drone: 6, kami: 2, jeep: 3, zombie: 3 };
+  // A kamikaze drone dives onto something it can see up to KAMI_RANGE cells away, instead of flying that turn.
+  const KAMI_RANGE = 3;
+  const isAir = u => u.type === 'drone' || u.type === 'kami';
+  // Barricade damage: a claw takes 1, a grenade, shell or kamikaze drone 2, a howitzer shell all 3.
+  const BLAST = 2;
   const GRENADES = 2, GRENADE_RANGE = 2, JEEP_RANGE = 2, SEATS = 3;
   const AIR = { plane: { r: 8, turns: 1 }, heli: { r: 4, turns: 3 } };
   const HQ_PTS = 20, ENCIRCLE_PTS = 10, CMD_HIT_PTS = 5, CMD_HP = 3, ROAD_RUN = 3, DRONE_RANGE = 4, INCOME = 2;
@@ -561,7 +571,7 @@ const Engine = (() => {
     return k + n;
   }, 0);
   const ready = (G, u) => u.placed < G.round;
-  const canShoot = (G, u) => (u.type === 'arty' || u.type === 'rifle') && ready(G, u) && !u.fired && !reloading(G, u);
+  const canShoot = (G, u) => (u.type === 'arty' || u.type === 'rifle' || (u.type === 'kami' && !u.moved)) && ready(G, u) && !u.fired && !reloading(G, u);
   const artyReady = (G, u) => u.type === 'arty' && canShoot(G, u);
   // A commander riding in a jeep shares the jeep's cell: the cell holds both.
   function occupant(G, i) {
@@ -703,7 +713,7 @@ const Engine = (() => {
       for (let i = 0; i < N; i++) if (G.owner[i] === side) vis[i] = 1;
       const see = (from, R, useLos) => { for (const i of square(G, from, R)) if (!vis[i] && (!useLos || los(G, from, i))) vis[i] = 1; };
       if (G.cmd[side] >= 0) see(G.cmd[side], SIGHT.cmd, true);
-      for (const u of G.units) if (u.side === side) see(u.idx, SIGHT[u.type], u.type !== 'drone');
+      for (const u of G.units) if (u.side === side) see(u.idx, SIGHT[u.type], !isAir(u));
       for (const a of G.air) if (a.side === side && airActive(G, a)) see(a.idx, AIR[a.kind].r, false);
     }
     const f = foe(side), raw = vis.slice();
@@ -711,7 +721,7 @@ const Engine = (() => {
     // this side's pieces stands right next to them.
     for (const u of G.units) {
       if (u.side !== f || G.terr[u.idx] !== T.BUILDING || u.reveal) continue;
-      const near = (G.cmd[side] >= 0 && cheb(G, G.cmd[side], u.idx) <= 1) || G.units.some(v => v.side === side && v.type !== 'drone' && cheb(G, v.idx, u.idx) <= 1);
+      const near = (G.cmd[side] >= 0 && cheb(G, G.cmd[side], u.idx) <= 1) || G.units.some(v => v.side === side && !isAir(v) && cheb(G, v.idx, u.idx) <= 1);
       if (!near) vis[u.idx] = 0;
     }
     if (G.cmd[f] >= 0 && vis[G.cmd[f]]) G.intel[side] = { idx: G.cmd[f], round: G.round };
@@ -740,7 +750,7 @@ const Engine = (() => {
     // they can move between the building's cells and walk back out.
     const inside = G.terr[from] === T.BUILDING;
     const passable = i => foot ? footOK(G, i) && (inside || G.terr[i] !== T.BUILDING) : vehOK(G, i);
-    const canEnd = i => { const o = occupant(G, i); return !o || (o.side !== side && foot); };
+    const canEnd = i => { const o = occupant(G, i); return !o || (o.side !== side && (foot || (mode === 'jeep' && rammable(o)))); };
     const offer = (i, road, path) => { const cur = out.get(i); if (!cur || (road && !cur.road)) out.set(i, { road, path }); };
     // A limited search from the start cell. roadOnly keeps it to road and treads.
     const search = (limit, roadOnly) => {
@@ -772,7 +782,7 @@ const Engine = (() => {
         for (const j of nb8(G, i)) {
           if (depth.has(j) || !passable(j) || (roadOnly && !roadLike(G, j))) continue;
           const o = occupant(G, j);
-          if (o) { if (canEnd(j) && (d === 0 || roadOnly)) { prev.set(j, i); offer(j, roadOnly, pathTo(j)); } continue; }
+          if (o) { if (canEnd(j) && (d === 0 || roadOnly || mode === 'jeep')) { prev.set(j, i); offer(j, roadOnly, pathTo(j)); } continue; }
           prev.set(j, i); depth.set(j, d + 1); q.push(j);
           offer(j, roadOnly || (d === 0 && roadLike(G, from) && roadLike(G, j)), pathTo(j));
         }
@@ -783,7 +793,11 @@ const Engine = (() => {
     out.delete(from);
     return out;
   }
-  const modeOf = u => u.type === 'drone' ? 'air' : u.type === 'arty' ? 'veh' : u.type === 'jeep' ? 'jeep' : 'foot';
+  // A jeep with a driver can run down troops on foot that stand on ground it can drive over.
+  // Pieces in a trench, a building or forest are out of its reach, and so is anything with armor.
+  const RAMMABLE = ['soldier', 'rifle', 'zombie'];
+  const rammable = o => o.cmd ? !o.unit : !!(o.unit && RAMMABLE.includes(o.unit.type));
+  const modeOf = u => isAir(u) ? 'air' : u.type === 'arty' ? 'veh' : u.type === 'jeep' ? 'jeep' : 'foot';
   function commanderMoves(G, side) {
     if (G.over || G.cmd[side] < 0 || G.cmdMoved[side] || (G.riding && G.riding[side])) return [];
     return [...moveOptions(G, side, G.cmd[side], 'foot').keys()];
@@ -828,9 +842,10 @@ const Engine = (() => {
       log(G, u.side, road ? 'Artillery drove along the road' : 'Artillery repositioned and cannot fire this turn');
     }
     if (u.type === 'jeep') log(G, u.side, u.cargo ? 'Jeep towed artillery ' + path.length + ' cells' : 'Jeep drove ' + path.length + ' cells');
-    if (u.type !== 'drone') capture(G, u.side, to);
-    if (o && o.cmd) killCommander(G, u.side, (u.type === 'rifle' ? 'Rifleman' : 'Soldier') + ' took out the enemy commander');
-    else if (u.type !== 'drone') encircle(G, u.side);
+    if (!isAir(u)) capture(G, u.side, to);
+    if (u.type === 'jeep' && o && (o.cmd || o.unit)) log(G, u.side, 'A jeep ran down ' + (o.cmd ? 'the enemy commander' : 'a ' + NAMES[o.unit.type]));
+    if (o && o.cmd) killCommander(G, u.side, (u.type === 'jeep' ? 'Jeep' : u.type === 'rifle' ? 'Rifleman' : 'Soldier') + ' took out the enemy commander');
+    else if (!isAir(u)) encircle(G, u.side);
     bump(G);
     return true;
   }
@@ -841,6 +856,14 @@ const Engine = (() => {
   function shotTargets(G, u) {
     if (G.over || !canShoot(G, u)) return [];
     const f = foe(u.side), vis = sight(G, u.side), out = [];
+    if (u.type === 'kami') {
+      for (const i of square(G, u.idx, KAMI_RANGE)) {
+        if (!vis[i] || i === u.idx) continue;
+        const o = occupant(G, i), b = structAt(G, i);
+        if ((o && o.side === f) || (b && b.side === f) || (G.terr[i] === T.BARRICADE && G.owner[i] !== u.side)) out.push(i);
+      }
+      return out;
+    }
     const R = u.type === 'arty' ? gunRange(G, u) : rifleRange(G, u.idx);
     const raw = u.type === 'arty' ? sightRaw(G, u.side) : null;
     for (const i of square(G, u.idx, R)) {
@@ -850,13 +873,35 @@ const Engine = (() => {
       if (!vis[i] && !shellBuilding) continue;
       if (shellBuilding && !vis[i]) { out.push(i); continue; }
       const o = occupant(G, i), enemyPiece = o && o.side === f;
-      if (u.type === 'arty') { const b = structAt(G, i); if (enemyPiece || G.owner[i] === f || shellBuilding || (G.terr[i] === T.BARRICADE && G.owner[i] !== u.side) || (b && b.side === f)) out.push(i); }
+      if (u.type === 'arty') { const b = structAt(G, i); if (enemyPiece || G.owner[i] === f || shellBuilding || (G.terr[i] === T.BARRICADE && !(o && o.side === u.side)) || (b && b.side === f)) out.push(i); }
       else if (enemyPiece && G.terr[i] !== T.TRENCH && los(G, u.idx, i)) out.push(i);
     }
     return out;
   }
+  // Knock health off a barricade. It falls when the health runs out.
+  function hitBarricade(G, side, i, dmg, how) {
+    G.bhp = G.bhp || {};
+    const left = (G.bhp[i] == null ? BARRICADE_HP : G.bhp[i]) - dmg;
+    if (left > 0) { G.bhp[i] = left; log(G, side, how + ' damaged a barricade, ' + left + ' of ' + BARRICADE_HP + ' left'); return; }
+    G.terr[i] = T.OPEN; delete G.bhp[i];
+    log(G, side, how + ' knocked down a barricade');
+  }
+  // The kamikaze drone flies into its target and is gone. It hits like a shell without taking ground.
+  function dive(G, u, to) {
+    const f = foe(u.side), o = occupant(G, to), sb = structAt(G, to), who = 'Kamikaze drone';
+    G.units.splice(G.units.indexOf(u), 1);
+    stat(G, u.side, 'shots');
+    if (G.terr[to] === T.BARRICADE) hitBarricade(G, u.side, to, BLAST, who);
+    else if (sb && sb.side === f && !(o && o.side === f)) hitStructure(G, u.side, sb, who);
+    else if (G.terr[to] === T.TRENCH && o && o.side === f) { G.terr[to] = T.OPEN; log(G, u.side, 'Kamikaze drone caved in a trench, the ' + (o.cmd ? 'commander' : NAMES[o.unit.type]) + ' inside survived'); }
+    else if (o && o.cmd) hitCommander(G, u.side, who);
+    else if (o && o.unit) { log(G, u.side, 'Kamikaze drone struck'); killUnit(G, u.side, o.unit); }
+    bump(G);
+    return true;
+  }
   function fire(G, u, to) {
     if (!shotTargets(G, u).includes(to)) return false;
+    if (u.type === 'kami') return dive(G, u, to);
     const f = foe(u.side), o = occupant(G, to), who = u.heavy ? 'Howitzer' : u.type === 'arty' ? 'Artillery' : 'Rifleman';
     u.fired = true;
     if (u.heavy) u.cool = G.round + HOW_RELOAD;
@@ -864,8 +909,7 @@ const Engine = (() => {
     stat(G, u.side, 'shots');
     // A barricade is knocked flat. A trench takes the blast for whoever is in it and caves in.
     if (G.terr[to] === T.BARRICADE) {
-      G.terr[to] = T.OPEN;
-      log(G, u.side, 'Artillery knocked down a barricade');
+      hitBarricade(G, u.side, to, u.heavy ? BARRICADE_HP : BLAST, who);
       bump(G);
       return true;
     }
@@ -1011,7 +1055,7 @@ const Engine = (() => {
       if (i === u.idx || !vis[i]) continue;
       const o = occupant(G, i);
       const b = structAt(G, i);
-      if ((o && o.side === f) || (G.terr[i] === T.BARRICADE && G.owner[i] !== u.side) || (b && b.side === f)) out.push(i);
+      if ((o && o.side === f) || (G.terr[i] === T.BARRICADE && !(o && o.side === u.side)) || (b && b.side === f)) out.push(i);
     }
     return out;
   }
@@ -1023,7 +1067,7 @@ const Engine = (() => {
     stat(G, u.side, 'grenades');
     const sb = structAt(G, to);
     if (G.terr[u.idx] === T.BUILDING) u.reveal = true;
-    if (G.terr[to] === T.BARRICADE && !(o && o.side === f)) { G.terr[to] = T.OPEN; log(G, u.side, 'Grenade blew apart a barricade'); }
+    if (G.terr[to] === T.BARRICADE && !(o && o.side === f)) hitBarricade(G, u.side, to, BLAST, 'Grenade');
     else if (sb && sb.side === f && !(o && o.side === f)) hitStructure(G, u.side, sb, 'Grenade');
     else if (o && o.cmd) hitCommander(G, u.side, 'Grenade');
     else if (o && o.unit) killUnit(G, u.side, o.unit);
@@ -1185,7 +1229,7 @@ const Engine = (() => {
     const d = (a, b) => { const [ar, ac] = rcOf(G, a), [br, bc] = rcOf(G, b); return Math.max(Math.abs(ar - br), Math.abs(ac - bc)) + Math.hypot(ar - br, ac - bc) * 0.01; };
     for (const z of G.units.filter(u => u.side === Z && u.type === 'zombie')) {
       if (!G.units.includes(z) || !ready(G, z)) continue;
-      const prey = G.units.filter(u => u.side === P && u.type !== 'drone').map(u => u.idx).concat(G.cmd[P] >= 0 ? [G.cmd[P]] : [], (G.builds || []).filter(b => b.side === P).map(b => b.idx));
+      const prey = G.units.filter(u => u.side === P && !isAir(u)).map(u => u.idx).concat(G.cmd[P] >= 0 ? [G.cmd[P]] : [], (G.builds || []).filter(b => b.side === P).map(b => b.idx));
       let goal = G.cmd[P] >= 0 ? G.cmd[P] : G.hq[P], bd = Infinity;
       for (const i of prey) { const di = d(z.idx, i); if (di < bd && di <= 12) { bd = di; goal = i; } }
       let steps = G.terr[z.idx] === T.TRENCH ? 1 : ZOMBIE_STEPS;
@@ -1272,7 +1316,7 @@ const Engine = (() => {
       if (b.side !== side || G.round < b.next || !STRUCT[b.type].makes) continue;
       const S = STRUCT[b.type], type = S.makes;
       const fits = i => !occupant(G, i) && G.terr[i] !== T.STRUCT && G.owner[i] !== foe(side) &&
-        (type === 'jeep' || type === 'arty' ? vehOK(G, i) : type === 'drone' ? true : footOK(G, i));
+        (type === 'jeep' || type === 'arty' ? vehOK(G, i) : type === 'drone' || type === 'kami' ? true : footOK(G, i));
       // Right beside it first; if that is full, the nearest free cell of its own within 3.
       let room = nb8(G, b.idx).filter(fits);
       for (let R = 2; !room.length && R <= 3; R++) room = square(G, b.idx, R).filter(i => cheb(G, i, b.idx) === R && G.owner[i] === side && fits(i));
@@ -1367,6 +1411,7 @@ const Engine = (() => {
       if (u.side !== side || !seen(u.idx)) continue;
       if (u.type === 'soldier' || u.type === 'rifle') for (const i of moveOptions(G, side, u.idx, 'foot').keys()) contact[i] = 1;
       if (u.type === 'zombie') for (const i of square(G, u.idx, 2)) contact[i] = 1;
+      if (u.type === 'jeep' && hasDriver(G, u)) for (const i of moveOptions(G, side, u.idx, 'jeep').keys()) contact[i] = 1;
       if (u.type === 'rifle') for (const i of square(G, u.idx, rifleRange(G, u.idx))) shot[i] = 1;
       if (u.type === 'arty') for (const i of square(G, u.idx, gunRange(G, u))) if (!tooClose(G, u, i)) shot[i] = 1;
     }
@@ -1388,7 +1433,11 @@ const Engine = (() => {
   function aiTurn(G, me) {
     const f = foe(me), touched = [];
     if (G.over) return touched;
-    if (G.offer && G.offer.win === me && G.offer.status === 'open') { G.offer.status = 'refused'; log(G, me, 'Turned down the surrender and fought on'); }
+    if (G.offer && G.offer.win === me && G.offer.status === 'open') {
+      // Watching two computers: the side that earned the surrender takes it, so battles do not drag on.
+      if (G.mode === 'watch') { G.offer.status = 'done'; log(G, me, 'Accepted the surrender'); finish(G, me, (me === 1 ? 'Red' : 'Blue') + ' surrendered to ' + (me === 1 ? 'blue' : 'red')); return touched; }
+      G.offer.status = 'refused'; log(G, me, 'Turned down the surrender and fought on');
+    }
     const def = !!(G.offer && G.offer.win === f && G.offer.status !== 'done');
     if (def && G.offer.home == null) G.offer.home = stronghold(G, me);
     const home = def ? G.offer.home : null;
@@ -1403,7 +1452,8 @@ const Engine = (() => {
       return G.tier[i] * 10 - cheb(G, i, tgt()) * 0.2 + rng(G) * 0.1;
     };
     const shootWith = u => {
-      const t = shotTargets(G, u);
+      // Never shell its own barricades.
+      const t = shotTargets(G, u).filter(i => !(G.terr[i] === T.BARRICADE && G.owner[i] === me));
       if (!t.length) return false;
       const best = pickCell(G, t, shotScore);
       fire(G, u, best); touched.push(best);
@@ -1440,6 +1490,15 @@ const Engine = (() => {
       if (j.cargo && drops().length) { const at = pickCell(G, drops(), i => tierAt(G, i)); unhitch(G, j, at); touched.push(at); continue; }
       const opts = unitMoveMap(G, j);
       if (!opts.size) continue;
+      // Run down any enemy trooper within reach, the commander above all.
+      const rams = [...opts.keys()].filter(i => { const o = occupant(G, i); return o && o.side === f && vis()[i]; });
+      if (rams.length) {
+        const at = pickCell(G, rams, i => { const o = occupant(G, i); return o.cmd ? 1000 : KILL[o.unit.type] + rng(G) * 0.1; });
+        moveUnit(G, j, at); touched.push(at);
+        if (G.over) return touched;
+        if (j.cargo && drops().length) { const d = pickCell(G, drops(), i => tierAt(G, i)); unhitch(G, j, d); touched.push(d); }
+        continue;
+      }
       const { contact } = reach(G, f, vis());
       let goal = T0, want = j.cargo ? 5 : ridersOf(j).length ? 3 : 4;
       if (!j.cargo) {
@@ -1524,8 +1583,9 @@ const Engine = (() => {
       const score = i => {
         const o = occupant(G, i);
         if (o && o.cmd) return 1000;
-        if (o && o.unit) return { arty: 50, rifle: 40, jeep: 40, drone: 20, soldier: G.terr[i] === T.TRENCH ? 30 : 0 }[o.unit.type] || 0;
+        if (o && o.unit) return { arty: 50, rifle: 40, jeep: 40, drone: 20, kami: 30, soldier: G.terr[i] === T.TRENCH ? 30 : 0 }[o.unit.type] || 0;
         if (structAt(G, i)) return 35;
+        if (G.terr[i] === T.BARRICADE && G.owner[i] === me) return 0;
         return cheb(G, i, T0) < cheb(G, u.idx, T0) ? 18 : 0;
       };
       const best = pickCell(G, t, score);
@@ -1573,6 +1633,27 @@ const Engine = (() => {
       }
       if (best != null) { moveUnit(G, u, best); touched.push(best); if (G.over) return touched; }
       if (u.type === 'rifle' && G.units.includes(u)) { shootWith(u); if (G.over) return touched; }
+    }
+
+    // Kamikaze drones strike the commander or anything valuable in reach, otherwise edge closer
+    // while staying out of reach of enemy troops and rifles.
+    for (const u of G.units.filter(u => u.side === me && u.type === 'kami')) {
+      if (!ready(G, u)) continue;
+      const worth = i => {
+        const o = occupant(G, i), b = structAt(G, i);
+        if (o && o.side === f && o.cmd) return G.diff === 'easy' && me === 2 ? 10 : 1000;
+        if (o && o.side === f && o.unit) return { how: 70, arty: 60, jeep: 45, rifle: 30, soldier: 18, drone: 20, kami: 25, zombie: 8 }[o.unit.heavy ? 'how' : o.unit.type] || 0;
+        if (b && b.side === f) return 50;
+        return 0;
+      };
+      const t = shotTargets(G, u), best = pickCell(G, t, worth);
+      if (best != null && worth(best) >= 18) { fire(G, u, best); touched.push(best); if (G.over) return touched; continue; }
+      const opts = unitMoves(G, u);
+      if (!opts.length) continue;
+      const { contact, shot } = reach(G, f, vis()), T0 = def ? home : tgt(), want = def ? 1 : KAMI_RANGE + 1;
+      const score = i => -Math.abs(cheb(G, i, T0) - want) * 2 - (contact[i] ? 20 : 0) - (shot[i] ? 6 : 0) + rng(G) * 0.3;
+      const at = pickCell(G, opts, score);
+      if (at != null && score(at) > score(u.idx)) { moveUnit(G, u, at); touched.push(at); }
     }
 
     // Drones hover about four cells from the enemy commander. While blind they sweep outward
@@ -1638,7 +1719,7 @@ const Engine = (() => {
 
     // Spend supply toward a mixed force: roughly 35 percent soldiers, 30 riflemen, 20 artillery
     // and up to 2 drones when fighting in fog. Save up when artillery is the piece most needed.
-    const MIX = { soldier: 0.32, rifle: 0.28, arty: 0.20, drone: G.fog ? 0.12 : 0, jeep: 0.08 };
+    const MIX = { soldier: 0.32, rifle: 0.28, arty: 0.20, drone: G.fog ? 0.12 : 0, jeep: 0.08, kami: 0.07 };
     let reserve = gunsIdle && !airBusy && count(G, me, 'soldier') >= 2 ? COST.plane : 0;
     // Once income is healthy, save up for the next structure it does not have yet.
     const saveFor = ['barracks', 'factory', 'range', 'foundry'].find(t => !(G.builds || []).some(b => b.side === me && b.type === t));
@@ -1646,8 +1727,9 @@ const Engine = (() => {
     for (let k = 0; k < 4; k++) {
       const n = t => count(G, me, t), total = G.units.filter(u => u.side === me).length + 1;
       let want = null, gap = -Infinity;
-      for (const t of ['soldier', 'rifle', 'arty', 'drone', 'jeep']) {
+      for (const t of ['soldier', 'rifle', 'arty', 'drone', 'jeep', 'kami']) {
         if (t === 'drone' && (n('drone') >= 2 || !G.fog)) continue;
+        if (t === 'kami' && (n('kami') >= 2 || G.round < 4 || G.mode === 'zombie')) continue;
         if (t === 'jeep' && (n('jeep') >= 1 || n('arty') < 1)) continue;
         const d = MIX[t] - n(t) / total + (t === 'drone' && blind >= 1 && !n('drone') ? 1 : 0);
         if (d > gap) { gap = d; want = t; }
@@ -1655,7 +1737,7 @@ const Engine = (() => {
       if (n('soldier') < 2) want = 'soldier';
       else if (n('arty') >= 1 && n('jeep') < 1) want = 'jeep';
       if (G.supply[me] < COST[want]) {
-        if (want === 'arty' || want === 'drone' || want === 'jeep') break;
+        if (want === 'arty' || want === 'drone' || want === 'jeep' || want === 'kami') break;
         want = 'soldier';
         if (G.supply[me] < COST.soldier) break;
       }
@@ -1684,6 +1766,7 @@ const Engine = (() => {
       G.round = MAX_ROUNDS;
       const a = G.score[1], b = G.score[2];
       if (G.mode === 'zombie') finish(G, 1, 'You held out for ' + MAX_ROUNDS + ' rounds');
+      else if (G.mode === 'watch') finish(G, a > b ? 1 : b > a ? 2 : 0, 'Scores after ' + MAX_ROUNDS + ' rounds');
       else finish(G, a > b ? 1 : b > a ? 2 : 0, 'Scores after ' + MAX_ROUNDS + ' rounds');
       return;
     }
@@ -1696,6 +1779,14 @@ const Engine = (() => {
     checkWipe(G);
     zombieCheck(G);
     nextRound(G);
+    return touched;
+  }
+
+  // Computer against computer: the computer plays blue's half of the round too.
+  function watchHalf(G) {
+    if (G.over || G.turn !== 1) return [];
+    const touched = aiTurn(G, 1);
+    checkWipe(G);
     return touched;
   }
 
@@ -1746,7 +1837,7 @@ const Engine = (() => {
     const i = a.i;
     if (!Number.isInteger(i) || i < 0 || i >= G.size * G.size) return false;
     if (a.f === 'cmd') return moveCommander(G, side, i);
-    if (a.f === 'deploy') return ['soldier', 'rifle', 'drone', 'jeep', 'arty', 'how'].includes(a.k) && deploy(G, side, a.k, i);
+    if (a.f === 'deploy') return ['soldier', 'rifle', 'drone', 'kami', 'jeep', 'arty', 'how'].includes(a.k) && deploy(G, side, a.k, i);
     if (a.f === 'air') return (a.k === 'plane' || a.k === 'heli') && callAir(G, side, a.k, i);
     if (a.f === 'structure') return !!STRUCT[a.k] && buildStructure(G, side, a.k, i);
     const u = G.units.find(x => x.id === a.u && x.side === side);
@@ -1889,6 +1980,7 @@ const Engine = (() => {
       let k = 3;
       for (const i of nb8(G, e)) if (k > 0 && footOK(G, i) && G.terr[i] !== T.BUILDING) { G.units.push({ id: G.nextId++, side: 2, type: 'zombie', idx: i, placed: 0, moved: false, fired: false }); k--; }
     }
+    if (o.mode === 'watch') { G.mode = 'watch'; G.fog = false; }
     log(G, 0, G.mode === 'zombie' ? 'The dead are walking' : 'Battle started');
     beginTurn(G, 1);
     return G;
@@ -1947,9 +2039,9 @@ const Engine = (() => {
     SEATS, ridersOf, seatsUsed, hasDriver, cmdAboard, loadTargets, load, boardTargets, board, unloadCells, unload, cmdOutCells, cmdOut,
     rcOf, nb8, square, cheb, footOK, vehOK, artyRange, rifleRange, unitAt, occupant, count, ready, canShoot, artyReady,
     los, sight, airActive, reach, moveOptions, commanderMoves, moveCommander, unitMoveMap, unitMoves, keepsFire, moveUnit,
-    shotTargets, fire, deployCheck, deployCells, deploy, callAir, income, aiTurn, beginTurn, nextRound, playerEnd,
+    shotTargets, fire, deployCheck, deployCells, deploy, callAir, income, aiTurn, beginTurn, nextRound, playerEnd, watchHalf,
     computeTiers, markSteep, noiseTerrain, create, clone, serialize, deserialize, apply, passTurn, swapSides, keepPlaying, checkWipe,
-    MG_SHOTS, BARRICADE_HP, zombieTurn, zombieCheck,
+    MG_SHOTS, BARRICADE_HP, KAMI_RANGE, BLAST, isAir, zombieTurn, zombieCheck,
     HOW_EXTRA, HOW_RELOAD, HOW_KILL, HOW_MIN, HOW_MIN_LOW, tooClose, gunRange, reloading, nameOf, buildingGroup, enterCells, enterBuilding, sightRaw,
     STRUCT, STRUCT_HP, STRUCT_KILL, structAt, structCheck, structCells, buildStructure
   };
@@ -1967,7 +2059,8 @@ const crs = L.CRS.EPSG3857;
 const PIECES = {
   soldier: { label: 'Soldier', desc: 'Steps 1 cell, or up to 3 along a road. Destroys any enemy piece it steps onto.' },
   rifle: { label: 'Rifleman', desc: 'Moves like a soldier and shoots enemy pieces it can see 2 cells away, 3 from high ground.' },
-  drone: { label: 'Drone', desc: 'Flies 4 cells over anything and sees 6 cells around it. Cannot attack.' },
+  drone: { label: 'Scout drone', desc: 'Flies 4 cells over anything and sees 6 cells around it. Cannot attack.' },
+  kami: { label: 'Kamikaze drone', desc: 'Flies 4 cells, or dives onto a target it can see within 3 cells and is destroyed. Sees only 2 cells.' },
   arty: { label: 'Artillery', desc: 'Shells any cell or piece you can see within 2 plus its tier. Roads and open ground only.' },
   how: { label: 'Howitzer', desc: 'Heavy artillery that gains twice as much range from height. Cannot hit anything within 3 cells, or lower ground within 6. Reloads for 2 rounds after each shot.' },
   plane: { label: 'Recon plane', desc: 'One pass that reveals 8 cells around any spot until this turn ends.' },
@@ -1993,7 +2086,7 @@ const map = L.map('map', {
   zoomControl: false, attributionControl: false, zoomSnap: 0, zoomDelta: 0.5,
   doubleClickZoom: false, maxZoom: 20, minZoom: 3
 }).setView(FALLBACK_VIEW, 13);
-L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 20, maxNativeZoom: 19 }).addTo(map);
+const baseTiles = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 20, maxNativeZoom: 19 }).addTo(map);
 
 const canvas = document.createElement('canvas');
 canvas.className = 'grid-canvas';
@@ -2311,7 +2404,7 @@ function draw() {
       const u = unitById(ui.sel);
       if (u) {
         if (Engine.canShoot(G, u)) {
-          const R = u.type === 'arty' ? Engine.gunRange(G, u) : Engine.rifleRange(G, u.idx);
+          const R = u.type === 'arty' ? Engine.gunRange(G, u) : u.type === 'kami' ? Engine.KAMI_RANGE : Engine.rifleRange(G, u.idx);
           box(u.idx, R, 'rgba(245,158,11,0.08)', '#b45309');
         }
         const shots = Engine.shotTargets(G, u);
@@ -2321,10 +2414,14 @@ function draw() {
         if (u.type === 'arty') {
           markCells(moves.filter(i => mm.get(i).road), '#0f766e');
           markCells(moves.filter(i => !mm.get(i).road), '#0f766e', true);
-        } else if (u.type === 'drone') markCells(moves, '#0f766e');
+        } else if (Engine.isAir(u)) markCells(moves, '#0f766e');
         else {
-          markCells(moves.filter(i => !danger.has(i)), '#0f766e');
-          markCells(moves.filter(i => danger.has(i)), '#ea580c');
+          // Enemy troops a jeep can run down show in orange, like a shot.
+          const rams = u.type === 'jeep' ? moves.filter(i => { const o = Engine.occupant(G, i); return o && o.side === 2; }) : [];
+          const walk = moves.filter(i => !rams.includes(i));
+          markCells(walk.filter(i => !danger.has(i)), '#0f766e');
+          markCells(walk.filter(i => danger.has(i)), '#ea580c');
+          if (rams.length) { fillCells(rams, 'rgba(234,88,12,0.38)', '#c2410c'); if (rams.includes(G.cmd[2])) crosshair(G.cmd[2]); }
         }
       }
     }
@@ -2519,6 +2616,13 @@ function drawPiece(u, cx, cy, R) {
       ctx.fillStyle = '#fff'; ctx.font = `700 ${br * 1.3}px system-ui,sans-serif`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
       ctx.fillText(String(riders), bx, by + 0.5);
     }
+  } else if (u.type === 'kami') {
+    // A delta-wing dart with an orange warhead at the nose, unlike the four-rotor scout drone.
+    const k = R * 0.95;
+    ctx.setLineDash([]);
+    ctx.beginPath(); ctx.moveTo(cx, cy - k); ctx.lineTo(cx + k * 0.85, cy + k * 0.75); ctx.lineTo(cx, cy + k * 0.35); ctx.lineTo(cx - k * 0.85, cy + k * 0.75); ctx.closePath();
+    ctx.fillStyle = setting ? '#fff' : col; ctx.fill(); ctx.lineWidth = 2; ctx.strokeStyle = setting ? col : '#fff'; ctx.stroke();
+    ctx.beginPath(); ctx.arc(cx, cy - k * 0.45, Math.max(2.5, k * 0.2), 0, Math.PI * 2); ctx.fillStyle = '#f97316'; ctx.fill(); ctx.lineWidth = 1.2; ctx.strokeStyle = '#fff'; ctx.stroke();
   } else if (u.type === 'drone') {
     const k = R * 0.62, rr = R * 0.34;
     ctx.setLineDash([]);
@@ -2640,7 +2744,7 @@ function dangerSet(kind = 'both') {
   for (let i = 0; i < contact.length; i++) if ((kind !== 'shot' && contact[i]) || (kind !== 'contact' && shot[i])) set.add(i);
   return set;
 }
-function myTurn() { return !!G && !G.over && !ui.busy && !(ui.mp && G.turn !== 1); }
+function myTurn() { return !!G && !G.over && !ui.busy && G.mode !== 'watch' && !(ui.mp && G.turn !== 1); }
 function clearSel() { ui.mode = 'idle'; ui.sel = null; ui.deployType = null; ui.action = null; }
 function toast(msg, ms = 2600) {
   const t = $('toast'); t.textContent = msg; t.classList.remove('hidden');
@@ -2656,7 +2760,7 @@ function describe(i) {
   if (G.mound[i]) s += ' Ground raised ' + G.mound[i] + ' level' + (G.mound[i] > 1 ? 's' : '') + '.';
   if (k === Engine.T.TRENCH) s += ' Rifles cannot hit a piece in this trench, and it soaks up one shell.' + (G.mode === 'zombie' ? ' A zombie spends a whole move climbing in and another climbing out.' : '');
   if (G.tread[i]) s += ' Tire treads: pieces can run along them like a road.';
-  if (k === Engine.T.BARRICADE) s += ' Blocks movement and sight until artillery knocks it down.' + (G.mode === 'zombie' ? ' Zombies claw at it: ' + (G.bhp && G.bhp[i] != null ? G.bhp[i] : Engine.BARRICADE_HP) + ' of ' + Engine.BARRICADE_HP + ' health left.' : '');
+  if (k === Engine.T.BARRICADE) s += ' Blocks movement and sight. ' + (G.bhp && G.bhp[i] != null ? G.bhp[i] : Engine.BARRICADE_HP) + ' of ' + Engine.BARRICADE_HP + ' health left. A shell, grenade or kamikaze drone takes 2, a howitzer shell all 3' + (G.mode === 'zombie' ? ', a zombie claw 1.' : '.');
   if (o === 2) s += ' Worth ' + t + ' to capture.';
   s += ' Artillery here reaches ' + (2 + t) + '.';
   if (G.fog && !seen) s = 'Hidden by fog. ' + s;
@@ -2665,7 +2769,7 @@ function describe(i) {
   else if (i === G.cmd[1]) s = 'Your commander' + (G.riding && G.riding[1] ? ', riding in this jeep' : '') + ', ' + G.hp[1] + ' of ' + Engine.CMD_HP + ' health. ' + s;
   const wr = (G.wrecks || []).filter(w => w.idx === i && (w.side === 1 || w.by === 1 || seen));
   if (wr.length) {
-    const WN = { soldier: 'soldier', rifle: 'rifleman', drone: 'drone', jeep: 'jeep', arty: 'artillery', how: 'howitzer', struct: 'structure', zombie: 'zombie' };
+    const WN = { soldier: 'soldier', rifle: 'rifleman', drone: 'drone', kami: 'kamikaze drone', jeep: 'jeep', arty: 'artillery', how: 'howitzer', struct: 'structure', zombie: 'zombie' };
     s = wr.map(w => 'Wreckage of ' + (w.side === 1 ? 'your ' : 'an enemy ') + WN[w.type] + ', destroyed in round ' + w.round + '.').join(' ') + ' ' + s;
   }
   const b = Engine.structAt(G, i);
@@ -2764,14 +2868,15 @@ function selectUnit(u) {
     ui.info = !Engine.hasDriver(G, u)
       ? 'No driver. Tap Load, then tap a soldier, rifleman or your commander beside the jeep. It cannot move until someone is aboard.'
       : (boss ? 'Your commander is aboard. ' : '') + (n ? n + ' trooper' + (n > 1 ? 's' : '') + ' aboard. ' : '') +
-        (u.cargo ? 'Towing artillery, tap Drop gun beside the jeep after driving. ' : '') + 'Jeeps drive 2 cells, or 3 along roads and tire treads.';
+        (u.cargo ? 'Towing artillery, tap Drop gun beside the jeep after driving. ' : '') + 'Jeeps drive 2 cells, or 3 along roads and tire treads. Tap an orange enemy trooper to run it down.';
     return;
   }
   ui.mode = 'unit'; ui.sel = u.id;
   if (u.type === 'arty' && Engine.reloading(G, u)) ui.info = 'Howitzer reloading. It can fire again in round ' + u.cool + '.' + (moves ? ' It can still move.' : '');
   else if (u.type === 'arty') ui.info = (u.heavy ? 'Howitzer, range ' : 'Range ') + Engine.gunRange(G, u) + ', shown by the blue square. ' + (u.heavy ? 'Its barrel cannot drop low enough for the gray inner square, 3 cells out, or for lower ground inside the outer gray square, 6 cells out. ' : '') + (shots ? 'Orange cells can be shelled. ' : 'It can only shell what your side can see, so nothing is a target yet. A drone, helicopter or recon plane over that square spots targets for it. ') + (moves ? 'Solid teal keeps the shot, dashed teal uses it.' : '');
   else if (u.type === 'rifle') ui.info = 'Range ' + Engine.rifleRange(G, u.idx) + ' with a clear line of sight. ' + (shots ? 'Orange cells can be shot. ' : '') + (moves ? 'Teal cells are moves. It can move and shoot in the same turn.' : '');
-  else if (u.type === 'drone') ui.info = 'Drones fly over anything and see 6 cells around them.';
+  else if (u.type === 'drone') ui.info = 'Scout drones fly over anything and see 6 cells around them.';
+  else if (u.type === 'kami') ui.info = Engine.canShoot(G, u) ? 'Tap orange to dive onto it, within 3 cells, or teal to fly closer. A dive destroys the drone. It only sees 2 cells, so scout for it.' : 'It flew this turn, so it can dive next turn.';
   else ui.info = 'Moving onto an enemy piece destroys it. Or throw a grenade, dig in, block a path, raise the ground or pave a road.';
 }
 // After a piece acts, keep it selected if it still has something to do.
@@ -2879,7 +2984,7 @@ function openDeploy() {
   if (ui.mode === 'deploy') { clearSel(); ui.info = ''; return render(); }
   const list = $('deployList');
   list.innerHTML = '';
-  for (const type of ['soldier', 'rifle', 'drone', 'jeep', 'arty', 'how', 'plane', 'heli']) {
+  for (const type of ['soldier', 'rifle', 'drone', 'kami', 'jeep', 'arty', 'how', 'plane', 'heli']) {
     const b = document.createElement('button');
     const why = Engine.deployCheck(G, 1, type, null);
     const noRoom = !why && type !== 'plane' && type !== 'heli' && !Engine.deployCells(G, 1, type).length;
@@ -3052,7 +3157,7 @@ function lossesNote() {
   const seen = G.seenWreck || 0, vis = Engine.sight(G, 1);
   const fresh = (G.wrecks || []).filter(w => w.n > seen);
   G.seenWreck = G.wreckSeq || 0;
-  const WN = { soldier: ['soldier', 'soldiers'], rifle: ['rifleman', 'riflemen'], drone: ['drone', 'drones'], jeep: ['jeep', 'jeeps'], arty: ['artillery piece', 'artillery pieces'], how: ['howitzer', 'howitzers'], struct: ['structure', 'structures'], zombie: ['zombie', 'zombies'] };
+  const WN = { soldier: ['soldier', 'soldiers'], rifle: ['rifleman', 'riflemen'], drone: ['drone', 'drones'], kami: ['kamikaze drone', 'kamikaze drones'], jeep: ['jeep', 'jeeps'], arty: ['artillery piece', 'artillery pieces'], how: ['howitzer', 'howitzers'], struct: ['structure', 'structures'], zombie: ['zombie', 'zombies'] };
   const say = list => {
     const c = {};
     for (const w of list) c[w.type] = (c[w.type] || 0) + 1;
@@ -3077,6 +3182,7 @@ function turnStartNote() {
   if (bits.length) ui.info = bits.join(' ');
 }
 $('undoBtn').onclick = () => {
+  if (G && G.mode === 'watch') { if (!G.over) watchToggle(); return; }
   if (!ui.undo.length || ui.busy) return;
   const e = ui.undo.pop(); G = e.g; ui.acts.length = e.n; clearSel(); ui.info = 'Undone.'; paintLayers(); persist(); render();
 };
@@ -3084,6 +3190,7 @@ $('ctrBtn').onclick = () => focusCommander();
 $('endBtn').onclick = () => endTurn();
 
 function endTurn() {
+  if (G && G.mode === 'watch' && !G.over) { watchStep(); if (ui.watch && ui.watch.on) watchNext(); return; }
   if (!G || !myTurn()) return;
   G.seenWreck = G.wreckSeq || 0;
   if (ui.mp) return mpEndTurn();
@@ -3100,8 +3207,38 @@ function endTurn() {
   }, 420);
 }
 
+// ---------- computer against computer ----------
+// Blue and red are both played by the computer. Each half of a round plays out on its own after a
+// short pause, so the battle can be followed. End turn becomes Pause and Play.
+const WATCH_STEP = 1600;
+function watchNext(ms) {
+  const w = ui.watch;
+  if (!w || !w.on || !G || G.over) return;
+  clearTimeout(w.timer);
+  const game = G;
+  w.timer = setTimeout(() => { if (G === game && ui.watch === w && w.on) watchStep(); }, ms == null ? WATCH_STEP : ms);
+}
+function watchStep() {
+  if (!G || G.over || G.mode !== 'watch') return;
+  if (!ui.watch) ui.watch = { on: false, timer: null };
+  clearSel(); ui.info = '';
+  // Blue plays, then red plays and the round ends. G.blueDone marks which half comes next.
+  if (!G.blueDone) { ui.touched = Engine.watchHalf(G); G.blueDone = true; ui.watch.last = 'Blue'; }
+  else { ui.touched = Engine.playerEnd(G); G.blueDone = false; ui.watch.last = 'Red'; }
+  paintLayers(); render();
+  if (G.over) { ui.watch.on = false; setTimeout(showOver, 600); return; }
+  if (ui.watch.on) watchNext();
+}
+function watchToggle() {
+  if (!ui.watch) ui.watch = { on: false, timer: null };
+  ui.watch.on = !ui.watch.on;
+  if (ui.watch.on) watchNext(150); else clearTimeout(ui.watch.timer);
+  render();
+}
+
 // ---------- HUD ----------
 function hintText() {
+  if (G.mode === 'watch') return G.over ? 'The battle is over.' : (ui.watch && ui.watch.last ? ui.watch.last + ' just moved. ' : '') + (ui.watch && ui.watch.on ? 'Playing by itself. Tap Stop to go back to one move at a time.' : 'Press Next for ' + (G.blueDone ? 'red' : 'blue') + '\'s move.');
   if (ui.mp && ui.busy) return 'Sending your turn to the battle server...';
   if (ui.busy) return G.mode === 'zombie' ? 'The dead are moving...' : 'Enemy is moving...';
   if (!G.over && ui.mode === 'struct') return 'Tap Turn to face it another way, or tap elsewhere to carry on.';
@@ -3111,7 +3248,7 @@ function hintText() {
   if (ui.mode === 'deploy') {
     if (ui.deployType === 'plane') return 'Tap where the recon plane should fly over.';
     if (ui.deployType === 'heli') return 'Tap where the helicopter should hover.';
-    return 'Tap gold squares to place ' + ({ soldier: 'soldiers', rifle: 'riflemen', drone: 'drones', jeep: 'jeeps', arty: 'artillery', how: 'howitzers', mg: 'machine gun nests', barracks: 'barracks', factory: 'jeep factories', range: 'rifle ranges', hangar: 'drone hangars', foundry: 'gun foundries' }[ui.deployType]) + ', then press Done.';
+    return 'Tap gold squares to place ' + ({ soldier: 'soldiers', rifle: 'riflemen', drone: 'scout drones', kami: 'kamikaze drones', jeep: 'jeeps', arty: 'artillery', how: 'howitzers', mg: 'machine gun nests', barracks: 'barracks', factory: 'jeep factories', range: 'rifle ranges', hangar: 'drone hangars', foundry: 'gun foundries' }[ui.deployType]) + ', then press Done.';
   }
   if (ui.mode === 'unit' && ui.action) return {
     grenade: 'Tap an orange cell to throw the grenade.', trench: 'Tap a gold square to dig a trench.',
@@ -3123,6 +3260,7 @@ function hintText() {
     const u = unitById(ui.sel);
     if (u && anyAction(u)) return Engine.unitMoves(G, u).length ? 'Tap teal to move, or pick an action above.' : 'Pick an action above.';
     if (u && u.type === 'drone') return 'Tap teal to fly there.';
+    if (u && u.type === 'kami') return Engine.canShoot(G, u) ? 'Tap orange to dive or teal to fly.' : 'Tap teal to fly there.';
     return 'Tap orange to shoot or teal to move.';
   }
   if (G.riding && G.riding[1] && !G.cmdMoved[1]) return 'Your commander is in a jeep. Select the jeep to drive or step out.';
@@ -3134,21 +3272,24 @@ function render() {
   if (!G) return draw();
   $('pScore').textContent = G.score[1];
   $('eScore').textContent = G.score[2];
-  $('eName').textContent = G.mode === 'zombie' ? 'Zombies' : 'Enemy';
+  const watching = G.mode === 'watch';
+  $('pName').textContent = watching ? 'Blue' : 'You';
+  $('eName').textContent = G.mode === 'zombie' ? 'Zombies' : watching ? 'Red' : 'Enemy';
   $('eName').style.color = G.mode === 'zombie' ? '#4d7c0f' : 'var(--red)';
   $('pBar').style.width = Math.min(100, G.score[1] / Engine.WIN * 100) + '%';
   $('eBar').style.width = Math.min(100, G.score[2] / Engine.WIN * 100) + '%';
   $('roundTxt').textContent = 'Round ' + G.round + '/' + Engine.MAX_ROUNDS;
-  $('supplyTxt').textContent = 'Supply ' + G.supply[1] + ' (+' + Engine.income(G, 1) + '), health ' + G.hp[1];
+  $('supplyTxt').textContent = watching ? 'Health ' + Math.max(0, G.hp[1]) + ' blue, ' + Math.max(0, G.hp[2]) + ' red' : 'Supply ' + G.supply[1] + ' (+' + Engine.income(G, 1) + '), health ' + G.hp[1];
   $('hint').textContent = hintText();
 
   let info = ui.info, warn = ui.warn;
-  if (!G.over && !ui.busy && G.cmdMoved[1] && !info) {
+  if (!G.over && !ui.busy && G.cmdMoved[1] && !info && !watching) {
     if (dangerSet('contact').has(G.cmd[1])) { info = 'Warning: an enemy piece you can see can reach your commander next turn and end the battle.'; warn = true; }
     else if (dangerSet('shot').has(G.cmd[1])) { info = 'Warning: your commander is inside the range of an enemy gun you can see.'; warn = true; }
   }
   if (!info && G.mapSource === 'none') info = 'Road and building data is missing, so roads will not speed anything up. Menu, Reload roads and buildings tries again.';
   if (!info && ui.mp && !ui.mp.joined && !G.over) info = 'Your friend has not joined yet. Menu, Invite a friend, shows the link to send.';
+  if (!info && watching && !G.over) info = 'The computer plays both sides. Tap any piece to see what it is. Auto plays a move every couple of seconds.';
   if (!info && G.round === 1 && !G.cmdMoved[1] && G.mode === 'zombie') info = 'The zombie nest, in green, is about ' + Engine.cheb(G, G.cmd[1], G.hq[2]) + ' cells away. It births more zombies every turn, and more as the horde spreads. Destroy the nest and every zombie to win, or hold out for ' + Engine.MAX_ROUNDS + ' rounds.';
   if (!info && G.round === 1 && !G.cmdMoved[1]) info = G.fog
     ? 'The enemy started about ' + Engine.cheb(G, G.cmd[1], G.hq[2]) + ' cells away, marked with a faded star. Scout with drones or aircraft to find them.'
@@ -3165,11 +3306,14 @@ function render() {
   $('deployBtn').disabled = !idle;
   $('deployBtn').classList.toggle('on', ui.mode === 'deploy');
   $('deployBtn').querySelector('small').textContent = ui.mode === 'deploy' ? 'tap to cancel' : G.supply[1] + ' supply';
-  $('undoBtn').disabled = !idle || !ui.undo.length;
-  $('endBtn').disabled = !idle;
-  $('endBtn').textContent = ui.mp ? (ui.busy ? 'Sending' : !G.over && G.turn !== 1 ? 'Their turn' : 'End turn') : ui.busy ? 'Enemy turn' : 'End turn';
+  $('undoBtn').disabled = watching ? !!G.over : !idle || !ui.undo.length;
+  $('undoBtn').firstChild.textContent = watching ? (ui.watch && ui.watch.on ? 'Stop' : 'Auto') : 'Undo';
+  $('undoBtn').querySelector('small').textContent = watching ? (ui.watch && ui.watch.on ? 'playing' : 'play by itself') : 'this turn';
+  $('endBtn').disabled = watching ? !!G.over : !idle;
+  $('endBtn').textContent = watching ? 'Next' : ui.mp ? (ui.busy ? 'Sending' : !G.over && G.turn !== 1 ? 'Their turn' : 'End turn') : ui.busy ? 'Enemy turn' : 'End turn';
   $('endBtn').classList.toggle('ready', idle && hintText().startsWith('All set'));
   $('mSurrender').disabled = !idle;
+  $('ctrBtn').querySelector('small').textContent = watching ? 'on blue' : 'on you';
   $('mSurrender').textContent = G.cleanup ? 'Finish battle' : 'Surrender';
   draw();
   checkOffer();
@@ -3469,7 +3613,7 @@ segment('sizeSeg', 'size', 'n', 'tw_size', v => +v);
 segment('diffSeg', 'diff', 'd', 'tc_diff');
 segment('oppSeg', 'opp', 'o', 'tw_opp');
 function syncOpp() {
-  const off = ui.opp === 'friend';
+  const off = ui.opp === 'friend' || ui.opp === 'watch';
   $('diffSeg').classList.toggle('off', off);
   document.querySelectorAll('#diffSeg button').forEach(b => { b.disabled = off; });
 }
@@ -3546,6 +3690,7 @@ async function launch(B, diff, fog, far = ui.far) {
   setPhase('play');
   persist();
   if (ui.mp) setTimeout(showInvite, 600);
+  if (G.mode === 'watch') ui.watch = { on: false, timer: null };
   if (source === 'generated') toast('Elevation sources did not answer, so this map uses generated hills.', 4200);
   else if (mapSource === 'none') { toast('Road data did not load, so every cell counts as open ground. Retrying in the background.', 5000); setTimeout(() => reloadMapData(true), 8000); }
   else if (mapSource === 'no buildings') { toast('Roads loaded. Buildings did not, retrying in the background.', 4200); setTimeout(() => reloadMapData(true), 8000); }
@@ -3562,8 +3707,8 @@ $('startBtn').onclick = () => {
   const f = setupFrame();
   const nw = crs.project(map.containerPointToLatLng([f.x, f.y]));
   const ne = crs.project(map.containerPointToLatLng([f.x + f.side, f.y]));
-  ui.launchMode = ui.opp === 'zombie' ? 'zombie' : '';
-  launch({ size: ui.size, cell: (ne.x - nw.x) / ui.size, x0: nw.x, y0: nw.y }, ui.opp === 'friend' ? 'friend' : ui.diff, ui.fog);
+  ui.launchMode = ui.opp === 'zombie' || ui.opp === 'watch' ? ui.opp : '';
+  launch({ size: ui.size, cell: (ne.x - nw.x) / ui.size, x0: nw.x, y0: nw.y }, ui.opp === 'friend' ? 'friend' : ui.opp === 'watch' ? 'normal' : ui.diff, ui.opp === 'watch' ? false : ui.fog);
 };
 
 function zoomForCellPx(px) {
@@ -3593,7 +3738,7 @@ function focusCommander() {
 }
 
 function persist() {
-  if (!G) return;
+  if (!G || G.mode === 'watch') return;
   try {
     if (ui.mp) { localStorage.setItem(MP_SAVE, Engine.serialize(G)); mpRemember(); }
     else localStorage.setItem(SAVE_KEY, Engine.serialize(G));
@@ -3932,25 +4077,28 @@ $('exportBtn').onclick = () => {
 
 function showOver() {
   if (!G || !G.over) return;
-  recordHistory();
+  const watching = G.mode === 'watch';
+  if (!watching) recordHistory();
   const w = G.over.winner;
-  $('overTitle').textContent = w === 1 ? 'Victory' : w === 2 ? 'Defeat' : 'Draw';
+  $('overTitle').textContent = watching ? (w === 1 ? 'Blue wins' : w === 2 ? 'Red wins' : 'Draw') : w === 1 ? 'Victory' : w === 2 ? 'Defeat' : 'Draw';
   $('overTitle').style.color = w === 1 ? 'var(--blue)' : w === 2 ? 'var(--red)' : 'var(--ink)';
-  $('overReason').textContent = G.over.reason + '. Round ' + G.round + '.';
+  const why = watching ? G.over.reason.replace('You took out the enemy commander', 'Blue took out the red commander').replace('The enemy took out your commander', 'Red took out the blue commander') : G.over.reason;
+  $('overReason').textContent = why + '. Round ' + G.round + '.';
   $('overP').textContent = G.score[1];
   $('overE').textContent = G.score[2];
-  $('overEName').textContent = G.mode === 'zombie' ? 'Zombies' : 'Enemy';
+  $('overEName').textContent = G.mode === 'zombie' ? 'Zombies' : watching ? 'Red' : 'Enemy';
+  $('overPName').textContent = watching ? 'Blue' : 'You';
   const st = G.stats || { 1: {}, 2: {} }, rows = [
     ['Enemy cells captured', 'captured'], ['Pieces destroyed', 'kills'], ['Pieces lost', 'lost'],
     ['Pieces deployed', 'deployed'], ['Shots fired', 'shots'], ['Hits on the commander', 'hits'],
     ['Aircraft called', 'air'], ['Cells sealed off', 'encircled'], ['Structures built', 'structures'], ['Pieces from structures', 'produced']
   ];
-  $('overStats').innerHTML = '<tr><th></th><th>You</th><th>' + (G.mode === 'zombie' ? 'Zombies' : 'Enemy') + '</th></tr>' +
+  $('overStats').innerHTML = '<tr><th></th><th>' + (watching ? 'Blue' : 'You') + '</th><th>' + (G.mode === 'zombie' ? 'Zombies' : watching ? 'Red' : 'Enemy') + '</th></tr>' +
     rows.map(([label, k]) => '<tr><td>' + label + '</td><td>' + (st[1][k] || 0) + '</td><td>' + (st[2][k] || 0) + '</td></tr>').join('');
   const leftovers = G.units.some(u => u.side === 2) || (G.builds || []).some(b => b.side === 2) || G.cmd[2] >= 0;
-  const canKeep = !ui.mp && G.mode !== 'zombie' && w === 1 && !G.cleanup && leftovers;
+  const canKeep = !ui.mp && G.mode !== 'zombie' && !watching && w === 1 && !G.cleanup && leftovers;
   $('overKeep').disabled = !canKeep;
-  $('overKeep').textContent = canKeep ? 'Keep playing and clear out the enemy' : G.cleanup ? 'Mop-up finished' : ui.mp ? 'Keep playing is for battles against the computer' : 'Keep playing';
+  $('overKeep').textContent = canKeep ? 'Keep playing and clear out the enemy' : G.cleanup ? 'Mop-up finished' : ui.mp ? 'Keep playing is for battles against the computer' : watching ? 'Keep playing is for your own battles' : 'Keep playing';
   $('over').classList.remove('hidden');
 }
 $('overKeep').onclick = () => {
@@ -4053,6 +4201,21 @@ setPhase('setup');
 locate(true);
 try { if (!localStorage.getItem('tw_seen_help_v4')) { open('help'); localStorage.setItem('tw_seen_help_v4', '1'); } } catch (e) { /* ignore */ }
 mpJoinFromLink();
+</script>
+<script>
+// Offline play: install the helper that saves the game and viewed map areas, and ask Firefox to keep them.
+if ("serviceWorker" in navigator) {
+  // On the very first visit the map tiles load before the helper is running. Once it takes over,
+  // fetch the tiles on screen again so they get saved too.
+  const firstVisit = !navigator.serviceWorker.controller;
+  navigator.serviceWorker.addEventListener("controllerchange", () => {
+    if (firstVisit && typeof baseTiles !== "undefined") baseTiles.redraw();
+  });
+  navigator.serviceWorker.register("./sw.js");
+}
+if (navigator.storage && navigator.storage.persist) {
+  navigator.storage.persist();
+}
 </script>
 </body>
 </html>
