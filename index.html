@@ -11,7 +11,7 @@
 <meta name="robots" content="index,follow">
 <link rel="canonical" href="https://topo-wars.vercel.app/">
 <meta name="application-name" content="Topo Wars">
-<meta name="version" content="7.3">
+<meta name="version" content="7.4">
 <meta name="apple-mobile-web-app-title" content="Topo Wars">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -177,7 +177,7 @@ button.on{background:var(--amber-soft);border-color:#f59e0b}
     <button id="ctrBtn">Center<small>on you</small></button>
     <button id="endBtn" class="primary">End turn</button>
   </div>
-  <div class="credit">Topo Wars 7.3. Map data &copy; OpenStreetMap contributors</div>
+  <div class="credit">Topo Wars 7.4. Map data &copy; OpenStreetMap contributors</div>
 </div>
 
 <div id="setup">
@@ -3106,6 +3106,16 @@ function keepOrClear(u) {
   else clearSel();
 }
 
+function sendBomber() {
+  if (!ui.bomb || ui.bomb.d == null) return;
+  const before = G.log.length, d = ui.bomb.d, start = ui.bomb.start;
+  act({ f: 'bomb', i: start, d });
+  clearSel();
+  const res = G.log.slice(before).find(e => /The bomber destroyed/.test(e.t));
+  ui.info = res ? res.t + '.' : 'The bomber could not fly. It needs ' + Engine.COST.bomber + ' supply.';
+  ui.warn = false;
+  render();
+}
 function onTap(i) {
   ui.warn = false;
   if (!myTurn()) { ui.info = describe(i); return render(); }
@@ -3116,20 +3126,13 @@ function onTap(i) {
       // First tap sets where the run starts, the next aims it, a tap inside the red strip sends it.
       const strip = ui.bomb && ui.bomb.d != null ? Engine.bombCells(G, ui.bomb.start, ui.bomb.d) : [];
       if (!ui.bomb) { ui.bomb = { start: i, d: null }; ui.info = 'Run starts here. Now tap toward where the bomber should fly.'; return render(); }
-      if (strip.includes(i) && ui.bomb.d != null) {
-        const before = G.log.length, d = ui.bomb.d, start = ui.bomb.start;
-        act({ f: 'bomb', i: start, d });
-        clearSel();
-        const res = G.log.slice(before).find(e => /The bomber destroyed/.test(e.t));
-        ui.info = res ? res.t + '.' : 'The bomber flew its run.';
-        return render();
-      }
+      if (strip.includes(i) && ui.bomb.d != null) return sendBomber();
       if (i === ui.bomb.start) return render();
       const [r0, c0] = Engine.rcOf(G, ui.bomb.start), [r1, c1] = Engine.rcOf(G, i);
       ui.bomb.d = ((Math.round(Math.atan2(c1 - c0, -(r1 - r0)) / (Math.PI / 4)) % 8) + 8) % 8;
       const cells = Engine.bombCells(G, ui.bomb.start, ui.bomb.d);
       const mine = cells.filter(j => { const o = Engine.occupant(G, j); return o && o.side === 1 && !(o.unit && Engine.isAir(o.unit)); }).length;
-      ui.info = 'The red strip is the run. ' + (mine ? mine + ' of your pieces ' + (mine === 1 ? 'is' : 'are') + ' in it and could be hit. ' : '') + 'Tap inside it to send the bomber for ' + Engine.COST.bomber + ' supply, or tap elsewhere to aim another way.';
+      ui.info = 'The red strip is the run. ' + (mine ? mine + ' of your pieces ' + (mine === 1 ? 'is' : 'are') + ' in it and could be hit. ' : '') + 'Press Send bomber, or tap elsewhere to aim another way.';
       ui.warn = mine > 0;
       return render();
     }
@@ -3295,6 +3298,23 @@ function renderActions(u, idle) {
     bar.classList.remove('hidden');
     bar.innerHTML = '';
     const t = ui.deployType, cost = Engine.STRUCT[t] ? Engine.STRUCT[t].cost : Engine.COST[t];
+    if (t === 'bomber') {
+      const send = document.createElement('button');
+      send.className = 'primary';
+      send.innerHTML = 'Send bomber<small></small>';
+      send.querySelector('small').textContent = ui.bomb && ui.bomb.d != null ? cost + ' supply' : 'aim it first';
+      send.disabled = !(ui.bomb && ui.bomb.d != null);
+      send.onclick = () => sendBomber();
+      const back = document.createElement('button');
+      back.innerHTML = '\u2715 Cancel<small>no bomber</small>';
+      back.onclick = () => { clearSel(); ui.info = ''; ui.warn = false; render(); };
+      const again = document.createElement('button');
+      again.innerHTML = 'New start<small>pick again</small>';
+      again.disabled = !ui.bomb;
+      again.onclick = () => { ui.bomb = null; ui.info = 'Tap where the bomber starts its run.'; ui.warn = false; render(); };
+      bar.append(back, again, send);
+      return;
+    }
     const done = document.createElement('button');
     done.innerHTML = '\u2715 Done<small></small>';
     done.querySelector('small').textContent = 'stop placing';
@@ -3492,7 +3512,7 @@ function hintText() {
   if (ui.mode === 'deploy') {
     if (ui.deployType === 'plane') return 'Tap where the recon plane should fly over.';
     if (ui.deployType === 'heli') return 'Tap where the helicopter should hover.';
-    if (ui.deployType === 'bomber') return !ui.bomb ? 'Tap where the bomber run starts.' : ui.bomb.d == null ? 'Tap toward where it should fly.' : 'Tap inside the red strip to send it.';
+    if (ui.deployType === 'bomber') return !ui.bomb ? 'Tap where the bomber run starts.' : ui.bomb.d == null ? 'Now tap toward where it should fly.' : 'Press Send bomber, or tap to aim another way.';
     return 'Tap gold squares to place ' + ({ soldier: 'soldiers', rifle: 'riflemen', drone: 'scout drones', kami: 'kamikaze drones', jeep: 'jeeps', arty: 'artillery', how: 'howitzers', mg: 'machine gun nests', barracks: 'barracks', factory: 'jeep factories', range: 'rifle ranges', hangar: 'drone hangars', foundry: 'gun foundries' }[ui.deployType]) + ', then press Done.';
   }
   if (ui.mode === 'unit' && ui.action) return {
