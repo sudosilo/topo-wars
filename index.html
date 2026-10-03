@@ -11,7 +11,7 @@
 <meta name="robots" content="index,follow">
 <link rel="canonical" href="https://topo-wars.vercel.app/">
 <meta name="application-name" content="Topo Wars">
-<meta name="version" content="7.4">
+<meta name="version" content="7.6">
 <meta name="apple-mobile-web-app-title" content="Topo Wars">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -177,7 +177,7 @@ button.on{background:var(--amber-soft);border-color:#f59e0b}
     <button id="ctrBtn">Center<small>on you</small></button>
     <button id="endBtn" class="primary">End turn</button>
   </div>
-  <div class="credit">Topo Wars 7.4. Map data &copy; OpenStreetMap contributors</div>
+  <div class="credit">Topo Wars 7.6. Map data &copy; OpenStreetMap contributors</div>
 </div>
 
 <div id="setup">
@@ -296,6 +296,12 @@ button.on{background:var(--amber-soft);border-color:#f59e0b}
       <tr><td>Raise ground</td><td>1</td><td>Piles earth on a cell, adding 1 tier and about 13 feet of height, up to 2 levels. Artillery on a raised cell reaches farther, and riflemen get their longer range from tier 4 up. A rifleman on ground raised the full 2 levels is a sniper and reaches 1 cell farther still. Artillery can drive onto it.</td></tr>
     </table>
     <p>A good pattern is to raise the ground next to your artillery for two turns, then roll the gun up onto it. Barricades across the approach to your commander force the enemy to go around or spend two shells on each. Your own artillery and grenades can knock down your own barricades too, if you ever wall yourself in: select the gun and your barricades in range show in orange.</p>
+
+    <h3>Tanks, mines and the Chinook</h3>
+    <p>A Tank costs 12 supply and needs open ground or road. It steps only 1 cell a turn, even on roads, but fires twice a turn at anything its side can see up to 3 cells away in a clear line, and it can move and fire in the same turn. Each shot hits like an artillery shell on that one cell. It has 3 armor, shown by the yellow dots under it: each shell, grenade, tank shot, kamikaze drone or bomb takes 1, a mine takes 2. Rifles, machine gun nests and soldiers on foot cannot hurt it, a jeep cannot run it over, and a zombie that reaches it can only claw off 1 armor.</p>
+    <p>A Mine drone costs 4 and flies like a scout drone. Select it and tap Drop mine, then a gold square under it or beside it, to bury a mine there. Laying one ends its turn, and it carries 3. Only you can see your mines, as dark discs with a yellow ring. The first enemy piece on the ground to stop on one sets it off: a piece is destroyed, a tank loses 2 armor and a commander loses 1 health. Drones fly over them and your own pieces are safe on them.</p>
+    <p>A Chinook costs 20. Pick it in Deploy, tap where it should land, somewhere your side can see, then tap up to 4 of your jeeps that have not moved this turn. Press Send Chinook and they are set down around that spot, with their troops, your commander if aboard, and any gun in tow. They have used their move for the turn, so the crews unload next turn.</p>
+    <p>A grenade now catches a second enemy piece on the ground right beside its target, the most valuable one there, so one throw can take out two.</p>
 
     <h3>Bomber run</h3>
     <p>For 30 supply, Deploy, Bomber run sends a bomber along a straight line. Tap where the run starts, then tap toward where it should fly, in any of 8 directions. A red strip 3 cells wide and 10 long shows what it will hit, and a warning shows if any of your own pieces are in it. Tap inside the strip to send it. Every cell in the strip is hit 7 times in 10. A hit destroys any piece on the ground, yours included, takes 1 health from a commander, damages a structure, takes 2 from a barricade, or caves in a trench while whoever is in it survives. Troops inside buildings are sheltered and drones in the air are untouched. The strip stays scorched on the map for a round so both sides can see where it fell. It is the answer to a big zombie horde, and the computer uses it when it can see a crowd of your pieces with none of its own in the way.</p>
@@ -489,18 +495,21 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
 /*ENGINE-START*/
 const Engine = (() => {
   const WIN = 150, MAX_ROUNDS = 40;
-  const COST = { soldier: 1, rifle: 2, drone: 2, kami: 3, jeep: 2, arty: 3, how: 6, plane: 3, heli: 4, bomber: 30 };
+  const COST = { soldier: 1, rifle: 2, drone: 2, kami: 3, miner: 4, jeep: 2, arty: 3, how: 6, tank: 12, plane: 3, heli: 4, bomber: 30, chinook: 20 };
   // A howitzer is artillery with 3 more range that needs 2 full rounds to reload after each shot.
   // Height helps a howitzer twice as much as ordinary artillery, but its barrel cannot drop low
   // enough for close targets: nothing within 3 cells, and nothing on lower ground within 6.
   const HOW_EXTRA = 3, HOW_RELOAD = 3, HOW_KILL = 12, HOW_MIN = 3, HOW_MIN_LOW = 6;
-  const KILL = { soldier: 5, rifle: 6, drone: 4, kami: 3, jeep: 5, arty: 8, zombie: 2 };
-  const NAMES = { soldier: 'soldier', rifle: 'rifleman', drone: 'drone', kami: 'kamikaze drone', jeep: 'jeep', arty: 'artillery', how: 'howitzer', plane: 'recon plane', heli: 'helicopter', zombie: 'zombie' };
+  const KILL = { soldier: 5, rifle: 6, drone: 4, kami: 3, miner: 4, tank: 15, jeep: 5, arty: 8, zombie: 2 };
+  const NAMES = { soldier: 'soldier', rifle: 'rifleman', drone: 'drone', kami: 'kamikaze drone', miner: 'mine drone', tank: 'tank', jeep: 'jeep', arty: 'artillery', how: 'howitzer', plane: 'recon plane', heli: 'helicopter', zombie: 'zombie' };
   const nameOf = u => u.heavy ? 'howitzer' : NAMES[u.type];
-  const SIGHT = { cmd: 4, soldier: 3, rifle: 4, arty: 2, drone: 6, kami: 2, jeep: 3, zombie: 3 };
+  const SIGHT = { cmd: 4, soldier: 3, rifle: 4, arty: 2, drone: 6, kami: 2, miner: 3, tank: 3, jeep: 3, zombie: 3 };
+  // Tanks: 3 armor, step 1 cell, fire twice a turn at what they can see in a straight line up to 3 cells.
+  // Rifles, machine guns and soldiers on foot cannot hurt one. Mine drones carry 3 hidden mines.
+  const TANK_HP = 3, TANK_RANGE = 3, TANK_SHOTS = 2, MINES = 3;
   // A kamikaze drone dives onto something it can see up to KAMI_RANGE cells away, instead of flying that turn.
   const KAMI_RANGE = 3;
-  const isAir = u => u.type === 'drone' || u.type === 'kami';
+  const isAir = u => u.type === 'drone' || u.type === 'kami' || u.type === 'miner';
   // Barricade damage: a claw takes 1, a grenade, shell or kamikaze drone 2, a howitzer shell all 3.
   const BLAST = 2;
   const GRENADES = 2, GRENADE_RANGE = 2, JEEP_RANGE = 2, SEATS = 3;
@@ -538,7 +547,7 @@ const Engine = (() => {
     return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
   }
   const foe = s => 3 - s;
-  const bump = G => { G.ver = (G.ver || 0) + 1; if (G.caches && G.caches.length) lootSweep(G); };
+  const bump = G => { G.ver = (G.ver || 0) + 1; if (G.mines && G.mines.length) mineSweep(G); if (G.caches && G.caches.length) lootSweep(G); };
   const rcOf = (G, i) => [(i / G.size) | 0, i % G.size];
   function nb8(G, i) {
     const n = G.size, r = (i / n) | 0, c = i - r * n, out = [];
@@ -580,7 +589,7 @@ const Engine = (() => {
     return k + n;
   }, 0);
   const ready = (G, u) => u.placed < G.round;
-  const canShoot = (G, u) => (u.type === 'arty' || u.type === 'rifle' || (u.type === 'kami' && !u.moved)) && ready(G, u) && !u.fired && !reloading(G, u);
+  const canShoot = (G, u) => (u.type === 'arty' || u.type === 'rifle' || u.type === 'tank' || (u.type === 'kami' && !u.moved)) && ready(G, u) && !u.fired && !reloading(G, u);
   const artyReady = (G, u) => u.type === 'arty' && canShoot(G, u);
   // A commander riding in a jeep shares the jeep's cell: the cell holds both.
   function occupant(G, i) {
@@ -653,6 +662,15 @@ const Engine = (() => {
     if (G.riding && G.riding[u.side] === u.id) G.riding[u.side] = null;
     stat(G, side, 'kills'); stat(G, u.side, 'lost');
     award(G, side, u.heavy ? HOW_KILL : KILL[u.type], 'Destroyed ' + (u.heavy ? 'a howitzer' : u.type === 'arty' ? 'artillery' : 'a ' + NAMES[u.type]));
+  }
+  // Tanks soak hits with their armor. Everything else is destroyed outright.
+  function hurtUnit(G, side, u, how, dmg = 1) {
+    if (u.type === 'tank') {
+      u.hp = (u.hp == null ? TANK_HP : u.hp) - dmg;
+      if (u.hp > 0) { log(G, side, how + ' hit a tank, ' + u.hp + ' of ' + TANK_HP + ' armor left'); return false; }
+    }
+    killUnit(G, side, u);
+    return true;
   }
   function killCommander(G, side, how) {
     G.hp[foe(side)] = 0;
@@ -759,7 +777,7 @@ const Engine = (() => {
     // they can move between the building's cells and walk back out.
     const inside = G.terr[from] === T.BUILDING;
     const passable = i => foot ? footOK(G, i) && (inside || G.terr[i] !== T.BUILDING) : vehOK(G, i);
-    const canEnd = i => { const o = occupant(G, i); return !o || (o.side !== side && (foot || (mode === 'jeep' && rammable(o)))); };
+    const canEnd = i => { const o = occupant(G, i); return !o || (o.side !== side && ((foot && !(o.unit && o.unit.type === 'tank' && !o.cmd)) || (mode === 'jeep' && rammable(o)))); };
     const offer = (i, road, path) => { const cur = out.get(i); if (!cur || (road && !cur.road)) out.set(i, { road, path }); };
     // A limited search from the start cell. roadOnly keeps it to road and treads.
     const search = (limit, roadOnly) => {
@@ -798,7 +816,7 @@ const Engine = (() => {
       }
     };
     search(mode === 'jeep' ? JEEP_RANGE : 1, false);
-    if (roadLike(G, from)) search(ROAD_RUN, true);
+    if (roadLike(G, from) && mode !== 'tank') search(ROAD_RUN, true);
     out.delete(from);
     return out;
   }
@@ -806,7 +824,7 @@ const Engine = (() => {
   // Pieces in a trench, a building or forest are out of its reach, and so is anything with armor.
   const RAMMABLE = ['soldier', 'rifle', 'zombie'];
   const rammable = o => o.cmd ? !o.unit : !!(o.unit && RAMMABLE.includes(o.unit.type));
-  const modeOf = u => isAir(u) ? 'air' : u.type === 'arty' ? 'veh' : u.type === 'jeep' ? 'jeep' : 'foot';
+  const modeOf = u => isAir(u) ? 'air' : u.type === 'tank' ? 'tank' : u.type === 'arty' ? 'veh' : u.type === 'jeep' ? 'jeep' : 'foot';
   function commanderMoves(G, side) {
     if (G.over || G.cmd[side] < 0 || G.cmdMoved[side] || (G.riding && G.riding[side])) return [];
     return [...moveOptions(G, side, G.cmd[side], 'foot').keys()];
@@ -837,7 +855,7 @@ const Engine = (() => {
     const { road, path } = opts.get(to), o = occupant(G, to);
     if (o && (o.unit || o.cmd)) u.acted = true;
     if (o && o.unit) killUnit(G, u.side, o.unit);
-    if (u.type === 'jeep') {
+    if (u.type === 'jeep' || u.type === 'tank') {
       for (const i of [u.idx, ...path]) if (G.terr[i] !== T.ROAD) G.tread[i] = 1;
       // Face the way the last step went, so the jeep points where it is heading.
       const from = path.length >= 2 ? path[path.length - 2] : u.idx, [fr, fc] = rcOf(G, from), [tr, tc] = rcOf(G, to);
@@ -866,6 +884,14 @@ const Engine = (() => {
   function shotTargets(G, u) {
     if (G.over || !canShoot(G, u)) return [];
     const f = foe(u.side), vis = sight(G, u.side), out = [];
+    if (u.type === 'tank') {
+      for (const i of square(G, u.idx, TANK_RANGE)) {
+        if (i === u.idx || !vis[i] || !los(G, u.idx, i)) continue;
+        const o = occupant(G, i), b = structAt(G, i);
+        if ((o && o.side === f && (o.cmd || !isAir(o.unit))) || (b && b.side === f) || (G.terr[i] === T.BARRICADE && G.owner[i] !== u.side)) out.push(i);
+      }
+      return out;
+    }
     if (u.type === 'kami') {
       for (const i of square(G, u.idx, KAMI_RANGE)) {
         if (!vis[i] || i === u.idx) continue;
@@ -884,7 +910,7 @@ const Engine = (() => {
       if (shellBuilding && !vis[i]) { out.push(i); continue; }
       const o = occupant(G, i), enemyPiece = o && o.side === f;
       if (u.type === 'arty') { const b = structAt(G, i); if (enemyPiece || G.owner[i] === f || shellBuilding || (G.terr[i] === T.BARRICADE && !(o && o.side === u.side)) || (b && b.side === f)) out.push(i); }
-      else if (enemyPiece && G.terr[i] !== T.TRENCH && los(G, u.idx, i)) out.push(i);
+      else if (enemyPiece && G.terr[i] !== T.TRENCH && !(o.unit && o.unit.type === 'tank' && !o.cmd) && los(G, u.idx, i)) out.push(i);
     }
     return out;
   }
@@ -896,6 +922,20 @@ const Engine = (() => {
     G.terr[i] = T.OPEN; delete G.bhp[i];
     log(G, side, how + ' knocked down a barricade');
   }
+  // A tank shell: hits like artillery on the one cell, without taking the ground.
+  function tankFire(G, u, to) {
+    const f = foe(u.side), o = occupant(G, to), sb = structAt(G, to);
+    u.shots = (u.shots || 0) + 1;
+    if (u.shots >= TANK_SHOTS) u.fired = true;
+    stat(G, u.side, 'shots');
+    if (G.terr[to] === T.BARRICADE) hitBarricade(G, u.side, to, BLAST, 'Tank');
+    else if (sb && sb.side === f && !(o && o.side === f)) hitStructure(G, u.side, sb, 'Tank');
+    else if (G.terr[to] === T.TRENCH && o && o.side === f) { G.terr[to] = T.OPEN; log(G, u.side, 'Tank caved in a trench, the ' + (o.cmd ? 'commander' : NAMES[o.unit.type]) + ' inside survived'); }
+    else if (o && o.side === f && o.cmd) hitCommander(G, u.side, 'Tank');
+    else if (o && o.side === f && o.unit) hurtUnit(G, u.side, o.unit, 'Tank');
+    bump(G);
+    return true;
+  }
   // The kamikaze drone flies into its target and is gone. It hits like a shell without taking ground.
   function dive(G, u, to) {
     const f = foe(u.side), o = occupant(G, to), sb = structAt(G, to), who = 'Kamikaze drone';
@@ -905,13 +945,14 @@ const Engine = (() => {
     else if (sb && sb.side === f && !(o && o.side === f)) hitStructure(G, u.side, sb, who);
     else if (G.terr[to] === T.TRENCH && o && o.side === f) { G.terr[to] = T.OPEN; log(G, u.side, 'Kamikaze drone caved in a trench, the ' + (o.cmd ? 'commander' : NAMES[o.unit.type]) + ' inside survived'); }
     else if (o && o.cmd) hitCommander(G, u.side, who);
-    else if (o && o.unit) { log(G, u.side, 'Kamikaze drone struck'); killUnit(G, u.side, o.unit); }
+    else if (o && o.unit) { log(G, u.side, 'Kamikaze drone struck'); hurtUnit(G, u.side, o.unit, who); }
     bump(G);
     return true;
   }
   function fire(G, u, to) {
     if (!shotTargets(G, u).includes(to)) return false;
     if (u.type === 'kami') return dive(G, u, to);
+    if (u.type === 'tank') return tankFire(G, u, to);
     const f = foe(u.side), o = occupant(G, to), who = u.heavy ? 'Howitzer' : u.type === 'arty' ? 'Artillery' : 'Rifleman';
     u.fired = true;
     if (u.heavy) u.cool = G.round + HOW_RELOAD;
@@ -933,7 +974,7 @@ const Engine = (() => {
     if (o && o.side === f && o.cmd) {
       hitCommander(G, u.side, who);
       if (G.over || u.type === 'rifle') { bump(G); return true; }
-    } else if (o && o.side === f && o.unit) killUnit(G, u.side, o.unit);
+    } else if (o && o.side === f && o.unit) hurtUnit(G, u.side, o.unit, who);
     if (u.type === 'arty') {
       if (G.owner[to] !== f && !(o && o.side === f)) log(G, u.side, 'Artillery shelled a cell');
       capture(G, u.side, to);
@@ -1081,7 +1122,13 @@ const Engine = (() => {
     if (G.terr[to] === T.BARRICADE && !(o && o.side === f)) hitBarricade(G, u.side, to, BLAST, 'Grenade');
     else if (sb && sb.side === f && !(o && o.side === f)) hitStructure(G, u.side, sb, 'Grenade');
     else if (o && o.cmd) hitCommander(G, u.side, 'Grenade');
-    else if (o && o.unit) killUnit(G, u.side, o.unit);
+    else if (o && o.unit) hurtUnit(G, u.side, o.unit, 'Grenade');
+    // The blast also catches one more enemy piece on the ground right beside the target, the most valuable one.
+    if (!G.over) {
+      const near = nb8(G, to).map(j => unitAt(G, j)).filter(v => v && v.side === f && !isAir(v) && G.terr[v.idx] !== T.BUILDING);
+      near.sort((a, b) => (KILL[b.type] || 0) - (KILL[a.type] || 0) || a.idx - b.idx);
+      if (near.length) { log(G, u.side, 'The grenade blast caught a second ' + NAMES[near[0].type]); hurtUnit(G, u.side, near[0], 'Grenade'); }
+    }
     bump(G);
     return true;
   }
@@ -1203,7 +1250,7 @@ const Engine = (() => {
     const f = foe(side), vis = sight(G, side);
     for (const b of nests) {
       const R = rifleRange(G, b.idx);
-      const targets = G.units.filter(u => u.side === f && vis[u.idx] && cheb(G, u.idx, b.idx) <= R && G.terr[u.idx] !== T.TRENCH && los(G, b.idx, u.idx))
+      const targets = G.units.filter(u => u.side === f && u.type !== 'tank' && vis[u.idx] && cheb(G, u.idx, b.idx) <= R && G.terr[u.idx] !== T.TRENCH && los(G, b.idx, u.idx))
         .sort((a, c) => cheb(G, a.idx, b.idx) - cheb(G, c.idx, b.idx)).slice(0, MG_SHOTS);
       let shots = targets.length;
       for (const u of targets) if (G.units.includes(u)) killUnit(G, side, u);
@@ -1264,6 +1311,7 @@ const Engine = (() => {
           touched.push(best); break;
         }
         if (sb) { if (sb.side === P) hitStructure(G, Z, sb, 'Zombies'); touched.push(best); break; }
+        if (o && o.unit && o.side === P && o.unit.type === 'tank' && (o.unit.hp == null ? TANK_HP : o.unit.hp) > 1) { hurtUnit(G, Z, o.unit, 'Zombies'); touched.push(best); break; }
         if (o && o.unit && o.side === P) { killUnit(G, Z, o.unit); z.idx = best; capture(G, Z, best); touched.push(best); break; }
         if ((t === T.BUILDING || t === T.TRENCH) && steps < ZOMBIE_STEPS) break;
         z.idx = best; capture(G, Z, best); touched.push(best);
@@ -1327,7 +1375,7 @@ const Engine = (() => {
       if (b.side !== side || G.round < b.next || !STRUCT[b.type].makes) continue;
       const S = STRUCT[b.type], type = S.makes;
       const fits = i => !occupant(G, i) && G.terr[i] !== T.STRUCT && G.owner[i] !== foe(side) &&
-        (type === 'jeep' || type === 'arty' ? vehOK(G, i) : type === 'drone' || type === 'kami' ? true : footOK(G, i));
+        (type === 'jeep' || type === 'arty' || type === 'tank' ? vehOK(G, i) : type === 'drone' || type === 'kami' || type === 'miner' ? true : footOK(G, i));
       // Right beside it first; if that is full, the nearest free cell of its own within 3.
       let room = nb8(G, b.idx).filter(fits);
       for (let R = 2; !room.length && R <= 3; R++) room = square(G, b.idx, R).filter(i => cheb(G, i, b.idx) === R && G.owner[i] === side && fits(i));
@@ -1352,11 +1400,11 @@ const Engine = (() => {
   function deployCheck(G, side, type, i) {
     if (G.over) return 'The battle is over';
     if (G.supply[side] < COST[type]) return 'Needs ' + COST[type] + ' supply';
-    if (type === 'plane' || type === 'heli' || type === 'bomber' || i == null) return null;
+    if (type === 'plane' || type === 'heli' || type === 'bomber' || type === 'chinook' || i == null) return null;
     if (G.owner[i] !== side) return 'Place units on your own territory';
     if (occupant(G, i)) return 'That cell is occupied';
     if (G.terr[i] === T.STRUCT) return 'A structure stands there';
-    if ((type === 'arty' || type === 'how' || type === 'jeep') && !vehOK(G, i)) return (type === 'arty' ? 'Artillery' : type === 'how' ? 'A howitzer' : 'A jeep') + ' needs a road or open ground, not ' + T_NAMES[G.terr[i]].toLowerCase();
+    if ((type === 'arty' || type === 'how' || type === 'jeep' || type === 'tank') && !vehOK(G, i)) return (type === 'arty' ? 'Artillery' : type === 'how' ? 'A howitzer' : type === 'tank' ? 'A tank' : 'A jeep') + ' needs a road or open ground, not ' + T_NAMES[G.terr[i]].toLowerCase();
     if ((type === 'soldier' || type === 'rifle') && !footOK(G, i)) return 'Troops cannot stand on ' + T_NAMES[G.terr[i]].toLowerCase();
     return null;
   }
@@ -1371,6 +1419,8 @@ const Engine = (() => {
     const unit = { id: G.nextId++, side, type: type === 'how' ? 'arty' : type, idx: i, placed: G.round, moved: true, fired: true };
     if (type === 'how') unit.heavy = true;
     if (type === 'soldier') unit.g = GRENADES;
+    if (type === 'tank') unit.hp = TANK_HP;
+    if (type === 'miner') unit.m = MINES;
     G.units.push(unit);
     stat(G, side, 'deployed');
     log(G, side, 'Placed ' + (type === 'arty' ? 'artillery' : 'a ' + NAMES[type]) + ' on tier ' + G.tier[i]);
@@ -1383,6 +1433,67 @@ const Engine = (() => {
     G.air.push({ side, kind, idx: i, round: G.round, until: G.round + AIR[kind].turns - 1 });
     stat(G, side, 'air');
     log(G, side, kind === 'plane' ? 'Called a recon plane' : 'Sent a helicopter to hover for ' + AIR.heli.turns + ' turns');
+    bump(G);
+    return true;
+  }
+
+  // ---------- mines ----------
+  // A mine drone lays a hidden mine on the ground under it or beside it, using its turn. Only its own
+  // side can see the mine. The first enemy piece on the ground to stop on it sets it off: a piece is
+  // destroyed (a tank loses 2 armor) and a commander loses 1 health. Drones fly over them.
+  const minesLeft = u => (u.m == null ? MINES : u.m);
+  const mineAt = (G, i) => (G.mines || []).find(m => m.idx === i);
+  function mineCells(G, u) {
+    if (G.over || u.type !== 'miner' || !ready(G, u) || u.fired || minesLeft(u) <= 0) return [];
+    return [u.idx, ...nb8(G, u.idx)].filter(i => footOK(G, i) && G.terr[i] !== T.BUILDING && !mineAt(G, i) && !cacheAt(G, i) && !(occupant(G, i) && i !== u.idx));
+  }
+  function dropMine(G, u, i) {
+    if (!mineCells(G, u).includes(i)) return false;
+    (G.mines = G.mines || []).push({ idx: i, side: u.side });
+    u.m = minesLeft(u) - 1; u.fired = true; u.moved = true;
+    stat(G, u.side, 'mines');
+    log(G, u.side, 'A drone laid a mine');
+    bump(G);
+    return true;
+  }
+  function mineSweep(G) {
+    for (const m of G.mines.slice()) {
+      const o = occupant(G, m.idx);
+      if (!o || o.side === m.side || (o.unit && !o.cmd && isAir(o.unit))) continue;
+      G.mines.splice(G.mines.indexOf(m), 1);
+      log(G, m.side, 'A mine went off');
+      if (o.cmd) hitCommander(G, m.side, 'A mine');
+      if (o.unit && !isAir(o.unit) && !G.over) hurtUnit(G, m.side, o.unit, 'A mine', 2);
+    }
+  }
+
+  // ---------- Chinook ----------
+  // Lifts up to 4 of your jeeps that have not moved this turn, with whoever and whatever they carry,
+  // and sets them down around a spot your side can see. They have used their move for the turn.
+  function chinookPlan(G, side, to, ids) {
+    if (G.over || G.supply[side] < COST.chinook || !Number.isInteger(to) || to < 0 || to >= G.size * G.size || !sight(G, side)[to]) return null;
+    if (!Array.isArray(ids) || !ids.length || ids.length > 4 || new Set(ids).size !== ids.length) return null;
+    const jeeps = ids.map(id => G.units.find(u => u.id === id && u.side === side && u.type === 'jeep' && ready(G, u) && !u.moved));
+    if (jeeps.some(j => !j)) return null;
+    const lift = new Set(jeeps.map(j => j.idx));
+    const spots = square(G, to, 2).filter(i => vehOK(G, i) && G.terr[i] !== T.STRUCT && (!occupant(G, i) || lift.has(i)))
+      .sort((a, b) => cheb(G, a, to) - cheb(G, b, to) || a - b);
+    if (spots.length < jeeps.length) return null;
+    return jeeps.map((j, k) => [j, spots[k]]);
+  }
+  function chinook(G, side, to, ids) {
+    const plan = chinookPlan(G, side, to, ids);
+    if (!plan) return false;
+    G.supply[side] -= COST.chinook;
+    stat(G, side, 'air');
+    for (const [j] of plan) j.idx = -1;
+    for (const [j, at] of plan) {
+      j.idx = at; j.moved = true;
+      if (cmdAboard(G, j)) G.cmd[side] = at;
+      capture(G, side, at);
+    }
+    log(G, side, 'A Chinook flew in ' + plan.length + ' jeep' + (plan.length > 1 ? 's' : ''));
+    encircle(G, side);
     bump(G);
     return true;
   }
@@ -1436,11 +1547,11 @@ const Engine = (() => {
           log(G, side, 'A bomb hit our own commander, ' + Math.max(0, G.hp[side]) + ' health left');
           if (G.hp[side] <= 0) finish(G, f, side === 1 ? 'Your own bomber took out your commander' : 'The enemy bomber took out its own commander');
         }
-        if (o.unit && !isAir(o.unit) && !G.over) { if (o.side === f) { killUnit(G, side, o.unit); theirs++; } else { friendlyLoss(G, o.unit, side); mine++; } }
+        if (o.unit && !isAir(o.unit) && !G.over) { if (o.side === f) { if (hurtUnit(G, side, o.unit, 'A bomb')) theirs++; } else { friendlyLoss(G, o.unit, side); mine++; } }
         continue;
       }
       if (isAir(o.unit)) continue;
-      if (o.side === f) { killUnit(G, side, o.unit); theirs++; } else { friendlyLoss(G, o.unit, side); mine++; }
+      if (o.side === f) { if (hurtUnit(G, side, o.unit, 'A bomb')) theirs++; } else if (o.unit.type === 'tank' && (o.unit.hp == null ? TANK_HP : o.unit.hp) > 1) { o.unit.hp = (o.unit.hp == null ? TANK_HP : o.unit.hp) - 1; log(G, side, 'A bomb hit one of our own tanks'); } else { friendlyLoss(G, o.unit, side); mine++; }
     }
     G.bomb = { cells, round: G.round, side };
     log(G, side, 'The bomber destroyed ' + theirs + ' enemy piece' + (theirs === 1 ? '' : 's') + (mine ? ' and ' + mine + ' of our own' : '') + (boss ? ', and hit ' + boss : ''));
@@ -1474,7 +1585,7 @@ const Engine = (() => {
     G.turn = side;
     G.supply[side] += income(G, side);
     G.cmdMoved[side] = false;
-    for (const u of G.units) if (u.side === side) { u.moved = false; u.fired = false; u.unhitched = false; u.reveal = false; u.acted = false; }
+    for (const u of G.units) if (u.side === side) { u.moved = false; u.fired = false; u.unhitched = false; u.reveal = false; u.acted = false; u.shots = 0; }
     resolveEntries(G, side);
     produce(G, side);
     machineGuns(G, side);
@@ -1648,6 +1759,19 @@ const Engine = (() => {
       if (G.over) return touched;
     }
 
+    // Tanks: fire, roll one cell toward the enemy, fire again with any shot left.
+    for (const u of G.units.filter(u => u.side === me && u.type === 'tank')) {
+      if (!ready(G, u)) continue;
+      shootWith(u); if (G.over) return touched;
+      if (G.units.includes(u) && !u.moved) {
+        const opts = unitMoves(G, u), T0 = def ? home : tgt(), want = def ? 1 : 2;
+        const score = i => -Math.abs(cheb(G, i, T0) - want) * 2 + tierAt(G, i) * 0.3 + rng(G) * 0.2;
+        const at = pickCell(G, opts, score);
+        if (at != null && score(at) > score(u.idx)) { moveUnit(G, u, at); touched.push(at); }
+      }
+      while (G.units.includes(u) && canShoot(G, u) && shootWith(u)) { if (G.over) return touched; }
+    }
+
     // Engineering. Raise the ground beside idle artillery so it can roll up for more range,
     // wall off the commander when enemy troops close in, and dig in soldiers guarding it.
     {
@@ -1756,7 +1880,7 @@ const Engine = (() => {
       const worth = i => {
         const o = occupant(G, i), b = structAt(G, i);
         if (o && o.side === f && o.cmd) return G.diff === 'easy' && me === 2 ? 10 : 1000;
-        if (o && o.side === f && o.unit) return { how: 70, arty: 60, jeep: 45, rifle: 30, soldier: 18, drone: 20, kami: 25, zombie: 8 }[o.unit.heavy ? 'how' : o.unit.type] || 0;
+        if (o && o.side === f && o.unit) return { how: 70, arty: 60, tank: 55, jeep: 45, rifle: 30, soldier: 18, drone: 20, kami: 25, miner: 22, zombie: 8 }[o.unit.heavy ? 'how' : o.unit.type] || 0;
         if (b && b.side === f) return 50;
         return 0;
       };
@@ -1833,7 +1957,7 @@ const Engine = (() => {
 
     // Spend supply toward a mixed force: roughly 35 percent soldiers, 30 riflemen, 20 artillery
     // and up to 2 drones when fighting in fog. Save up when artillery is the piece most needed.
-    const MIX = { soldier: 0.32, rifle: 0.28, arty: 0.20, drone: G.fog ? 0.12 : 0, jeep: 0.08, kami: 0.07 };
+    const MIX = { soldier: 0.32, rifle: 0.28, arty: 0.20, drone: G.fog ? 0.12 : 0, jeep: 0.08, kami: 0.07, tank: 0.08 };
     let reserve = gunsIdle && !airBusy && count(G, me, 'soldier') >= 2 ? COST.plane : 0;
     // Once income is healthy, save up for the next structure it does not have yet.
     const saveFor = ['barracks', 'factory', 'range', 'foundry'].find(t => !(G.builds || []).some(b => b.side === me && b.type === t));
@@ -1841,7 +1965,8 @@ const Engine = (() => {
     for (let k = 0; k < 4; k++) {
       const n = t => count(G, me, t), total = G.units.filter(u => u.side === me).length + 1;
       let want = null, gap = -Infinity;
-      for (const t of ['soldier', 'rifle', 'arty', 'drone', 'jeep', 'kami']) {
+      for (const t of ['soldier', 'rifle', 'arty', 'drone', 'jeep', 'kami', 'tank']) {
+        if (t === 'tank' && (n('tank') >= 2 || G.round < 5 || G.supply[me] < COST.tank + 2)) continue;
         if (t === 'drone' && (n('drone') >= 2 || !G.fog)) continue;
         if (t === 'kami' && (n('kami') >= 2 || G.round < 4 || G.mode === 'zombie')) continue;
         if (t === 'jeep' && (n('jeep') >= 1 || n('arty') < 1)) continue;
@@ -1851,7 +1976,7 @@ const Engine = (() => {
       if (n('soldier') < 2) want = 'soldier';
       else if (n('arty') >= 1 && n('jeep') < 1) want = 'jeep';
       if (G.supply[me] < COST[want]) {
-        if (want === 'arty' || want === 'drone' || want === 'jeep' || want === 'kami') break;
+        if (want === 'arty' || want === 'drone' || want === 'jeep' || want === 'kami' || want === 'tank') break;
         want = 'soldier';
         if (G.supply[me] < COST.soldier) break;
       }
@@ -1860,7 +1985,9 @@ const Engine = (() => {
       if (!cells.length) break;
       const { contact } = reach(G, f, vis()), T0 = def ? home : tgt();
       const guns = G.units.filter(a => a.side === me && a.type === 'arty');
-      const at = want === 'jeep'
+      const at = want === 'tank'
+        ? pickCell(G, cells, i => -cheb(G, i, T0) - (contact[i] ? 2 : 0) + rng(G) * 0.2)
+        : want === 'jeep'
         ? pickCell(G, cells, i => -Math.min(99, ...guns.map(a => cheb(G, a.idx, i))) + rng(G) * 0.2)
         : want === 'arty'
         ? pickCell(G, cells, i => G.tier[i] * 3 - (def ? cheb(G, i, T0) : Math.abs(cheb(G, i, T0) - (1 + G.tier[i])) * 1.5) - (contact[i] ? 20 : 0) + (G.terr[i] === T.ROAD ? 1 : 0))
@@ -1952,8 +2079,9 @@ const Engine = (() => {
     const i = a.i;
     if (!Number.isInteger(i) || i < 0 || i >= G.size * G.size) return false;
     if (a.f === 'cmd') return moveCommander(G, side, i);
-    if (a.f === 'deploy') return ['soldier', 'rifle', 'drone', 'kami', 'jeep', 'arty', 'how'].includes(a.k) && deploy(G, side, a.k, i);
+    if (a.f === 'deploy') return ['soldier', 'rifle', 'drone', 'kami', 'miner', 'jeep', 'arty', 'how', 'tank'].includes(a.k) && deploy(G, side, a.k, i);
     if (a.f === 'air') return (a.k === 'plane' || a.k === 'heli') && callAir(G, side, a.k, i);
+    if (a.f === 'chinook') return chinook(G, side, i, a.ids);
     if (a.f === 'bomb') return Number.isInteger(a.d) && a.d >= 0 && a.d < 8 && bomberRun(G, side, i, a.d);
     if (a.f === 'structure') return !!STRUCT[a.k] && buildStructure(G, side, a.k, i);
     const u = G.units.find(x => x.id === a.u && x.side === side);
@@ -1970,6 +2098,7 @@ const Engine = (() => {
       case 'cmdout': return cmdOut(G, u, i);
       case 'unload': return unload(G, u, i);
       case 'board': return board(G, u, i);
+      case 'mine': return dropMine(G, u, i);
     }
     return false;
   }
@@ -1992,6 +2121,7 @@ const Engine = (() => {
     G.turn = sw(G.turn);
     if (G.offer) G.offer = { ...G.offer, win: sw(G.offer.win) };
     if (G.bomb) G.bomb = { ...G.bomb, side: sw(G.bomb.side) };
+    for (const m of G.mines || []) m.side = sw(m.side);
     if (G.over) G.over = { winner: sw(G.over.winner), reason: REASON_FLIP[G.over.reason] || G.over.reason };
     G.ver = (G.ver || 0) + 1;
     return G;
@@ -2125,7 +2255,7 @@ const Engine = (() => {
       v: 4, size: n, cell: o.cell, x0: o.x0, y0: o.y0, elev: o.elev, tier: o.tier,
       terr: o.terr || new Uint8Array(N), mound: new Uint8Array(N), tread: new Uint8Array(N),
       owner: new Uint8Array(N), known: new Uint8Array(N), explored: new Uint8Array(N),
-      units: [], air: [], builds: [], pave: [], wrecks: [], wreckSeq: 0, riding: { 1: null, 2: null }, cmd: { 1: 0, 2: 0 }, hq: { 1: 0, 2: 0 }, intel: { 1: null, 2: null },
+      units: [], air: [], builds: [], pave: [], wrecks: [], mines: [], wreckSeq: 0, riding: { 1: null, 2: null }, cmd: { 1: 0, 2: 0 }, hq: { 1: 0, 2: 0 }, intel: { 1: null, 2: null },
       hqTaken: { 1: false, 2: false }, score: { 1: 0, 2: 0 }, supply: { 1: 0, 2: 0 },
       hp: { 1: CMD_HP, 2: CMD_HP }, cmdMoved: { 1: false, 2: false }, round: 1, turn: 1, ver: 0, nextId: 1,
       seed: (o.seed >>> 0) || 1, over: null, log: [], source: o.source || '', mapSource: o.mapSource || '',
@@ -2174,7 +2304,7 @@ const Engine = (() => {
     return {
       ...G, owner: G.owner.slice(), known: G.known.slice(), explored: G.explored.slice(), terr: G.terr.slice(), mound: G.mound.slice(), tread: G.tread.slice(),
       units: G.units.map(u => ({ ...u, cargo: u.cargo ? { ...u.cargo } : null, riders: u.riders ? u.riders.map(r => ({ ...r })) : undefined })), air: G.air.map(a => ({ ...a })),
-      bhp: { ...(G.bhp || {}) }, caches: (G.caches || []).map(c => ({ ...c })), builds: (G.builds || []).map(b => ({ ...b })), pave: (G.pave || []).slice(), wrecks: (G.wrecks || []).map(w => ({ ...w })),
+      bhp: { ...(G.bhp || {}) }, caches: (G.caches || []).map(c => ({ ...c })), mines: (G.mines || []).map(m => ({ ...m })), builds: (G.builds || []).map(b => ({ ...b })), pave: (G.pave || []).slice(), wrecks: (G.wrecks || []).map(w => ({ ...w })),
       cmd: { ...G.cmd }, riding: { ...(G.riding || { 1: null, 2: null }) }, hq: { ...G.hq }, hqTaken: { ...G.hqTaken }, score: { ...G.score },
       intel: { 1: G.intel[1] && { ...G.intel[1] }, 2: G.intel[2] && { ...G.intel[2] } },
       supply: { ...G.supply }, hp: { ...G.hp }, cmdMoved: { ...G.cmdMoved }, log: G.log.slice(),
@@ -2205,6 +2335,7 @@ const Engine = (() => {
     if (!o.air) o.air = [];
     if (!o.bhp) o.bhp = {};
     if (!o.caches) o.caches = [];
+    if (!o.mines) o.mines = [];
     if (!o.builds) o.builds = [];
     if (!o.wrecks) o.wrecks = [];
     if (!o.pave) o.pave = [];
@@ -2226,7 +2357,7 @@ const Engine = (() => {
     los, sight, airActive, reach, moveOptions, commanderMoves, moveCommander, unitMoveMap, unitMoves, keepsFire, moveUnit,
     shotTargets, fire, deployCheck, deployCells, deploy, callAir, income, aiTurn, beginTurn, nextRound, playerEnd, watchHalf,
     computeTiers, markSteep, noiseTerrain, create, clone, serialize, deserialize, apply, passTurn, swapSides, keepPlaying, checkWipe,
-    MG_SHOTS, BARRICADE_HP, KAMI_RANGE, DIRS8, BOMB_LEN, BOMB_HIT, bombCells, bomberRun, LOOT_NAMES, cacheAt, BLAST, isAir, zombieTurn, zombieCheck,
+    MG_SHOTS, BARRICADE_HP, KAMI_RANGE, TANK_HP, TANK_RANGE, TANK_SHOTS, MINES, minesLeft, mineAt, mineCells, dropMine, chinookPlan, chinook, hurtUnit, DIRS8, BOMB_LEN, BOMB_HIT, bombCells, bomberRun, LOOT_NAMES, cacheAt, BLAST, isAir, zombieTurn, zombieCheck,
     HOW_EXTRA, HOW_RELOAD, HOW_KILL, HOW_MIN, HOW_MIN_LOW, tooClose, gunRange, reloading, nameOf, buildingGroup, enterCells, enterBuilding, sightRaw,
     STRUCT, STRUCT_HP, STRUCT_KILL, structAt, structCheck, structCells, buildStructure
   };
@@ -2245,6 +2376,9 @@ const PIECES = {
   soldier: { label: 'Soldier', desc: 'Steps 1 cell, or up to 3 along a road. Destroys any enemy piece it steps onto.' },
   rifle: { label: 'Rifleman', desc: 'Moves like a soldier and shoots enemy pieces it can see 2 cells away, 3 from high ground.' },
   drone: { label: 'Scout drone', desc: 'Flies 4 cells over anything and sees 6 cells around it. Cannot attack.' },
+  tank: { label: 'Tank', desc: 'Steps 1 cell a turn and fires twice, up to 3 cells in a clear line. 3 armor; rifles and soldiers cannot hurt it.' },
+  miner: { label: 'Mine drone', desc: 'Flies 4 cells and lays up to 3 hidden mines under or beside it. An enemy on a mine is destroyed.' },
+  chinook: { label: 'Chinook', desc: 'Lifts up to 4 of your jeeps that have not moved, crews and guns included, to a spot you can see.' },
   kami: { label: 'Kamikaze drone', desc: 'Flies 4 cells, or dives onto a target it can see within 3 cells and is destroyed. Sees only 2 cells.' },
   arty: { label: 'Artillery', desc: 'Shells any cell or piece you can see within 2 plus its tier. Roads and open ground only.' },
   how: { label: 'Howitzer', desc: 'Heavy artillery that gains twice as much range from height. Cannot hit anything within 3 cells, or lower ground within 6. Reloads for 2 rounds after each shot.' },
@@ -2285,6 +2419,18 @@ window.addEventListener('resize', () => { map.invalidateSize(); draw(); });
 
 // ---------- offscreen layers ----------
 let terrCv = null, ownCv = null, ownCtx = null, ownImg = null, fogCv = null, fogCtx = null, fogImg = null;
+let terrImg = null;
+// Paint each visible cell straight from the layer's pixel data. Used when zoomed far in, where
+// stretching a tiny layer image hundreds of times over can come out blank in some browsers.
+function fillFromImage(ctx, img, c0, r0, c1, r1, ox, oy, s, times = 1) {
+  const n = G.size, d = img.data;
+  for (let r = r0; r < r1; r++) for (let c = c0; c < c1; c++) {
+    const k = (r * n + c) * 4, a = d[k + 3];
+    if (!a) continue;
+    ctx.fillStyle = 'rgba(' + d[k] + ',' + d[k + 1] + ',' + d[k + 2] + ',' + (a / 255).toFixed(3) + ')';
+    for (let t = 0; t < times; t++) ctx.fillRect(ox + c * s, oy + r * s, Math.ceil(s), Math.ceil(s));
+  }
+}
 function buildTerrainCanvas() {
   const n = G.size;
   terrCv = document.createElement('canvas');
@@ -2305,6 +2451,7 @@ function buildTerrainCanvas() {
     d[i * 4 + 3] = Math.min(255, (p[3] + (1 - h) * 0.18) * 255);
   }
   tctx.putImageData(img, 0, 0);
+  terrImg = img;
   ownCv = document.createElement('canvas');
   ownCv.width = ownCv.height = n;
   ownCtx = ownCv.getContext('2d');
@@ -2395,9 +2542,15 @@ function draw() {
   if (c1 > c0 && r1 > r0) {
     ctx.imageSmoothingEnabled = false;
     const sw = c1 - c0, sh = r1 - r0, dx = ox + c0 * s, dy = oy + r0 * s;
-    for (let k = 0; k < ui.terrain; k++) ctx.drawImage(terrCv, c0, r0, sw, sh, dx, dy, sw * s, sh * s);
-    ctx.drawImage(ownCv, c0, r0, sw, sh, dx, dy, sw * s, sh * s);
-    if (G.fog) ctx.drawImage(fogCv, c0, r0, sw, sh, dx, dy, sw * s, sh * s);
+    if (s >= 20 && terrImg) {
+      if (ui.terrain) fillFromImage(ctx, terrImg, c0, r0, c1, r1, ox, oy, s, ui.terrain);
+      fillFromImage(ctx, ownImg, c0, r0, c1, r1, ox, oy, s);
+      if (G.fog) fillFromImage(ctx, fogImg, c0, r0, c1, r1, ox, oy, s);
+    } else {
+      for (let k = 0; k < ui.terrain; k++) ctx.drawImage(terrCv, c0, r0, sw, sh, dx, dy, sw * s, sh * s);
+      ctx.drawImage(ownCv, c0, r0, sw, sh, dx, dy, sw * s, sh * s);
+      if (G.fog) ctx.drawImage(fogCv, c0, r0, sw, sh, dx, dy, sw * s, sh * s);
+    }
 
     if (s >= 9) {
       ctx.strokeStyle = 'rgba(31,41,55,0.10)'; ctx.lineWidth = 1; ctx.beginPath();
@@ -2579,12 +2732,21 @@ function draw() {
       markCells(moves.filter(i => !danger.has(i) || i === G.cmd[2]), '#15803d');
       markCells(moves.filter(i => danger.has(i) && i !== G.cmd[2]), '#ea580c');
     }
+    if (ui.mode === 'deploy' && ui.deployType === 'chinook') {
+      const jeeps = G.units.filter(j => j.side === 1 && j.type === 'jeep' && Engine.ready(G, j) && !j.moved);
+      markCells(jeeps.filter(j => !(ui.lift && ui.lift.ids.includes(j.id))).map(j => j.idx), '#b45309', true);
+      if (ui.lift) {
+        fillCells(jeeps.filter(j => ui.lift.ids.includes(j.id)).map(j => j.idx), 'rgba(245,158,11,0.35)', '#b45309');
+        box(ui.lift.to, 2, 'rgba(37,99,235,0.12)', '#1d4ed8');
+        markCells([ui.lift.to], '#1d4ed8');
+      }
+    }
     if (ui.mode === 'deploy' && ui.deployType === 'bomber' && ui.bomb) {
       const strip = ui.bomb.d == null ? [] : Engine.bombCells(G, ui.bomb.start, ui.bomb.d);
       fillCells(strip, 'rgba(220,38,38,0.28)', '#b91c1c');
       markCells([ui.bomb.start], '#b91c1c');
     }
-    if (ui.mode === 'deploy' && ui.deployType !== 'plane' && ui.deployType !== 'heli' && ui.deployType !== 'bomber') {
+    if (ui.mode === 'deploy' && ui.deployType !== 'plane' && ui.deployType !== 'heli' && ui.deployType !== 'bomber' && ui.deployType !== 'chinook') {
       markCells(Engine.STRUCT[ui.deployType] ? Engine.structCells(G, 1, ui.deployType) : Engine.deployCells(G, 1, ui.deployType), '#b45309', true);
     }
     if (ui.mode === 'unit' && ui.action) {
@@ -2595,7 +2757,7 @@ function draw() {
       const u = unitById(ui.sel);
       if (u) {
         if (Engine.canShoot(G, u)) {
-          const R = u.type === 'arty' ? Engine.gunRange(G, u) : u.type === 'kami' ? Engine.KAMI_RANGE : Engine.rifleRange(G, u.idx);
+          const R = u.type === 'arty' ? Engine.gunRange(G, u) : u.type === 'kami' ? Engine.KAMI_RANGE : u.type === 'tank' ? Engine.TANK_RANGE : Engine.rifleRange(G, u.idx);
           box(u.idx, R, 'rgba(245,158,11,0.08)', '#b45309');
         }
         const shots = Engine.shotTargets(G, u);
@@ -2641,10 +2803,32 @@ function draw() {
     if (w.type === 'zombie') {
       const pile = (G.wrecks || []).filter(v => v.idx === w.idx && v.type === 'zombie' && v.n <= w.n).length;
       ctx.globalAlpha = Math.max(0.3, 1 - age * 0.1);
-      ctx.fillStyle = 'rgba(54,83,20,0.55)';
-      const sp = [[0, 0.15], [-0.18, 0.08], [0.18, 0.1], [-0.08, -0.05], [0.1, -0.08], [0, -0.2]];
-      const [dx, dy] = sp[(pile - 1) % sp.length];
-      ctx.beginPath(); ctx.ellipse(cx + dx * s, cy + dy * s, s * 0.22, s * 0.1, (pile % 3 - 1) * 0.6, 0, Math.PI * 2); ctx.fill();
+      // A fallen body lying in a dark stain: round head with X eyes, torso, arms flung out, legs.
+      const sp = [[0, 0.12], [-0.16, 0.06], [0.16, 0.08], [-0.06, -0.08], [0.1, -0.1], [0, -0.2]];
+      const [dx, dy] = sp[(pile - 1) % sp.length], bx = cx + dx * s, by = cy + dy * s, k = s * 0.2;
+      ctx.save(); ctx.translate(bx, by); ctx.rotate([-0.5, 0.35, 1.1, -1.2, 0.8, 0][(pile - 1) % 6]);
+      ctx.fillStyle = 'rgba(68,40,24,0.35)';
+      ctx.beginPath(); ctx.ellipse(0, k * 0.15, k * 1.25, k * 0.6, 0, 0, Math.PI * 2); ctx.fill();
+      ctx.strokeStyle = '#3f4a26'; ctx.lineCap = 'round';
+      ctx.lineWidth = Math.max(2, k * 0.42);
+      ctx.beginPath(); ctx.moveTo(-k * 0.45, 0); ctx.lineTo(k * 0.45, 0); ctx.stroke();
+      ctx.lineWidth = Math.max(1.2, k * 0.2);
+      ctx.beginPath();
+      ctx.moveTo(-k * 0.3, 0); ctx.lineTo(-k * 0.55, -k * 0.6); ctx.moveTo(-k * 0.3, 0); ctx.lineTo(-k * 0.6, k * 0.55);
+      ctx.moveTo(k * 0.45, 0); ctx.lineTo(k * 1.0, -k * 0.35); ctx.moveTo(k * 0.45, 0); ctx.lineTo(k * 1.0, k * 0.4);
+      ctx.stroke();
+      ctx.fillStyle = '#6b7a3a';
+      ctx.beginPath(); ctx.arc(-k * 0.85, 0, k * 0.38, 0, Math.PI * 2); ctx.fill();
+      ctx.lineWidth = Math.max(1, k * 0.1); ctx.stroke();
+      if (s >= 20) {
+        const e = k * 0.1;
+        ctx.lineWidth = Math.max(1, k * 0.08);
+        ctx.beginPath();
+        for (const ey of [-k * 0.13, k * 0.13]) { ctx.moveTo(-k * 0.9 - e, ey - e); ctx.lineTo(-k * 0.9 + e, ey + e); ctx.moveTo(-k * 0.9 + e, ey - e); ctx.lineTo(-k * 0.9 - e, ey + e); }
+        ctx.stroke();
+      }
+      ctx.restore();
+      ctx.lineCap = 'butt';
       ctx.globalAlpha = 1;
       continue;
     }
@@ -2673,6 +2857,15 @@ function draw() {
   if (G.bomb && G.round - G.bomb.round <= 1) {
     ctx.fillStyle = 'rgba(68,64,60,0.22)';
     for (const i of G.bomb.cells) { if (!visible(i)) continue; const [x, y] = rect(i); ctx.fillRect(x, y, s, s); }
+  }
+
+  // Your own mines: a dark disc with a yellow ring. The enemy never sees them.
+  for (const m of G.mines || []) {
+    if (m.side !== 1 || !visible(m.idx)) continue;
+    const [x, y] = rect(m.idx), cx = x + s / 2, cy = y + s / 2, k = s * 0.16;
+    ctx.beginPath(); ctx.arc(cx, cy, k, 0, Math.PI * 2); ctx.fillStyle = '#1f2937'; ctx.fill();
+    ctx.lineWidth = Math.max(1.5, s * 0.04); ctx.strokeStyle = '#fbbf24'; ctx.stroke();
+    ctx.beginPath(); for (let q = 0; q < 4; q++) { const a = q * Math.PI / 2 + Math.PI / 4; ctx.moveTo(cx + Math.cos(a) * k, cy + Math.sin(a) * k); ctx.lineTo(cx + Math.cos(a) * k * 1.6, cy + Math.sin(a) * k * 1.6); } ctx.strokeStyle = '#1f2937'; ctx.stroke();
   }
 
   // Supply crates: a wooden box with a question mark, shown where your side can see or has seen.
@@ -2825,6 +3018,29 @@ function drawPiece(u, cx, cy, R) {
       ctx.fillStyle = '#fff'; ctx.font = `700 ${br * 1.3}px system-ui,sans-serif`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
       ctx.fillText(String(riders), bx, by + 0.5);
     }
+  } else if (u.type === 'tank') {
+    // A squat hull on two tread bands, a round turret and a long gun pointing the way it faces.
+    const k = R * 1.02, ang = { n: -Math.PI / 2, e: 0, s: Math.PI / 2, w: Math.PI }[u.face || (u.side === 1 ? 'n' : 's')];
+    ctx.setLineDash([]);
+    ctx.fillStyle = '#374151'; ctx.fillRect(cx - k, cy - k * 0.85, 2 * k, k * 0.38); ctx.fillRect(cx - k, cy + k * 0.47, 2 * k, k * 0.38);
+    ctx.beginPath();
+    if (ctx.roundRect) ctx.roundRect(cx - k * 0.85, cy - k * 0.6, k * 1.7, k * 1.2, k * 0.2); else ctx.rect(cx - k * 0.85, cy - k * 0.6, k * 1.7, k * 1.2);
+    ctx.fillStyle = fill; ctx.fill(); ctx.lineWidth = 2; ctx.strokeStyle = setting ? col : '#fff'; ctx.stroke();
+    ctx.save(); ctx.translate(cx, cy); ctx.rotate(ang);
+    ctx.fillStyle = ink; ctx.fillRect(0, -k * 0.09, k * 1.15, k * 0.18);
+    ctx.restore();
+    ctx.beginPath(); ctx.arc(cx, cy, k * 0.38, 0, Math.PI * 2); ctx.fillStyle = ink; ctx.fill();
+    const hp = u.hp == null ? Engine.TANK_HP : u.hp;
+    for (let q = 0; q < Engine.TANK_HP; q++) { ctx.beginPath(); ctx.arc(cx + (q - 1) * k * 0.45, cy + k * 1.2, Math.max(2, k * 0.13), 0, Math.PI * 2); ctx.fillStyle = q < hp ? '#f59e0b' : '#d1d5db'; ctx.fill(); }
+  } else if (u.type === 'miner') {
+    // A four-rotor drone like the scout, with a round mine slung under it and pips for mines left.
+    const k = R * 0.62, rr = R * 0.3;
+    ctx.setLineDash([]);
+    ctx.moveTo(cx - k, cy - k); ctx.lineTo(cx + k, cy + k); ctx.moveTo(cx + k, cy - k); ctx.lineTo(cx - k, cy + k);
+    ctx.strokeStyle = col; ctx.lineWidth = 3; ctx.stroke();
+    for (const [dx, dy] of [[-k, -k], [k, -k], [-k, k], [k, k]]) { ctx.beginPath(); ctx.arc(cx + dx, cy + dy, rr, 0, Math.PI * 2); ctx.fillStyle = setting ? '#fff' : col; ctx.fill(); ctx.lineWidth = 1.5; ctx.strokeStyle = '#fff'; ctx.stroke(); }
+    ctx.beginPath(); ctx.arc(cx, cy, R * 0.36, 0, Math.PI * 2); ctx.fillStyle = '#1f2937'; ctx.fill(); ctx.lineWidth = 1.5; ctx.strokeStyle = '#fbbf24'; ctx.stroke();
+    if (u.side === 1) { const left = Engine.minesLeft(u); for (let q = 0; q < Engine.MINES; q++) { ctx.beginPath(); ctx.arc(cx + (q - 1) * R * 0.4, cy + R * 1.15, Math.max(2, R * 0.11), 0, Math.PI * 2); ctx.fillStyle = q < left ? '#1f2937' : '#d1d5db'; ctx.fill(); } }
   } else if (u.type === 'kami') {
     // A delta-wing dart with an orange warhead at the nose, unlike the four-rotor scout drone.
     const k = R * 0.95;
@@ -2954,7 +3170,7 @@ function dangerSet(kind = 'both') {
   return set;
 }
 function myTurn() { return !!G && !G.over && !ui.busy && G.mode !== 'watch' && !(ui.mp && G.turn !== 1); }
-function clearSel() { ui.mode = 'idle'; ui.sel = null; ui.deployType = null; ui.action = null; ui.bomb = null; }
+function clearSel() { ui.mode = 'idle'; ui.sel = null; ui.deployType = null; ui.action = null; ui.bomb = null; ui.lift = null; }
 function toast(msg, ms = 2600) {
   const t = $('toast'); t.textContent = msg; t.classList.remove('hidden');
   clearTimeout(toast._t); toast._t = setTimeout(() => t.classList.add('hidden'), ms);
@@ -2967,6 +3183,7 @@ function describe(i) {
   const moveNote = !Engine.footOK(G, i) ? ' Nobody can enter.' : Engine.vehOK(G, i) ? (k === Engine.T.ROAD ? ' Pieces can run up to 3 cells along roads.' : '') : ' Artillery cannot enter.';
   let s = Engine.T_NAMES[k] + ' on ' + TIER_NAMES[t - 1].toLowerCase() + ' (tier ' + t + '), ' + fmtFt(Engine.heightAt(G, i)) + ', ' + who + '.' + moveNote;
   if (G.mound[i]) s += ' Ground raised ' + G.mound[i] + ' level' + (G.mound[i] > 1 ? 's' : '') + '.';
+  { const m = Engine.mineAt(G, i); if (m && m.side === 1) s += ' One of your mines is buried here. Enemy pieces that stop on it set it off.'; }
   if (Engine.cacheAt(G, i) && (seen || G.explored[i])) s += ' A supply crate was left here. Move your commander, a soldier, rifleman, jeep or artillery onto it to open it and see what is inside.';
   if (k === Engine.T.TRENCH) s += ' Rifles cannot hit a piece in this trench, and it soaks up one shell.' + (G.mode === 'zombie' ? ' A zombie spends a whole move climbing in and another climbing out.' : '');
   if (G.tread[i]) s += ' Tire treads: pieces can run along them like a road.';
@@ -2979,7 +3196,7 @@ function describe(i) {
   else if (i === G.cmd[1]) s = 'Your commander' + (G.riding && G.riding[1] ? ', riding in this jeep' : '') + ', ' + G.hp[1] + ' of ' + Engine.CMD_HP + ' health. ' + s;
   const wr = (G.wrecks || []).filter(w => w.idx === i && (w.side === 1 || w.by === 1 || seen));
   if (wr.length) {
-    const WN = { soldier: 'soldier', rifle: 'rifleman', drone: 'drone', kami: 'kamikaze drone', jeep: 'jeep', arty: 'artillery', how: 'howitzer', struct: 'structure', zombie: 'zombie' };
+    const WN = { soldier: 'soldier', rifle: 'rifleman', drone: 'drone', kami: 'kamikaze drone', miner: 'mine drone', tank: 'tank', jeep: 'jeep', arty: 'artillery', how: 'howitzer', struct: 'structure', zombie: 'zombie' };
     s = wr.map(w => 'Wreckage of ' + (w.side === 1 ? 'your ' : 'an enemy ') + WN[w.type] + ', destroyed in round ' + w.round + '.').join(' ') + ' ' + s;
   }
   const b = Engine.structAt(G, i);
@@ -3054,6 +3271,7 @@ const ACTIONS = {
   load: { label: 'Load', cells: u => Engine.loadTargets(G, u), sub: u => Engine.seatsUsed(G, u) + ' of ' + Engine.SEATS + ' seats' },
   cmdout: { label: 'Commander out', cells: u => Engine.cmdOutCells(G, u), sub: () => 'beside the jeep' },
   unload: { label: 'Unload', cells: u => Engine.unloadCells(G, u), sub: u => Engine.ridersOf(u).length + ' aboard' },
+  mine: { label: 'Drop mine', cells: u => Engine.mineCells(G, u), sub: u => Engine.minesLeft(u) + ' left' },
   board: { label: 'Get in jeep', cells: u => Engine.boardTargets(G, u), sub: () => 'jeep beside it' }
 };
 function actionsFor(u) {
@@ -3064,6 +3282,7 @@ function actionsFor(u) {
     return Engine.grenadeTargets(G, u).length ? ['grenade'] : [];
   }
   if (u.type === 'rifle' && !u.moved) return Engine.enterCells(G, u).length ? ['enter'] : [];
+  if (u.type === 'miner') return Engine.minesLeft(u) > 0 && !u.fired ? ['mine'] : [];
   if (u.type === 'jeep') {
     const k = [];
     // Hitching is done by tapping the gun, so only Drop gun has a button.
@@ -3096,6 +3315,8 @@ function selectUnit(u) {
   else if (u.type === 'arty') ui.info = (u.heavy ? 'Howitzer, range ' : 'Range ') + Engine.gunRange(G, u) + ', shown by the blue square. ' + (u.heavy ? 'Its barrel cannot drop low enough for the gray inner square, 3 cells out, or for lower ground inside the outer gray square, 6 cells out. ' : '') + (shots ? 'Orange cells can be shelled. ' : 'It can only shell what your side can see, so nothing is a target yet. A drone, helicopter or recon plane over that square spots targets for it. ') + (moves ? 'Solid teal keeps the shot, dashed teal uses it.' : '');
   else if (u.type === 'rifle') ui.info = (G.mound[u.idx] >= Engine.MOUND_MAX ? 'Sniper on raised ground. ' : '') + 'Range ' + Engine.rifleRange(G, u.idx) + ' with a clear line of sight. ' + (Engine.boardTargets(G, u).length ? 'Tap the jeep in a gold square to climb in. ' : '') + (shots ? 'Orange cells can be shot. ' : '') + (moves ? 'Teal cells are moves. It can move and shoot in the same turn.' : '');
   else if (u.type === 'drone') ui.info = 'Scout drones fly over anything and see 6 cells around them.';
+  else if (u.type === 'tank') ui.info = 'Tank, ' + (u.hp == null ? Engine.TANK_HP : u.hp) + ' of ' + Engine.TANK_HP + ' armor. ' + (Engine.canShoot(G, u) ? (Engine.TANK_SHOTS - (u.shots || 0)) + ' shot' + (Engine.TANK_SHOTS - (u.shots || 0) > 1 ? 's' : '') + ' left this turn, up to 3 cells in a clear line. ' : 'No shots left this turn. ') + (moves ? 'Teal is its 1-cell move.' : '');
+  else if (u.type === 'miner') ui.info = Engine.minesLeft(u) + ' mine' + (Engine.minesLeft(u) === 1 ? '' : 's') + ' left. Tap teal to fly, or Drop mine to lay one under it or beside it. Laying one ends its turn. Only you can see your mines.';
   else if (u.type === 'kami') ui.info = Engine.canShoot(G, u) ? 'Tap orange to dive onto it, within 3 cells, or teal to fly closer. A dive destroys the drone. It only sees 2 cells, so scout for it.' : 'It flew this turn, so it can dive next turn.';
   else ui.info = u.moved ? 'It can still throw a grenade at an enemy within 2 cells.' : 'Moving onto an enemy piece destroys it. It can also throw a grenade after walking. ' + (Engine.boardTargets(G, u).length ? 'Tap the jeep in a gold square to climb in.' : 'Or dig in, block a path, raise the ground or pave a road.');
 }
@@ -3122,6 +3343,27 @@ function onTap(i) {
 
   if (ui.mode === 'deploy') {
     const type = ui.deployType;
+    if (type === 'chinook') {
+      // First tap picks the landing spot, then tap jeeps to add or remove them, then Send Chinook.
+      const vis = Engine.sight(G, 1);
+      if (!ui.lift) {
+        if (!vis[i]) { ui.info = 'The Chinook can only land where your side can see.'; ui.warn = true; return render(); }
+        ui.lift = { to: i, ids: [] }; ui.warn = false;
+        ui.info = 'Landing spot set. Now tap up to 4 of your jeeps in gold squares to send them.';
+        return render();
+      }
+      const j = Engine.unitAt(G, i);
+      if (j && j.side === 1 && j.type === 'jeep' && Engine.ready(G, j) && !j.moved) {
+        const k = ui.lift.ids.indexOf(j.id);
+        if (k >= 0) ui.lift.ids.splice(k, 1); else if (ui.lift.ids.length < 4) ui.lift.ids.push(j.id);
+        const ok = ui.lift.ids.length && Engine.chinookPlan(G, 1, ui.lift.to, ui.lift.ids);
+        ui.info = ui.lift.ids.length + ' of 4 jeeps picked. ' + (ui.lift.ids.length && !ok ? 'Not enough open ground around the landing spot for that many.' : 'Press Send Chinook, or tap more jeeps.');
+        ui.warn = !!(ui.lift.ids.length && !ok);
+        return render();
+      }
+      ui.info = 'Tap one of your jeeps that has not moved yet, shown in gold.';
+      return render();
+    }
     if (type === 'bomber') {
       // First tap sets where the run starts, the next aims it, a tap inside the red strip sends it.
       const strip = ui.bomb && ui.bomb.d != null ? Engine.bombCells(G, ui.bomb.start, ui.bomb.d) : [];
@@ -3231,10 +3473,10 @@ function openDeploy() {
   if (ui.mode === 'deploy') { clearSel(); ui.info = ''; return render(); }
   const list = $('deployList');
   list.innerHTML = '';
-  for (const type of ['soldier', 'rifle', 'drone', 'kami', 'jeep', 'arty', 'how', 'plane', 'heli', 'bomber']) {
+  for (const type of ['soldier', 'rifle', 'drone', 'kami', 'miner', 'jeep', 'arty', 'how', 'tank', 'plane', 'heli', 'bomber', 'chinook']) {
     const b = document.createElement('button');
     const why = Engine.deployCheck(G, 1, type, null);
-    const noRoom = !why && type !== 'plane' && type !== 'heli' && type !== 'bomber' && !Engine.deployCells(G, 1, type).length;
+    const noRoom = !why && type !== 'plane' && type !== 'heli' && type !== 'bomber' && type !== 'chinook' && !Engine.deployCells(G, 1, type).length;
     b.className = 'pick';
     b.disabled = !!why || noRoom;
     b.innerHTML = '<span><b></b><small></small></span><em></em>';
@@ -3243,7 +3485,7 @@ function openDeploy() {
     b.querySelector('em').textContent = Engine.COST[type];
     b.onclick = () => {
       close('deploySheet'); clearSel(); ui.mode = 'deploy'; ui.deployType = type;
-      ui.info = type === 'bomber' ? 'Tap where the bomber starts its run, even under fog.' : type === 'plane' || type === 'heli' ? 'Tap any cell on the battlefield, even under fog.' : type === 'arty' || type === 'how' ? 'Higher ground gives longer range.' : '';
+      ui.info = type === 'chinook' ? 'Tap where the Chinook should land. It has to be ground your side can see.' : type === 'bomber' ? 'Tap where the bomber starts its run, even under fog.' : type === 'plane' || type === 'heli' ? 'Tap any cell on the battlefield, even under fog.' : type === 'arty' || type === 'how' ? 'Higher ground gives longer range.' : '';
       render();
     };
     list.appendChild(b);
@@ -3298,6 +3540,30 @@ function renderActions(u, idle) {
     bar.classList.remove('hidden');
     bar.innerHTML = '';
     const t = ui.deployType, cost = Engine.STRUCT[t] ? Engine.STRUCT[t].cost : Engine.COST[t];
+    if (t === 'chinook') {
+      const send = document.createElement('button');
+      const ok = ui.lift && ui.lift.ids.length && Engine.chinookPlan(G, 1, ui.lift.to, ui.lift.ids);
+      send.className = 'primary';
+      send.innerHTML = 'Send Chinook<small></small>';
+      send.querySelector('small').textContent = ok ? ui.lift.ids.length + ' jeep' + (ui.lift.ids.length > 1 ? 's' : '') + ', ' + cost + ' supply' : 'pick jeeps first';
+      send.disabled = !ok;
+      send.onclick = () => {
+        const n = ui.lift.ids.length;
+        act({ f: 'chinook', i: ui.lift.to, ids: ui.lift.ids.slice() });
+        clearSel(); ui.warn = false;
+        ui.info = 'The Chinook set down ' + n + ' jeep' + (n > 1 ? 's' : '') + '. They have used their move this turn, so the crews can unload next turn.';
+        render();
+      };
+      const back = document.createElement('button');
+      back.innerHTML = '\u2715 Cancel<small>no Chinook</small>';
+      back.onclick = () => { clearSel(); ui.info = ''; ui.warn = false; render(); };
+      const again = document.createElement('button');
+      again.innerHTML = 'New spot<small>pick again</small>';
+      again.disabled = !ui.lift;
+      again.onclick = () => { ui.lift = null; ui.info = 'Tap where the Chinook should land.'; ui.warn = false; render(); };
+      bar.append(back, again, send);
+      return;
+    }
     if (t === 'bomber') {
       const send = document.createElement('button');
       send.className = 'primary';
@@ -3421,7 +3687,7 @@ function lossesNote() {
   const seen = G.seenWreck || 0, vis = Engine.sight(G, 1);
   const fresh = (G.wrecks || []).filter(w => w.n > seen);
   G.seenWreck = G.wreckSeq || 0;
-  const WN = { soldier: ['soldier', 'soldiers'], rifle: ['rifleman', 'riflemen'], drone: ['drone', 'drones'], kami: ['kamikaze drone', 'kamikaze drones'], jeep: ['jeep', 'jeeps'], arty: ['artillery piece', 'artillery pieces'], how: ['howitzer', 'howitzers'], struct: ['structure', 'structures'], zombie: ['zombie', 'zombies'] };
+  const WN = { soldier: ['soldier', 'soldiers'], rifle: ['rifleman', 'riflemen'], drone: ['drone', 'drones'], kami: ['kamikaze drone', 'kamikaze drones'], miner: ['mine drone', 'mine drones'], tank: ['tank', 'tanks'], jeep: ['jeep', 'jeeps'], arty: ['artillery piece', 'artillery pieces'], how: ['howitzer', 'howitzers'], struct: ['structure', 'structures'], zombie: ['zombie', 'zombies'] };
   const say = list => {
     const c = {};
     for (const w of list) c[w.type] = (c[w.type] || 0) + 1;
@@ -3512,19 +3778,21 @@ function hintText() {
   if (ui.mode === 'deploy') {
     if (ui.deployType === 'plane') return 'Tap where the recon plane should fly over.';
     if (ui.deployType === 'heli') return 'Tap where the helicopter should hover.';
+    if (ui.deployType === 'chinook') return !ui.lift ? 'Tap where the Chinook should land.' : 'Tap your jeeps in gold, then Send Chinook.';
     if (ui.deployType === 'bomber') return !ui.bomb ? 'Tap where the bomber run starts.' : ui.bomb.d == null ? 'Now tap toward where it should fly.' : 'Press Send bomber, or tap to aim another way.';
-    return 'Tap gold squares to place ' + ({ soldier: 'soldiers', rifle: 'riflemen', drone: 'scout drones', kami: 'kamikaze drones', jeep: 'jeeps', arty: 'artillery', how: 'howitzers', mg: 'machine gun nests', barracks: 'barracks', factory: 'jeep factories', range: 'rifle ranges', hangar: 'drone hangars', foundry: 'gun foundries' }[ui.deployType]) + ', then press Done.';
+    return 'Tap gold squares to place ' + ({ soldier: 'soldiers', rifle: 'riflemen', drone: 'scout drones', kami: 'kamikaze drones', miner: 'mine drones', tank: 'tanks', jeep: 'jeeps', arty: 'artillery', how: 'howitzers', mg: 'machine gun nests', barracks: 'barracks', factory: 'jeep factories', range: 'rifle ranges', hangar: 'drone hangars', foundry: 'gun foundries' }[ui.deployType]) + ', then press Done.';
   }
   if (ui.mode === 'unit' && ui.action) return {
     grenade: 'Tap an orange cell to throw the grenade.', trench: 'Tap a gold square to dig a trench.',
     barricade: 'Tap a gold square to put up a barricade.', mound: 'Tap a gold square to raise the ground.', road: 'Tap a gold square to pave it.', enter: 'Tap a gold building square to head inside.',
     hitch: 'Tap the gun to hitch it to the jeep.', unhitch: 'Tap a gold square to drop the gun there.',
-    load: 'Tap a soldier, rifleman or your commander beside the jeep.', cmdout: 'Tap a gold square for the commander to step out.', unload: 'Tap a gold square to let a trooper out.', board: 'Tap the jeep to climb in.'
+    load: 'Tap a soldier, rifleman or your commander beside the jeep.', cmdout: 'Tap a gold square for the commander to step out.', unload: 'Tap a gold square to let a trooper out.', board: 'Tap the jeep to climb in.', mine: 'Tap a gold square to lay the mine there.'
   }[ui.action];
   if (ui.mode === 'unit') {
     const u = unitById(ui.sel);
     if (u && anyAction(u)) return Engine.unitMoves(G, u).length ? 'Tap teal to move, or pick an action above.' : 'Pick an action above.';
     if (u && u.type === 'drone') return 'Tap teal to fly there.';
+    if (u && u.type === 'tank') return 'Tap orange to fire or teal to move one cell.';
     if (u && u.type === 'kami') return Engine.canShoot(G, u) ? 'Tap orange to dive or teal to fly.' : 'Tap teal to fly there.';
     return 'Tap orange to shoot or teal to move.';
   }
