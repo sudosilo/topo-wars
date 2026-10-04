@@ -11,7 +11,7 @@
 <meta name="robots" content="index,follow">
 <link rel="canonical" href="https://topo-wars.vercel.app/">
 <meta name="application-name" content="Topo Wars">
-<meta name="version" content="7.6">
+<meta name="version" content="7.7">
 <meta name="apple-mobile-web-app-title" content="Topo Wars">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -177,7 +177,7 @@ button.on{background:var(--amber-soft);border-color:#f59e0b}
     <button id="ctrBtn">Center<small>on you</small></button>
     <button id="endBtn" class="primary">End turn</button>
   </div>
-  <div class="credit">Topo Wars 7.6. Map data &copy; OpenStreetMap contributors</div>
+  <div class="credit">Topo Wars 7.7. Map data &copy; OpenStreetMap contributors</div>
 </div>
 
 <div id="setup">
@@ -378,7 +378,6 @@ button.on{background:var(--amber-soft);border-color:#f59e0b}
       <tr><td><span class="sw" style="border:2px dashed #dc2626"></span>Red dashed box</td><td>Reach of each enemy gun you can see</td></tr>
       <tr><td><span class="sw" style="border:2px dashed #2563eb"></span>Blue dashed box</td><td>Area your helicopter is watching</td></tr>
       <tr><td><span class="sw" style="background:rgba(71,85,105,.5)"></span>Gray haze</td><td>Fog. Darker means never scouted.</td></tr>
-      <tr><td>Faded star with ?</td><td>Where the enemy commander was last seen</td></tr>
       <tr><td>Brown zigzag</td><td>Trench</td></tr>
       <tr><td>Dashed brown double line</td><td>Tire treads</td></tr>
       <tr><td>Small square behind a jeep</td><td>Artillery in tow</td></tr>
@@ -1906,25 +1905,41 @@ const Engine = (() => {
       if (best != null && score(best) > score(u.idx)) { moveUnit(G, u, best); touched.push(best); }
     }
 
-    // Commander: never step where the enemy can touch it next turn, avoid gunfire, hover about 3 out.
+    // Commander. On Easy it hovers about 3 cells from the enemy. Otherwise it keeps well back from
+    // the fighting while the troops push forward: away from every enemy piece and the enemy
+    // commander it knows of, inside its own territory, off the map edge, out of gun range, and on
+    // the move away from wherever the enemy last spotted it.
     {
       const { contact, shot } = reach(G, f, vis());
-      const cur = G.cmd[me], T0 = tgt();
+      const cur = G.cmd[me], T0 = tgt(), v = vis();
+      const easy = G.diff === 'easy' && me === 2;
+      const threats = [T0, ...G.units.filter(u => u.side === f && v[u.idx] && !isAir(u)).map(u => u.idx)];
+      const seenAt = G.intel[f] && G.round - G.intel[f].round <= 2 ? G.intel[f].idx : -1;
+      const edge = i => { const [r, c] = rcOf(G, i); return Math.min(r, c, G.size - 1 - r, G.size - 1 - c); };
+      const hideScore = i => {
+        let s = Math.min(14, Math.min(...threats.map(t => cheb(G, i, t)))) * 2;
+        if (G.owner[i] === me) s += 3;
+        if (edge(i) <= 1) s -= 3;
+        if (seenAt >= 0) s -= Math.max(0, 4 - cheb(G, i, seenAt)) * 3;
+        if (G.terr[i] === T.FOREST) s += 1;
+        return s;
+      };
       const score = (i, moving) => {
         if (i === G.cmd[f]) return 1e9;
         let s = 0;
         if (moving) {
           const o = occupant(G, i);
           if (o && o.unit && o.side === f) s += o.unit.type === 'arty' ? 40 : 30;
-          if (def) { /* holding ground, not grabbing it */ }
+          if (def || !easy) { /* holding ground or hanging back, not grabbing it */ }
           else if (G.owner[i] === f) { s += G.tier[i] * 4; if (i === G.hq[f] && !G.hqTaken[f]) s += 40; }
           else if (G.owner[i] === 0) s += 1.5;
         }
         if (contact[i]) s -= 5000;
-        if (shot[i]) s -= G.hp[me] <= 1 ? 800 : 14;
+        if (shot[i]) s -= G.hp[me] <= 1 ? 800 : easy ? 14 : 40;
         s += G.tier[i];
         if (def) s -= cheb(G, i, home) * 3 - (G.terr[i] === T.TRENCH ? 2 : 0);
-        else s -= Math.abs(cheb(G, i, T0) - 3) * 2.5;
+        else if (easy) s -= Math.abs(cheb(G, i, T0) - 3) * 2.5;
+        else s += hideScore(i);
         return s + rng(G) * 0.5;
       };
       let best = null, bs = score(cur, false);
@@ -2919,7 +2934,8 @@ function draw() {
   for (const side of [1, 2]) {
     let i = G.cmd[side], ghost = false;
     if (G.riding && G.riding[side] && (side === 1 || vis[i])) continue;
-    if (side === 2 && !vis[i]) { if (!G.intel[1]) continue; i = G.intel[1].idx; ghost = true; }
+    // No marker for where the enemy commander was last seen: out of sight means unknown.
+    if (side === 2 && !vis[i]) continue;
     if (!visible(i)) continue;
     const [x, y] = rect(i), cx = x + s / 2, cy = y + s / 2, rr = Math.max(7, s * 0.42);
     ctx.globalAlpha = ghost ? 0.35 : 1;
@@ -3192,7 +3208,6 @@ function describe(i) {
   s += ' Artillery here reaches ' + (2 + t) + '.';
   if (G.fog && !seen) s = 'Hidden by fog. ' + s;
   if (seen && i === G.cmd[2]) s = 'Enemy commander, ' + G.hp[2] + ' of ' + Engine.CMD_HP + ' health. ' + s;
-  else if (!seen && G.intel[1] && G.intel[1].idx === i) s = 'Enemy commander was last seen here in round ' + G.intel[1].round + '. ' + s;
   else if (i === G.cmd[1]) s = 'Your commander' + (G.riding && G.riding[1] ? ', riding in this jeep' : '') + ', ' + G.hp[1] + ' of ' + Engine.CMD_HP + ' health. ' + s;
   const wr = (G.wrecks || []).filter(w => w.idx === i && (w.side === 1 || w.by === 1 || seen));
   if (wr.length) {
@@ -3825,7 +3840,7 @@ function render() {
   if (!info && watching && !G.over) info = 'The computer plays both sides. Tap any piece to see what it is. Auto plays a move every couple of seconds.';
   if (!info && G.round === 1 && !G.cmdMoved[1] && G.mode === 'zombie') info = 'The zombie nest, in green, is about ' + Engine.cheb(G, G.cmd[1], G.hq[2]) + ' cells away. It births more zombies every turn, and more as the horde spreads. Destroy the nest and every zombie to win, or hold out for ' + Engine.MAX_ROUNDS + ' rounds.';
   if (!info && G.round === 1 && !G.cmdMoved[1]) info = G.fog
-    ? 'The enemy started about ' + Engine.cheb(G, G.cmd[1], G.hq[2]) + ' cells away, marked with a faded star. Scout with drones or aircraft to find them.'
+    ? 'The enemy started about ' + Engine.cheb(G, G.cmd[1], G.hq[2]) + ' cells away. Its commander will not sit still, so scout with drones or aircraft to find it.'
     : 'The enemy HQ is ' + Engine.cheb(G, G.cmd[1], G.hq[2]) + ' cells away. Pinch out to scout it.';
   $('info').textContent = info;
   $('info').classList.toggle('warn', !!warn);
