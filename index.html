@@ -11,7 +11,7 @@
 <meta name="robots" content="index,follow">
 <link rel="canonical" href="https://topo-wars.vercel.app/">
 <meta name="application-name" content="Topo Wars">
-<meta name="version" content="7.9">
+<meta name="version" content="8.0">
 <meta name="apple-mobile-web-app-title" content="Topo Wars">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -177,7 +177,7 @@ button.on{background:var(--amber-soft);border-color:#f59e0b}
     <button id="ctrBtn">Center<small>on you</small></button>
     <button id="endBtn" class="primary">End turn</button>
   </div>
-  <div class="credit">Topo Wars 7.9. Map data &copy; OpenStreetMap contributors</div>
+  <div class="credit">Topo Wars 8.0. Map data &copy; OpenStreetMap contributors</div>
 </div>
 
 <div id="setup">
@@ -305,6 +305,9 @@ button.on{background:var(--amber-soft);border-color:#f59e0b}
     <p>A Mine drone costs 4 and flies like a scout drone. Select it and tap Drop mine, then a gold square under it or beside it, to bury a mine there. Laying one ends its turn, and it carries 3. Only you can see your mines, as dark discs with a yellow ring. The first enemy piece on the ground to stop on one sets it off: a piece is destroyed, a tank loses 2 armor and a commander loses 1 health. Drones fly over them and your own pieces are safe on them.</p>
     <p>A Chinook costs 20. Pick it in Deploy, tap where it should land, somewhere your side can see, then tap up to 4 of your jeeps that have not moved this turn. Press Send Chinook and they are set down around that spot, with their troops, your commander if aboard, and any gun in tow. They have used their move for the turn, so the crews unload next turn.</p>
     <p>A grenade now catches a second enemy piece on the ground right beside its target, the most valuable one there, so one throw can take out two.</p>
+
+    <h3>Commander's aura</h3>
+    <p>Your pieces within 2 cells of your commander, inside the faint blue square around it, get one extra action each turn. Riflemen, artillery, howitzers and tanks fire one more shot, and a howitzer only starts reloading after its last shot. A soldier that ends its first move inside the square can move or act again. The bonus counts where the piece is when it acts, so a rifleman that steps out after its first shot loses the second. The computer uses it too: off Easy it hides its commander and builds a ring of howitzers around it, so a hidden commander can be a fortress.</p>
 
     <h3>Several opponents</h3>
     <p>With Opponent set to Computer, the Computer opponents row picks 1 to 4 computer sides: red, then purple, gold and teal. Each starts about as far from you as the first and spread apart from the others, and every side fights every other side, so they will wear each other down as well as you. A side whose commander falls is out of the battle: its pieces and structures are wrecked and its land goes back to nobody. You win when every other side is out, or with the highest score after round 40, and you lose when your commander falls. The top bar shows how many enemy sides are left, as foes, and the best enemy score. Surrender offers and Keep playing are only for one on one battles.</p>
@@ -602,7 +605,12 @@ const Engine = (() => {
     return k + n;
   }, 0);
   const ready = (G, u) => u.placed < G.round;
-  const canShoot = (G, u) => (u.type === 'arty' || u.type === 'rifle' || u.type === 'tank' || (u.type === 'kami' && !u.moved)) && ready(G, u) && !u.fired && !reloading(G, u);
+  // Command aura: your pieces within AURA cells of your own commander get one extra action a turn.
+  // Riflemen, artillery, howitzers and tanks fire one more shot; soldiers get a second move.
+  const AURA = 2;
+  const inAura = (G, u) => u.idx >= 0 && G.cmd[u.side] >= 0 && cheb(G, u.idx, G.cmd[u.side]) <= AURA;
+  const shotsAllowed = (G, u) => (u.type === 'tank' ? TANK_SHOTS : 1) + (u.type !== 'kami' && inAura(G, u) ? 1 : 0);
+  const canShoot = (G, u) => (u.type === 'arty' || u.type === 'rifle' || u.type === 'tank' || (u.type === 'kami' && !u.moved)) && ready(G, u) && !u.fired && (u.shots || 0) < shotsAllowed(G, u) && !reloading(G, u);
   const artyReady = (G, u) => u.type === 'arty' && canShoot(G, u);
   // A commander riding in a jeep shares the jeep's cell: the cell holds both.
   function occupant(G, i) {
@@ -860,7 +868,7 @@ const Engine = (() => {
     return [...moveOptions(G, side, G.cmd[side], 'foot').keys()];
   }
   function unitMoveMap(G, u) {
-    if (G.over || u.moved || !ready(G, u) || (u.type === 'arty' && u.fired)) return new Map();
+    if (G.over || u.moved || !ready(G, u) || (u.type === 'arty' && (u.fired || u.shots))) return new Map();
     if (u.type === 'jeep' && !hasDriver(G, u)) return new Map();
     return moveOptions(G, u.side, u.idx, modeOf(u));
   }
@@ -894,7 +902,9 @@ const Engine = (() => {
     }
     u.idx = to;
     if (u.type === 'jeep' && cmdAboard(G, u)) G.cmd[u.side] = to;
-    u.moved = true;
+    u.steps = (u.steps || 0) + 1;
+    // A soldier that ends its first move near its commander may move again this turn.
+    u.moved = !(u.type === 'soldier' && u.steps < 2 && inAura(G, u));
     if (u.type === 'arty') {
       if (!road) u.fired = true;
       log(G, u.side, road ? 'Artillery drove along the road' : 'Artillery repositioned and cannot fire this turn');
@@ -956,7 +966,7 @@ const Engine = (() => {
   function tankFire(G, u, to) {
     const hf = q => isFoe(G, u.side, q), o = occupant(G, to), sb = structAt(G, to);
     u.shots = (u.shots || 0) + 1;
-    if (u.shots >= TANK_SHOTS) u.fired = true;
+    if (u.shots >= shotsAllowed(G, u)) u.fired = true;
     stat(G, u.side, 'shots');
     if (G.terr[to] === T.BARRICADE) hitBarricade(G, u.side, to, BLAST, 'Tank');
     else if (sb && hf(sb.side) && !(o && hf(o.side))) hitStructure(G, u.side, sb, 'Tank');
@@ -984,8 +994,8 @@ const Engine = (() => {
     if (u.type === 'kami') return dive(G, u, to);
     if (u.type === 'tank') return tankFire(G, u, to);
     const hf = q => isFoe(G, u.side, q), o = occupant(G, to), who = u.heavy ? 'Howitzer' : u.type === 'arty' ? 'Artillery' : 'Rifleman';
-    u.fired = true;
-    if (u.heavy) u.cool = G.round + HOW_RELOAD;
+    u.shots = (u.shots || 0) + 1;
+    if (u.shots >= shotsAllowed(G, u)) { u.fired = true; if (u.heavy) u.cool = G.round + HOW_RELOAD; }
     if (G.terr[u.idx] === T.BUILDING) u.reveal = true;
     stat(G, u.side, 'shots');
     // A barricade is knocked flat. A trench takes the blast for whoever is in it and caves in.
@@ -1617,7 +1627,7 @@ const Engine = (() => {
     G.turn = side;
     G.supply[side] += income(G, side);
     G.cmdMoved[side] = false;
-    for (const u of G.units) if (u.side === side) { u.moved = false; u.fired = false; u.unhitched = false; u.reveal = false; u.acted = false; u.shots = 0; }
+    for (const u of G.units) if (u.side === side) { u.moved = false; u.fired = false; u.unhitched = false; u.reveal = false; u.acted = false; u.shots = 0; u.steps = 0; }
     resolveEntries(G, side);
     produce(G, side);
     machineGuns(G, side);
@@ -1790,7 +1800,7 @@ const Engine = (() => {
         if (!hasDriver(G, j) || cheb(G, i, T0) > 6) { load(G, j, i); touched.push(i); }
       }
       if (!j.cargo) {
-        const h = searching ? [] : hitchTargets(G, j).filter(i => { const a = unitAt(G, i); return !shotTargets(G, a).length && !G.mound[i] && cheb(G, i, T0) > artyRange(G, i) + 3; });
+        const h = searching ? [] : hitchTargets(G, j).filter(i => { const a = unitAt(G, i); return !shotTargets(G, a).length && !G.mound[i] && !(a.heavy && inAura(G, a)) && cheb(G, i, T0) > artyRange(G, i) + 3; });
         if (h.length) { hitch(G, j, h[0]); touched.push(h[0]); }
       }
       const drops = () => unhitchCells(G, j).filter(i => cheb(G, i, T0) <= gunRange(G, j.cargo || {}, i) - 1);
@@ -1827,7 +1837,8 @@ const Engine = (() => {
     for (const u of G.units.filter(u => u.side === me && (u.type === 'arty' || u.type === 'rifle'))) {
       if (!G.units.includes(u) || !canShoot(G, u)) continue;
       const tow = G.units.some(j => j.side === me && j.type === 'jeep' && !j.cargo && cheb(G, j.idx, u.idx) <= 3);
-      if (!shotTargets(G, u).length && u.type === 'arty' && !tow) {
+      const guard = u.heavy && !(G.diff === 'easy' && me === 2) && inAura(G, u);
+      if (!shotTargets(G, u).length && u.type === 'arty' && !tow && !guard) {
         const opts = unitMoveMap(G, u), A = def ? home : tgt();
         if (opts.size && cheb(G, u.idx, A) > (def ? 2 : artyRange(G, u.idx) - 1)) {
           const best = pickCell(G, [...opts.keys()], i => -cheb(G, i, A) + (opts.get(i).road ? 0.8 : 0) + tierAt(G, i) * 0.3 + rng(G) * 0.1);
@@ -1838,8 +1849,7 @@ const Engine = (() => {
         if (up.length && !u.moved && !u.fired) { const at = pickCell(G, up, i => tierAt(G, i)); moveUnit(G, u, at); touched.push(at);
         }
       }
-      shootWith(u);
-      if (G.over) return touched;
+      while (G.units.includes(u) && canShoot(G, u) && shootWith(u)) { if (G.over) return touched; }
     }
 
     // Tanks: fire, roll one cell toward the enemy, fire again with any shot left.
@@ -1936,7 +1946,7 @@ const Engine = (() => {
       if (!opts.size) continue;
       const { contact } = reachF(vis());
       if (opts.has(G.cmd[f]) && cmdSeen()) { moveUnit(G, u, G.cmd[f]); touched.push(G.cmd[f]); return touched; }
-      if (def && G.terr[u.idx] === T.TRENCH && cheb(G, u.idx, home) <= 3) { if (u.type === 'rifle') { shootWith(u); if (G.over) return touched; } continue; }
+      if (def && G.terr[u.idx] === T.TRENCH && cheb(G, u.idx, home) <= 3) { if (u.type === 'rifle') { while (G.units.includes(u) && canShoot(G, u) && shootWith(u)) { if (G.over) return touched; } } continue; }
       const want = def ? (u.type === 'rifle' ? 2 : 1) : u.type === 'rifle' ? 2 : 0, T0 = def ? home : tgt(), v = vis();
       let best = null, bs = -Math.abs(cheb(G, u.idx, T0) - want) * 1.6 - 0.5 - (contact[u.idx] ? (u.type === 'rifle' ? 8 : 4) : 0);
       for (const i of opts.keys()) {
@@ -1955,7 +1965,7 @@ const Engine = (() => {
         if (s > bs) { bs = s; best = i; }
       }
       if (best != null) { moveUnit(G, u, best); touched.push(best); if (G.over) return touched; }
-      if (u.type === 'rifle' && G.units.includes(u)) { shootWith(u); if (G.over) return touched; }
+      if (u.type === 'rifle') { while (G.units.includes(u) && canShoot(G, u) && shootWith(u)) { if (G.over) return touched; } }
     }
 
     // Kamikaze drones strike the commander or anything valuable in reach, otherwise edge closer
@@ -2008,6 +2018,7 @@ const Engine = (() => {
         if (edge(i) <= 1) s -= 3;
         if (seenAt >= 0) s -= Math.max(0, 4 - cheb(G, i, seenAt)) * 3;
         if (G.terr[i] === T.FOREST) s += 1;
+        s += Math.min(4, G.units.filter(u => u.side === me && u.heavy && cheb(G, u.idx, i) <= AURA).length) * 6;
         return s;
       };
       const score = (i, moving) => {
@@ -2047,11 +2058,18 @@ const Engine = (() => {
     // A howitzer once there are a couple of ordinary guns and supply to spare.
     const saving = ['barracks', 'factory', 'range', 'foundry'].find(t => !(G.builds || []).some(b => b.side === me && b.type === t));
     const keep = saving && income(G, me) >= 8 ? STRUCT[saving].cost : 0;
-    if (G.round >= 4 && G.supply[me] - keep >= COST.how + 3 && G.units.filter(u => u.side === me && u.heavy).length < 2 && count(G, me, 'arty') >= 2) {
-      const cells = deployCells(G, me, 'how');
+    // Off Easy it keeps building a howitzer battery around its hidden commander as income allows,
+    // where the commander's aura lets each gun fire twice at anything that comes near.
+    const easyAi = G.diff === 'easy' && me === 2;
+    const howCap = easyAi ? 2 : Math.min(6, 2 + Math.floor(income(G, me) / 12));
+    const ringCells = !easyAi && G.cmd[me] >= 0 && G.round >= 5 ? deployCells(G, me, 'how').filter(i => cheb(G, i, G.cmd[me]) <= AURA) : [];
+    if (G.round >= 4 && G.supply[me] - (ringCells.length ? 0 : keep) >= COST.how + 3 && G.units.filter(u => u.side === me && u.heavy).length < howCap && (count(G, me, 'arty') >= 2 || ringCells.length)) {
+      const ring = ringCells;
+      const cells = ring.length ? ring : deployCells(G, me, 'how');
       if (cells.length) {
         const { contact } = reachF(vis()), T0 = def ? home : tgt();
-        const at = pickCell(G, cells, i => G.tier[i] * 3 - Math.abs(cheb(G, i, T0) - (1 + HOW_EXTRA + G.tier[i])) - (contact[i] ? 30 : 0));
+        const at = ring.length ? pickCell(G, cells, i => tierAt(G, i) * 3 - (contact[i] ? 30 : 0) + rng(G) * 0.2)
+          : pickCell(G, cells, i => G.tier[i] * 3 - Math.abs(cheb(G, i, T0) - (1 + HOW_EXTRA + G.tier[i])) - (contact[i] ? 30 : 0));
         if (at != null && deploy(G, me, 'how', at)) touched.push(at);
       }
     }
@@ -2481,7 +2499,7 @@ const Engine = (() => {
     los, sight, airActive, reach, moveOptions, commanderMoves, moveCommander, unitMoveMap, unitMoves, keepsFire, moveUnit,
     shotTargets, fire, deployCheck, deployCells, deploy, callAir, income, aiTurn, beginTurn, nextRound, playerEnd, watchHalf,
     computeTiers, markSteep, noiseTerrain, create, clone, serialize, deserialize, apply, passTurn, swapSides, keepPlaying, checkWipe,
-    MG_SHOTS, BARRICADE_HP, KAMI_RANGE, sidesOf, alive, isFoe, multi, SIDE_NAMES, TANK_HP, TANK_RANGE, TANK_SHOTS, MINES, minesLeft, mineAt, mineCells, dropMine, chinookPlan, chinook, hurtUnit, DIRS8, BOMB_LEN, BOMB_HIT, bombCells, bomberRun, LOOT_NAMES, cacheAt, BLAST, isAir, zombieTurn, zombieCheck,
+    MG_SHOTS, BARRICADE_HP, KAMI_RANGE, AURA, inAura, shotsAllowed, sidesOf, alive, isFoe, multi, SIDE_NAMES, TANK_HP, TANK_RANGE, TANK_SHOTS, MINES, minesLeft, mineAt, mineCells, dropMine, chinookPlan, chinook, hurtUnit, DIRS8, BOMB_LEN, BOMB_HIT, bombCells, bomberRun, LOOT_NAMES, cacheAt, BLAST, isAir, zombieTurn, zombieCheck,
     HOW_EXTRA, HOW_RELOAD, HOW_KILL, HOW_MIN, HOW_MIN_LOW, tooClose, gunRange, reloading, nameOf, buildingGroup, enterCells, enterBuilding, sightRaw,
     STRUCT, STRUCT_HP, STRUCT_KILL, structAt, structCheck, structCells, buildStructure
   };
@@ -2911,6 +2929,9 @@ function draw() {
       }
     }
   }
+
+  // Your commander's aura: a faint square 2 cells out. Pieces inside it get an extra action.
+  if (G.cmd[1] >= 0 && !G.over && G.mode !== 'watch') box(G.cmd[1], Engine.AURA, 'rgba(37,99,235,0.05)', 'rgba(37,99,235,0.45)');
 
   // HQ labels. The enemy HQ shows once you have seen it.
   if (s >= 14) for (const side of Engine.sidesOf(G)) {
@@ -3454,11 +3475,17 @@ function selectUnit(u) {
     return;
   }
   ui.mode = 'unit'; ui.sel = u.id;
+  const aura = Engine.inAura(G, u) && u.type !== 'kami' && u.type !== 'drone' && u.type !== 'miner';
+  selectInfo(u, moves, shots);
+  if (aura && (u.type === 'rifle' || u.type === 'arty') && Engine.canShoot(G, u)) ui.info = 'Near your commander: ' + (Engine.shotsAllowed(G, u) - (u.shots || 0)) + ' shot' + (Engine.shotsAllowed(G, u) - (u.shots || 0) > 1 ? 's' : '') + ' left this turn. ' + ui.info;
+  if (aura && u.type === 'soldier' && !u.moved && (u.steps || 0) === 1) ui.info = 'Near your commander, so it can move or act again this turn. ' + ui.info;
+}
+function selectInfo(u, moves, shots) {
   if (u.type === 'arty' && Engine.reloading(G, u)) ui.info = 'Howitzer reloading. It can fire again in round ' + u.cool + '.' + (moves ? ' It can still move.' : '');
   else if (u.type === 'arty') ui.info = (u.heavy ? 'Howitzer, range ' : 'Range ') + Engine.gunRange(G, u) + ', shown by the blue square. ' + (u.heavy ? 'Its barrel cannot drop low enough for the gray inner square, 3 cells out, or for lower ground inside the outer gray square, 6 cells out. ' : '') + (shots ? 'Orange cells can be shelled. ' : 'It can only shell what your side can see, so nothing is a target yet. A drone, helicopter or recon plane over that square spots targets for it. ') + (moves ? 'Solid teal keeps the shot, dashed teal uses it.' : '');
   else if (u.type === 'rifle') ui.info = (G.mound[u.idx] >= Engine.MOUND_MAX ? 'Sniper on raised ground. ' : '') + 'Range ' + Engine.rifleRange(G, u.idx) + ' with a clear line of sight. ' + (Engine.boardTargets(G, u).length ? 'Tap the jeep in a gold square to climb in. ' : '') + (shots ? 'Orange cells can be shot. ' : '') + (moves ? 'Teal cells are moves. It can move and shoot in the same turn.' : '');
   else if (u.type === 'drone') ui.info = 'Scout drones fly over anything and see 6 cells around them.';
-  else if (u.type === 'tank') ui.info = 'Tank, ' + (u.hp == null ? Engine.TANK_HP : u.hp) + ' of ' + Engine.TANK_HP + ' armor. ' + (Engine.canShoot(G, u) ? (Engine.TANK_SHOTS - (u.shots || 0)) + ' shot' + (Engine.TANK_SHOTS - (u.shots || 0) > 1 ? 's' : '') + ' left this turn, up to 3 cells in a clear line. ' : 'No shots left this turn. ') + (moves ? 'Teal is its 1-cell move.' : '');
+  else if (u.type === 'tank') ui.info = 'Tank, ' + (u.hp == null ? Engine.TANK_HP : u.hp) + ' of ' + Engine.TANK_HP + ' armor. ' + (Engine.canShoot(G, u) ? (Engine.shotsAllowed(G, u) - (u.shots || 0)) + ' shot' + (Engine.shotsAllowed(G, u) - (u.shots || 0) > 1 ? 's' : '') + ' left this turn, up to 3 cells in a clear line. ' : 'No shots left this turn. ') + (moves ? 'Teal is its 1-cell move.' : '');
   else if (u.type === 'miner') ui.info = Engine.minesLeft(u) + ' mine' + (Engine.minesLeft(u) === 1 ? '' : 's') + ' left. Tap teal to fly, or Drop mine to lay one under it or beside it. Laying one ends its turn. Only you can see your mines.';
   else if (u.type === 'kami') ui.info = Engine.canShoot(G, u) ? 'Tap orange to dive onto it, within 3 cells, or teal to fly closer. A dive destroys the drone. It only sees 2 cells, so scout for it.' : 'It flew this turn, so it can dive next turn.';
   else ui.info = u.moved ? 'It can still throw a grenade at an enemy within 2 cells.' : 'Moving onto an enemy piece destroys it. It can also throw a grenade after walking. ' + (Engine.boardTargets(G, u).length ? 'Tap the jeep in a gold square to climb in.' : 'Or dig in, block a path, raise the ground or pave a road.');
